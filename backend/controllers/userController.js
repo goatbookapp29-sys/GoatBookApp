@@ -6,7 +6,11 @@ exports.getProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
       attributes: { exclude: ['password'] },
-      include: [{ model: Employee, as: 'employeeProfile' }]
+      include: [{ 
+        model: Employee, 
+        as: 'employeeProfile',
+        include: [{ model: Farm, as: 'farms', through: { attributes: [] } }]
+      }]
     });
     res.json(user);
   } catch (err) {
