@@ -132,15 +132,19 @@ exports.getLocationStats = async (req, res) => {
     const distribution = {};
     animals.forEach(animal => {
       const breedName = animal.Breed?.name || 'Unknown Breed';
-      if (!distribution[breedName]) {
-        distribution[breedName] = {
+      const breedId = animal.breedId;
+      
+      if (!distribution[breedId]) {
+        distribution[breedId] = {
+          breedId,
           breedName,
           count: 0,
           animals: []
         };
       }
-      distribution[breedName].count += 1;
-      distribution[breedName].animals.push({
+      
+      distribution[breedId].count += 1;
+      distribution[breedId].animals.push({
           id: animal.id,
           tagNumber: animal.tagNumber,
           gender: animal.gender

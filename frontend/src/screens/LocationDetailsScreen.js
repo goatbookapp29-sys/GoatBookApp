@@ -85,7 +85,11 @@ const LocationDetailsScreen = ({ navigation, route }) => {
             <TouchableOpacity 
               key={index} 
               style={styles.breedRow}
-              onPress={() => navigation.navigate('AnimalList', { initialSearch: item.breedName })}
+              onPress={() => navigation.navigate('AnimalList', { 
+                breedId: item.breedId, 
+                locationId: location.id,
+                initialSearch: item.breedName 
+              })}
               activeOpacity={0.7}
             >
               <View style={styles.breedIndicator}>

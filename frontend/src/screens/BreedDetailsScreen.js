@@ -72,7 +72,7 @@ const BreedDetailsScreen = ({ navigation, route }) => {
         {/* Navigation Button */}
         <TouchableOpacity 
           style={styles.actionButton}
-          onPress={() => navigation.navigate('AnimalList', { initialSearch: breed.name })}
+          onPress={() => navigation.navigate('AnimalList', { breedId: breed.id, initialSearch: breed.name })}
           activeOpacity={0.8}
         >
           <View style={styles.actionIcon}>

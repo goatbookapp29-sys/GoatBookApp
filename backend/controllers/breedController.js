@@ -14,8 +14,8 @@ exports.getBreeds = async (req, res) => {
           [
             Breed.sequelize.literal(`(
               SELECT COUNT(*)
-              FROM Animals AS animal
-              WHERE animal.breedId = Breed.id
+              FROM animals AS animal
+              WHERE animal.breed_id = Breed.id AND animal.farm_id = Breed.farm_id
             )`),
             'animalCount'
           ]

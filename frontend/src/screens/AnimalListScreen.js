@@ -26,18 +26,28 @@ const AnimalListScreen = ({ navigation, route }) => {
   );
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredAnimals(animals);
-    } else {
+    let result = animals;
+    
+    // Strict filters from navigation
+    if (route.params?.breedId) {
+      result = result.filter(a => a.breedId === route.params.breedId);
+    }
+    if (route.params?.locationId) {
+      result = result.filter(a => a.locationId === route.params.locationId);
+    }
+
+    // Search query filter
+    if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase();
-      const filtered = animals.filter(animal => 
+      result = result.filter(animal => 
         animal.tagNumber.toLowerCase().includes(q) ||
         (animal.Breed?.name && animal.Breed.name.toLowerCase().includes(q)) ||
         (animal.Location?.name && animal.Location.name.toLowerCase().includes(q))
       );
-      setFilteredAnimals(filtered);
     }
-  }, [searchQuery, animals]);
+    
+    setFilteredAnimals(result);
+  }, [searchQuery, animals, route.params]);
 
   const fetchAnimals = async () => {
     try {
