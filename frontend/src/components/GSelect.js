@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Modal, FlatList, SafeAreaView, Platform } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
-import { ChevronDown, X } from 'lucide-react-native';
+import { ChevronDown, X, AlertCircle } from 'lucide-react-native';
 
 const GSelect = ({ 
   label, 
@@ -10,18 +10,18 @@ const GSelect = ({
   onSelect, 
   error, 
   required,
-  placeholder = 'Select option'
+  placeholder = ''
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
   useEffect(() => {
     Animated.timing(animatedValue, {
-      toValue: value ? 1 : 0,
+      toValue: (value || modalVisible) ? 1 : 0,
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [value]);
+  }, [value, modalVisible]);
 
   const labelStyle = {
     position: 'absolute',
@@ -36,15 +36,15 @@ const GSelect = ({
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [COLORS.textLight, COLORS.primary],
+      outputRange: [COLORS.textLight, error ? COLORS.error : COLORS.primary],
     }),
-    backgroundColor: value ? COLORS.white : 'transparent',
-    paddingHorizontal: value ? 4 : 0,
+    backgroundColor: (value || modalVisible) ? COLORS.white : 'transparent',
+    paddingHorizontal: (value || modalVisible) ? 4 : 0,
     zIndex: 1,
-    fontWeight: value ? '600' : '400',
+    fontWeight: (value || modalVisible) ? '600' : '400',
   };
 
-  const selectedOption = options.find(opt => opt.value === value) || { label: '' };
+  const selectedOption = options.find(opt => opt.value === value);
 
   return (
     <View style={styles.container}>
@@ -61,17 +61,30 @@ const GSelect = ({
           {label}{required && '*'}
         </Animated.Text>
         
-        <Text style={[
-          styles.valueText, 
-          !value && { color: 'transparent' } // FIX: Hide placeholder when label is in the way
-        ]}>
-          {selectedOption.label || placeholder}
-        </Text>
+        {/* Selection text only visible when label has moved up to border */}
+        {value || modalVisible ? (
+          <Text 
+            style={[styles.valueText, !value && { color: '#9CA3AF' }]} 
+            numberOfLines={1}
+          >
+            {selectedOption?.label || placeholder}
+          </Text>
+        ) : <View style={{ flex: 1 }} />}
 
-        <ChevronDown size={20} color={COLORS.textLight} />
+        <View style={styles.iconContainer}>
+          {error ? (
+            <AlertCircle size={20} color={COLORS.error} />
+          ) : (
+            <ChevronDown size={20} color={COLORS.textLight} />
+          )}
+        </View>
       </TouchableOpacity>
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error ? (
+        <View style={styles.errorContainer}>
+           <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : null}
 
       <Modal
         visible={modalVisible}
@@ -131,7 +144,6 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     borderWidth: 1.5,
     borderColor: '#E5E7EB',
     borderRadius: 12,
@@ -145,18 +157,29 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: COLORS.error,
+    borderWidth: 2,
   },
   valueText: {
     fontSize: 16,
     color: COLORS.text,
     flex: 1,
+    marginRight: 8,
+  },
+  iconContainer: {
+    width: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end', // Aligns error text to the right corner
+    marginTop: 4,
+    paddingRight: 4,
   },
   errorText: {
     fontSize: 12,
     color: COLORS.error,
-    marginTop: 4,
-    marginLeft: 4,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
