@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, MapPin, X, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, MapPin, X } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -12,9 +12,6 @@ const LocationListScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedId, setExpandedId] = useState(null);
-  const [locationStats, setLocationStats] = useState({});
-  const [statLoading, setStatLoading] = useState(null);
 
   const searchBarTranslateY = useRef(new Animated.Value(-100)).current;
 
@@ -70,87 +67,21 @@ const LocationListScreen = ({ navigation }) => {
     }
   };
 
-  const toggleExpand = async (locationId) => {
-    if (expandedId === locationId) {
-      setExpandedId(null);
-      return;
-    }
-
-    setExpandedId(locationId);
-    
-    if (!locationStats[locationId]) {
-      try {
-        setStatLoading(locationId);
-        const response = await api.get(`/locations/${locationId}/stats`);
-        setLocationStats(prev => ({ ...prev, [locationId]: response.data }));
-        setStatLoading(null);
-      } catch (error) {
-        console.error('Fetch location stats error:', error);
-        setStatLoading(null);
-      }
-    }
-  };
-
-  const renderDistribution = (locationId) => {
-    if (statLoading === locationId) {
-      return <ActivityIndicator size="small" color={COLORS.primary} style={{ marginVertical: 10 }} />;
-    }
-
-    const data = locationStats[locationId];
-    if (!data || data.distribution.length === 0) {
-      return <Text style={styles.emptyStats}>No animals present here</Text>;
-    }
-
-    return (
-      <View style={styles.statsContainer}>
-        {data.distribution.map((item, index) => (
-          <View key={index} style={styles.breedStatRow}>
-            <View style={styles.breedHeader}>
-              <Text style={styles.statBreedName}>{item.breedName}</Text>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{item.count}</Text>
-              </View>
-            </View>
-            <View style={styles.animalList}>
-              {item.animals.map((animal, aIdx) => (
-                <Text key={aIdx} style={styles.animalTag}>• {animal.tagNumber} ({animal.gender})</Text>
-              ))}
-            </View>
-          </View>
-        ))}
-      </View>
-    );
-  };
-
   const renderItem = ({ item }) => (
-    <View style={styles.cardContainer}>
-      <TouchableOpacity 
-        style={styles.locationItem}
-        onPress={() => toggleExpand(item.id)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.iconBox}>
-          <MapPin size={24} color={COLORS.primary} />
-        </View>
-        <View style={styles.locationInfo}>
-          <Text style={styles.locationName} numberOfLines={2}>{item.displayName || item.name}</Text>
-          <Text style={styles.locationCode}>{item.code} • {item.type}</Text>
-        </View>
-        <TouchableOpacity 
-          style={styles.editBtn} 
-          onPress={() => navigation.navigate('EditLocation', { location: item })}
-        >
-          <ChevronRight size={20} color="#D1D5DB" />
-        </TouchableOpacity>
-        {expandedId === item.id ? <ChevronUp size={20} color={COLORS.primary} /> : <ChevronDown size={20} color="#D1D5DB" />}
-      </TouchableOpacity>
-      
-      {expandedId === item.id && (
-        <View style={styles.expandedContent}>
-          {renderDistribution(item.id)}
-        </View>
-      )}
-    </View>
+    <TouchableOpacity 
+      style={styles.locationCard}
+      onPress={() => navigation.navigate('LocationDetails', { locationId: item.id })}
+      activeOpacity={0.7}
+    >
+      <View style={styles.iconBox}>
+        <MapPin size={24} color={COLORS.primary} />
+      </View>
+      <View style={styles.locationInfo}>
+        <Text style={styles.locationName} numberOfLines={1}>{item.displayName || item.name}</Text>
+        <Text style={styles.locationMeta}>{item.code} • {item.type}</Text>
+      </View>
+      <ChevronRight size={20} color="#D1D5DB" />
+    </TouchableOpacity>
   );
 
   return (
@@ -203,7 +134,13 @@ const LocationListScreen = ({ navigation }) => {
           data={filteredLocations}
           renderItem={renderItem}
           keyExtractor={item => item.id}
-          ListEmptyComponent={<Text style={styles.noRecords}>No Locations Found</Text>}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+                <MapPin size={64} color="#E5E7EB" />
+                <Text style={styles.noRecords}>No Locations Found</Text>
+                <Text style={styles.emptyDesc}>Add stables, pens, or sections to organize your farm.</Text>
+            </View>
+          }
           contentContainerStyle={[styles.listContent, isSearching && { paddingTop: 20 }]}
           keyboardShouldPersistTaps="handled"
         />
@@ -215,7 +152,7 @@ const LocationListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F9FAFB',
   },
   searchBarContainer: {
     backgroundColor: COLORS.white,
@@ -268,26 +205,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingBottom: 40,
   },
-  cardContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    marginBottom: 12,
-    overflow: 'hidden',
-    ...SHADOW.sm,
-  },
-  locationItem: {
+  locationCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
     padding: 16,
+    marginBottom: 12,
+    ...SHADOW.sm,
   },
   iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     backgroundColor: '#FFF1EA',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
   },
   locationInfo: {
     flex: 1,
@@ -297,74 +231,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.text,
   },
-  locationCode: {
+  locationMeta: {
     fontSize: 12,
     color: COLORS.textLight,
     marginTop: 2,
   },
-  editBtn: {
-    padding: 8,
-    marginRight: 4,
-  },
-  expandedContent: {
-    backgroundColor: '#FAFBFD',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    padding: 16,
-  },
-  statsContainer: {
-    gap: 12,
-  },
-  emptyStats: {
-    textAlign: 'center',
-    color: COLORS.textLight,
-    padding: 10,
-    fontStyle: 'italic',
-  },
-  breedStatRow: {
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
-    padding: 12,
-    borderLeftWidth: 3,
-    borderLeftColor: COLORS.primary,
-    ...SHADOW.sm,
-  },
-  breedHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  emptyContainer: {
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  statBreedName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: COLORS.text,
-  },
-  badge: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  badgeText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  animalList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  animalTag: {
-    fontSize: 12,
-    color: COLORS.textLight,
+    marginTop: 80,
+    paddingHorizontal: 40,
   },
   noRecords: {
-    textAlign: 'center',
-    marginTop: 40,
+    fontSize: 18,
+    fontWeight: 'bold',
     color: COLORS.textLight,
-    fontSize: 16,
+    marginTop: 16,
+  },
+  emptyDesc: {
+    textAlign: 'center',
+    color: '#9CA3AF',
+    marginTop: 8,
   },
   center: {
     flex: 1,
