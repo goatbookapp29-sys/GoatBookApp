@@ -36,8 +36,9 @@ exports.updateProfile = async (req, res) => {
 };
 
 // @desc    Owner creates an employee account
+// Flow: Create User -> Create Employee ID -> Link to Farm
 exports.createEmployee = async (req, res) => {
-  const { name, phone, password, role } = req.body;
+  const { name, email, password, role } = req.body;
   const t = await sequelize.transaction();
 
   try {
@@ -46,14 +47,18 @@ exports.createEmployee = async (req, res) => {
       return res.status(403).json({ message: 'Only farm owners can create employees' });
     }
 
-    // 2. Step 1: Create User login
-    let user = await User.findOne({ where: { phone } }, { transaction: t });
-    if (user) {
-      await t.rollback();
-      return res.status(400).json({ message: 'A user with this phone already exists' });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and temporary password are required' });
     }
 
-    user = await User.create({ name, phone, password }, { transaction: t });
+    // 2. Step 1: Create User login
+    let user = await User.findOne({ where: { email } }, { transaction: t });
+    if (user) {
+      await t.rollback();
+      return res.status(400).json({ message: 'A user with this email already exists' });
+    }
+
+    user = await User.create({ name, email, password }, { transaction: t });
 
     // 3. Step 2: Create Employee identity
     const employee = await Employee.create({
@@ -61,7 +66,7 @@ exports.createEmployee = async (req, res) => {
       employeeType: role || 'EMPLOYEE'
     }, { transaction: t });
 
-    // 4. Step 3: Attach Employee to the CURRENT Farm of the owner
+    // 4. Step 3: Attach Employee to the CURRENT Farm
     if (!req.farmId) {
       await t.rollback();
       return res.status(400).json({ message: 'No active farm context' });
@@ -73,7 +78,7 @@ exports.createEmployee = async (req, res) => {
     }, { transaction: t });
 
     await t.commit();
-    res.status(201).json({ message: 'Employee account created and linked to farm' });
+    res.status(201).json({ message: 'Employee created successfully' });
 
   } catch (err) {
     if (t) await t.rollback();
@@ -82,24 +87,84 @@ exports.createEmployee = async (req, res) => {
   }
 };
 
-// @desc    Get all employees for the current owner's farm
+// @desc    Update employee (Owner only)
+exports.updateEmployee = async (req, res) => {
+  const { name, role } = req.body;
+  try {
+    if (req.employee.employeeType !== 'OWNER') {
+      return res.status(403).json({ message: 'Permission denied' });
+    }
+
+    const employee = await Employee.findByPk(req.params.id, {
+      include: [{ model: User }]
+    });
+
+    if (!employee) {
+      return res.status(404).json({ message: 'Employee not found' });
+    }
+
+    // Update Employee Type
+    if (role) employee.employeeType = role;
+    await employee.save();
+
+    // Update Linked User Name
+    if (name) {
+      const user = await User.findByPk(employee.userId);
+      user.name = name;
+      await user.save();
+    }
+
+    res.json({ message: 'Employee updated successfully' });
+  } catch (err) {
+    console.error('UPDATE EMPLOYEE ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Reset Employee Password (Owner only)
+exports.resetEmployeePassword = async (req, res) => {
+  const { newPassword } = req.body;
+  try {
+    if (req.employee.employeeType !== 'OWNER') {
+      return res.status(403).json({ message: 'Only owners can reset staff passwords' });
+    }
+
+    const employee = await Employee.findByPk(req.params.id);
+    if (!employee) {
+      return res.status(404).json({ message: 'Employee not found' });
+    }
+
+    const user = await User.findByPk(employee.userId);
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Get all employees for the active farm
 exports.getEmployees = async (req, res) => {
   try {
     if (!req.farmId) {
-      return res.status(400).json({ message: 'No active farm context' });
+      return res.status(400).json({ message: 'No farm selected' });
     }
 
-    // Get all employees linked to this farm
     const farmEmployees = await FarmEmployee.findAll({
       where: { farmId: req.farmId },
       include: [{
         model: Employee,
-        include: [{ model: User, attributes: ['name', 'phone'] }]
+        include: [{ model: User, attributes: ['id', 'name', 'email'] }]
       }]
     });
 
-    const employees = farmEmployees.map(fe => fe.Employee);
-    res.json(employees);
+    res.json(farmEmployees.map(fe => ({
+      id: fe.Employee.id,
+      name: fe.Employee.User.name,
+      email: fe.Employee.User.email,
+      role: fe.Employee.employeeType
+    })));
   } catch (err) {
     console.error('GET EMPLOYEES ERROR:', err);
     res.status(500).json({ message: 'Server Error' });

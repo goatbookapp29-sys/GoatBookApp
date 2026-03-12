@@ -4,26 +4,26 @@ const userController = require('../controllers/userController');
 const auth = require('../middleware/auth');
 
 // @route   GET api/users/profile
-// @desc    Get current user's profile
-// @access  Private
 router.get('/profile', auth, userController.getProfile);
 
 // @route   PUT api/users/profile
-// @desc    Update user's profile
-// @access  Private
+router.put('/profile', auth, userController.updateProfile);
+
 // @route   POST api/users/change-password
-// @desc    Change user's password
-// @access  Private
 router.post('/change-password', auth, userController.changePassword);
 
+// --- Employee Management (Owner Scoped) ---
+
 // @route   GET api/users/employees
-// @desc    Get all employees linked to the current active farm
-// @access  Private (Owner Only)
 router.get('/employees', auth, userController.getEmployees);
 
 // @route   POST api/users/employees
-// @desc    Owner creates an employee account and links to current farm
-// @access  Private (Owner Only)
 router.post('/employees', auth, userController.createEmployee);
+
+// @route   PUT api/users/employees/:id
+router.put('/employees/:id', auth, userController.updateEmployee);
+
+// @route   POST api/users/employees/:id/reset-password
+router.post('/employees/:id/reset-password', auth, userController.resetEmployeePassword);
 
 module.exports = router;

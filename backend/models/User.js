@@ -20,7 +20,7 @@ const User = sequelize.define('User', {
   },
   phone: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true, // Made optional for employees
     unique: true
   },
   password: {
