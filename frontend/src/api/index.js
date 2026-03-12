@@ -4,9 +4,9 @@ import * as SecureStore from 'expo-secure-store';
 // UPDATE THIS with your PC's IP address for phone testing
 // For simulator.html on the same machine, 'localhost' works.
 // For physical phone, use: '10.11.136.249'
-// For Production: Replace with your Render URL (e.g., https://your-app.onrender.com/api)
+// For Production: Replace with your Render URL
 // For Development: Use your PC's IP address
-const BASE_URL = 'http://10.11.136.249:5000/api'; 
+const BASE_URL = 'https://goatbook-bankend.onrender.com/api'; 
 
 const api = axios.create({
   baseURL: BASE_URL,
