@@ -15,7 +15,7 @@ exports.getProfile = async (req, res) => {
     res.json(user);
   } catch (err) {
     console.error('FETCH PROFILE ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
@@ -170,15 +170,18 @@ exports.getEmployees = async (req, res) => {
       }]
     });
 
-    res.json(farmEmployees.map(fe => ({
-      id: fe.Employee.id,
-      name: fe.Employee.User.name,
-      email: fe.Employee.User.email,
-      role: fe.Employee.employeeType
-    })));
+    res.json(farmEmployees.map(fe => {
+      if (!fe.Employee) return null;
+      return {
+        id: fe.Employee.id,
+        name: fe.Employee.User?.name || 'Unknown',
+        email: fe.Employee.User?.email || 'No Email',
+        role: fe.Employee.employeeType
+      };
+    }).filter(e => e !== null));
   } catch (err) {
     console.error('GET EMPLOYEES ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 

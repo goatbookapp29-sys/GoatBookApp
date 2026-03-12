@@ -18,7 +18,7 @@ exports.getAnimals = async (req, res) => {
     res.json(animals);
   } catch (err) {
     console.error('FETCH ANIMALS ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
@@ -79,8 +79,8 @@ exports.getAnimal = async (req, res) => {
 
     res.json(animal);
   } catch (err) {
-    console.error('FETCH ANIMAL ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    console.error('FETCH LOCATIONS ERROR:', err);
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 

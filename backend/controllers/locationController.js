@@ -5,12 +5,15 @@ const { Op } = require('sequelize');
 const buildHierarchicalName = (location, allLocations) => {
   let name = location.name;
   let current = location;
+  const visited = new Set([location.id]);
   
   while (current.parentLocationId) {
+    if (visited.has(current.parentLocationId)) break; // Protection
     const parent = allLocations.find(l => l.id === current.parentLocationId);
     if (!parent) break;
     name += ` / ${parent.name}`;
     current = parent;
+    visited.add(current.id);
   }
   return name;
 };
@@ -34,7 +37,7 @@ exports.getLocations = async (req, res) => {
     res.json(locationsWithPaths);
   } catch (err) {
     console.error('FETCH LOCATIONS ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
@@ -53,7 +56,7 @@ exports.addLocation = async (req, res) => {
     res.status(201).json(location);
   } catch (err) {
     console.error('ADD LOCATION ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
@@ -78,7 +81,7 @@ exports.updateLocation = async (req, res) => {
     res.json(location);
   } catch (err) {
     console.error('UPDATE LOCATION ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
@@ -109,7 +112,7 @@ exports.deleteLocation = async (req, res) => {
     res.json({ message: 'Location removed' });
   } catch (err) {
     console.error('DELETE LOCATION ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
@@ -158,6 +161,6 @@ exports.getLocationStats = async (req, res) => {
     });
   } catch (err) {
     console.error('GET LOCATION STATS ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };

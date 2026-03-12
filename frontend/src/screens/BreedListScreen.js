@@ -43,6 +43,8 @@ const BreedListScreen = ({ navigation }) => {
       setLoading(false);
     } catch (error) {
       console.error('Fetch breeds error:', error);
+      const msg = error.response?.data?.error || error.message;
+      alert('Fetch Breeds Error: ' + msg);
       setLoading(false);
     }
   };

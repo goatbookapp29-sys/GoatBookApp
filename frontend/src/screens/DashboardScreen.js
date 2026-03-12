@@ -54,14 +54,16 @@ const DashboardScreen = ({ navigation }) => {
       }
 
       setStats({
-        breeds: breedsRes.data.length,
-        employees: employeesRes.data.length,
-        animals: animalsRes.data.length,
-        locations: locationsRes.data.length
+        breeds: Array.isArray(breedsRes.data) ? breedsRes.data.length : 0,
+        employees: Array.isArray(employeesRes.data) ? employeesRes.data.length : 0,
+        animals: Array.isArray(animalsRes.data) ? animalsRes.data.length : 0,
+        locations: Array.isArray(locationsRes.data) ? locationsRes.data.length : 0
       });
       setLoading(false);
     } catch (error) {
       console.error('Fetch dashboard error:', error);
+      const msg = error.response?.data?.error || error.response?.data?.message || error.message;
+      alert('Dashboard Error: ' + msg);
       setLoading(false);
     }
   };
