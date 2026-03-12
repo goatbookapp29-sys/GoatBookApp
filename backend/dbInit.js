@@ -11,16 +11,13 @@ const initDB = async () => {
     await sequelize.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
 
     // Sync all models
-    // CAUTION: force: true will DROP all existing tables. 
-    // This is necessary because we changed primary key types from INT to UUID.
-    await sequelize.sync({ force: true });
+    // CAUTION: force: false for production server startups
+    await sequelize.sync();
     
     console.log('All models were synchronized successfully.');
-    process.exit(0);
   } catch (error) {
     console.error('Unable to connect to the database:', error);
-    process.exit(1);
   }
 };
 
-initDB();
+module.exports = initDB;

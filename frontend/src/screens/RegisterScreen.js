@@ -18,8 +18,8 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     // Basic validation
-    if (!formData.name || !formData.phone || !formData.password || !formData.farmName) {
-      alert('Please fill in all required fields (Name, Phone, Password, and Farm Name)');
+    if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.farmName) {
+      alert('Please fill in all required fields (Name, Email, Phone, Password, and Farm Name)');
       return;
     }
 
@@ -69,10 +69,12 @@ const RegisterScreen = ({ navigation }) => {
           />
           <View style={styles.gap} />
           <GInput 
-            label="Email (Optional)" 
+            label="Email Address" 
             value={formData.email} 
             onChangeText={(v) => updateField('email', v)} 
             keyboardType="email-address"
+            autoCapitalize="none"
+            required
           />
           <View style={styles.gap} />
           <GInput 

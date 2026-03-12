@@ -6,31 +6,23 @@ import GButton from '../components/GButton';
 import api, { setAuthToken, setSelectedFarm } from '../api';
 
 const LoginScreen = ({ navigation }) => {
-  const [identifier, setIdentifier] = useState(''); // Can be email or phone
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!identifier || !password) {
-      alert('Please enter your credentials');
+    if (!email || !password) {
+      alert('Please enter your email and password');
       return;
     }
 
     setLoading(true);
     try {
-      // Logic to check if identifier is email-like or phone-like
-      const isEmail = identifier.includes('@');
-      
-      const payload = isEmail 
-        ? { email: identifier, password } 
-        : { phone: identifier, password };
-
-      const response = await api.post('/auth/login', payload);
-      const { token, farms, user } = response.data;
+      const response = await api.post('/auth/login', { email, password });
+      const { token, farms } = response.data;
       
       await setAuthToken(token);
       
-      // Multi-farm logic
       if (farms && farms.length > 1) {
         setLoading(false);
         navigation.replace('FarmSelection', { farms });
@@ -65,10 +57,12 @@ const LoginScreen = ({ navigation }) => {
 
         <View style={styles.form}>
           <GInput 
-            label="Email or Phone Number" 
-            value={identifier} 
-            onChangeText={setIdentifier} 
-            placeholder="example@mail.com or 1234567890"
+            label="Email Address" 
+            value={email} 
+            onChangeText={setEmail} 
+            placeholder="example@mail.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
             required 
           />
           <View style={styles.gap} />

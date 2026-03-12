@@ -7,19 +7,27 @@ const sequelize = require('../config/database');
 exports.register = async (req, res) => {
   const { name, email, phone, password, farmName, farmLocation } = req.body;
 
-  // Transaction ensures either everything is created or nothing is (prevents partial data)
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
   const t = await sequelize.transaction();
 
   try {
-    // 1. Check if user already exists
-    let user = await User.findOne({ where: { phone } }, { transaction: t });
-    if (user) {
+    // 1. Check if user already exists (Check both email and phone)
+    let userExists = await User.findOne({ 
+      where: { 
+        [sequelize.Sequelize.Op.or]: [{ email }, { phone }] 
+      }
+    }, { transaction: t });
+
+    if (userExists) {
       await t.rollback();
-      return res.status(400).json({ message: 'User with this phone number already exists' });
+      return res.status(400).json({ message: 'User with this email or phone already exists' });
     }
 
     // 2. Step 1: Create User
-    user = await User.create({
+    const user = await User.create({
       name,
       email,
       phone,
@@ -45,10 +53,8 @@ exports.register = async (req, res) => {
       employeeId: employee.id
     }, { transaction: t });
 
-    // Commit Transaction
     await t.commit();
 
-    // Generate Token
     const token = jwt.sign(
       { id: user.id },
       process.env.JWT_SECRET || 'secret',
@@ -60,8 +66,7 @@ exports.register = async (req, res) => {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email,
-        phone: user.phone
+        email: user.email
       },
       farm: {
         id: farm.id,
@@ -70,34 +75,37 @@ exports.register = async (req, res) => {
     });
 
   } catch (err) {
-    await t.rollback();
+    if (t) await t.rollback();
     console.error('REGISTRATION ERROR:', err);
     res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
-// @desc    Employee/Owner Login Flow
+// @desc    Email-only Login Flow
 // @route   POST api/auth/login
 exports.login = async (req, res) => {
-  const { email, phone, password } = req.body;
+  const { email, password } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
 
   try {
-    // Auth by Email OR Phone
     const user = await User.findOne({
-      where: email ? { email } : { phone },
+      where: { email },
       include: [{
         model: Employee,
         as: 'employeeProfile',
         include: [{
           model: Farm,
           as: 'farms',
-          through: { attributes: [] } // Hide junction table data
+          through: { attributes: [] }
         }]
       }]
     });
 
     if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
 
     const token = jwt.sign(
@@ -113,7 +121,7 @@ exports.login = async (req, res) => {
         name: user.name,
         role: user.employeeProfile.employeeType
       },
-      farms: user.employeeProfile.farms // Return list of available farms
+      farms: user.employeeProfile.farms
     });
 
   } catch (err) {
