@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, Bug, X } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, Bug, X, MapPin } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -25,9 +25,11 @@ const AnimalListScreen = ({ navigation }) => {
     if (searchQuery.trim() === '') {
       setFilteredAnimals(animals);
     } else {
+      const q = searchQuery.toLowerCase();
       const filtered = animals.filter(animal => 
-        animal.tagNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (animal.Breed?.name && animal.Breed.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        animal.tagNumber.toLowerCase().includes(q) ||
+        (animal.Breed?.name && animal.Breed.name.toLowerCase().includes(q)) ||
+        (animal.Location?.name && animal.Location.name.toLowerCase().includes(q))
       );
       setFilteredAnimals(filtered);
     }
@@ -75,6 +77,12 @@ const AnimalListScreen = ({ navigation }) => {
       <View style={styles.animalInfo}>
         <Text style={styles.tagNumber}>Tag: {item.tagNumber}</Text>
         <Text style={styles.breedName}>{item.Breed?.name} • {item.gender}</Text>
+        {item.Location && (
+          <View style={styles.locationTag}>
+            <MapPin size={12} color={COLORS.textLight} style={styles.locIcon} />
+            <Text style={styles.locationName}>{item.Location.name}</Text>
+          </View>
+        )}
       </View>
       <ChevronRight size={20} color="#D1D5DB" />
     </TouchableOpacity>
@@ -109,7 +117,7 @@ const AnimalListScreen = ({ navigation }) => {
             <Search size={20} color={COLORS.textLight} style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search tag number or breed..."
+              placeholder="Search tag, breed or location..."
               value={searchQuery}
               onChangeText={setSearchQuery}
               autoFocus
@@ -237,6 +245,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textLight,
     marginTop: 2,
+  },
+  locationTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  locIcon: {
+    marginRight: 4,
+  },
+  locationName: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    fontWeight: '500',
   },
   emptyContainer: {
     flex: 1,

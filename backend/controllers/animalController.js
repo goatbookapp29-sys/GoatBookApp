@@ -1,4 +1,4 @@
-const { Animal, Breed } = require('../models');
+const { Animal, Breed, Location } = require('../models');
 
 // @desc    Get all animals for the current farm
 exports.getAnimals = async (req, res) => {
@@ -9,7 +9,10 @@ exports.getAnimals = async (req, res) => {
 
     const animals = await Animal.findAll({
       where: { farmId: req.farmId },
-      include: [{ model: Breed, attributes: ['name'] }],
+      include: [
+        { model: Breed, attributes: ['name', 'animalType'] },
+        { model: Location, attributes: ['name', 'code'] }
+      ],
       order: [['createdAt', 'DESC']]
     });
     res.json(animals);
@@ -21,7 +24,7 @@ exports.getAnimals = async (req, res) => {
 
 // @desc    Add a new animal
 exports.addAnimal = async (req, res) => {
-  const { tagNumber, breedId, gender, birthDate } = req.body;
+  const { tagNumber, breedId, gender, birthDate, locationId } = req.body;
   
   try {
     if (!req.farmId) {
@@ -34,11 +37,20 @@ exports.addAnimal = async (req, res) => {
       return res.status(400).json({ message: 'Invalid breed selected for this farm' });
     }
 
+    // Verify location belongs to this farm (if provided)
+    if (locationId) {
+        const location = await Location.findOne({ where: { id: locationId, farmId: req.farmId } });
+        if (!location) {
+            return res.status(400).json({ message: 'Invalid location selected for this farm' });
+        }
+    }
+
     const animal = await Animal.create({
       tagNumber,
       breedId,
       gender,
       birthDate,
+      locationId: locationId || null,
       farmId: req.farmId,
       createdByEmployeeId: req.employee.id
     });
@@ -55,7 +67,10 @@ exports.getAnimal = async (req, res) => {
   try {
     const animal = await Animal.findOne({
       where: { id: req.params.id, farmId: req.farmId },
-      include: [{ model: Breed }]
+      include: [
+        { model: Breed },
+        { model: Location }
+      ]
     });
 
     if (!animal) {
@@ -71,7 +86,7 @@ exports.getAnimal = async (req, res) => {
 
 // @desc    Update animal details
 exports.updateAnimal = async (req, res) => {
-  const { tagNumber, breedId, gender, birthDate } = req.body;
+  const { tagNumber, breedId, gender, birthDate, locationId } = req.body;
   try {
     const animal = await Animal.findOne({
       where: { id: req.params.id, farmId: req.farmId }
@@ -81,7 +96,21 @@ exports.updateAnimal = async (req, res) => {
       return res.status(404).json({ message: 'Animal not found' });
     }
 
-    await animal.update({ tagNumber, breedId, gender, birthDate });
+    // Verify location if changing
+    if (locationId) {
+        const location = await Location.findOne({ where: { id: locationId, farmId: req.farmId } });
+        if (!location) {
+            return res.status(400).json({ message: 'Invalid location selected for this farm' });
+        }
+    }
+
+    await animal.update({ 
+        tagNumber, 
+        breedId, 
+        gender, 
+        birthDate, 
+        locationId: locationId || null 
+    });
     res.json(animal);
   } catch (err) {
     console.error('UPDATE ANIMAL ERROR:', err);

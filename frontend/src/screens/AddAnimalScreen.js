@@ -16,13 +16,16 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [breedId, setBreedId] = useState(isEditing ? existingAnimal.breedId : '');
   const [gender, setGender] = useState(isEditing ? existingAnimal.gender : 'FEMALE');
   const [birthDate, setBirthDate] = useState(isEditing ? existingAnimal.birthDate : '');
+  const [locationId, setLocationId] = useState(isEditing ? existingAnimal.locationId : null);
   
   const [breeds, setBreeds] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchBreeds();
+    fetchLocations();
   }, []);
 
   const fetchBreeds = async () => {
@@ -34,6 +37,21 @@ const AddAnimalScreen = ({ navigation, route }) => {
     }
   };
 
+  const fetchLocations = async () => {
+    try {
+      const response = await api.get('/locations');
+      setLocations([
+        { label: 'No Location Assigned', value: null },
+        ...response.data.map(loc => ({ 
+          label: loc.displayName || loc.name, 
+          value: loc.id 
+        }))
+      ]);
+    } catch (error) {
+      console.error('Fetch locations error:', error);
+    }
+  };
+
   const handleSave = async () => {
     if (!tagNumber || !breedId) {
       alert('Please fill in required fields (Tag Number and Breed)');
@@ -42,7 +60,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
     setLoading(true);
     try {
-      const payload = { tagNumber, breedId, gender, birthDate };
+      const payload = { tagNumber, breedId, gender, birthDate, locationId };
       if (isEditing) {
         await api.put(`/animals/${existingAnimal.id}`, payload);
       } else {
@@ -112,6 +130,16 @@ const AddAnimalScreen = ({ navigation, route }) => {
               options={breeds}
               placeholder="Choose a breed"
               required
+            />
+            
+            <View style={styles.gap} />
+            
+            <GSelect 
+              label="Location" 
+              value={locationId} 
+              onSelect={setLocationId}
+              options={locations}
+              placeholder="Assign to a location"
             />
             
             <View style={styles.gap} />
