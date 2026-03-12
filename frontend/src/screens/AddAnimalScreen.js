@@ -5,6 +5,7 @@ import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
+import GDatePicker from '../components/GDatePicker';
 import api from '../api';
 
 const AddAnimalScreen = ({ navigation, route }) => {
@@ -27,7 +28,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const fetchBreeds = async () => {
     try {
       const response = await api.get('/breeds');
-      setBreeds(response.data.map(b => ({ label: b.name, value: b.id })));
+      setBreeds(response.data.map(b => ({ label: `${b.name} (${b.animalType})`, value: b.id })));
     } catch (error) {
       console.error('Fetch breeds error:', error);
     }
@@ -109,6 +110,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               value={breedId} 
               onSelect={setBreedId}
               options={breeds}
+              placeholder="Choose a breed"
               required
             />
             
@@ -119,19 +121,19 @@ const AddAnimalScreen = ({ navigation, route }) => {
               value={gender} 
               onSelect={setGender}
               options={[
-                { label: 'Male', value: 'MALE' },
-                { label: 'Female', value: 'FEMALE' }
+                { label: 'Male (Buck/Ram)', value: 'MALE' },
+                { label: 'Female (Doe/Ewe)', value: 'FEMALE' }
               ]}
               required
             />
 
             <View style={styles.gap} />
 
-            <GInput 
-              label="Birth Date (YYYY-MM-DD)" 
+            <GDatePicker 
+              label="Date of Birth" 
               value={birthDate} 
-              onChangeText={setBirthDate} 
-              placeholder="2024-05-15"
+              onDateChange={setBirthDate}
+              placeholder="Select birth date"
             />
           </View>
 
@@ -156,7 +158,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               </View>
             ) : (
               <GButton 
-                title="Add Animal" 
+                title="Add Animal to Farm" 
                 onPress={handleSave}
                 loading={loading}
               />

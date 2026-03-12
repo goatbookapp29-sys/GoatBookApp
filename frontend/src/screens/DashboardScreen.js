@@ -7,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 const DashboardScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
-  const [activeFarm, setActiveFarm] = useState(null);
+  const [farmName, setFarmName] = useState('Loading...');
   const [stats, setStats] = useState({ breeds: 0, employees: 0, animals: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -26,12 +26,30 @@ const DashboardScreen = ({ navigation }) => {
 
   const fetchDashboardData = async () => {
     try {
+      const profilePromise = api.get('/users/profile');
       const breedsPromise = api.get('/breeds');
       const animalsPromise = api.get('/animals');
       const employeesPromise = api.get('/users/employees');
       
-      const [breedsRes, animalsRes, employeesRes] = await Promise.all([breedsPromise, animalsPromise, employeesPromise]);
+      const [profileRes, breedsRes, animalsRes, employeesRes] = await Promise.all([
+        profilePromise, 
+        breedsPromise, 
+        animalsPromise, 
+        employeesPromise
+      ]);
       
+      const userData = profileRes.data;
+      setUser(userData);
+
+      // Find the name of the farm we are currently looking at
+      const currentFarmId = api.defaults.headers.common['X-Farm-ID'];
+      const farm = userData.employeeProfile?.farms?.find(f => f.id === currentFarmId);
+      if (farm) {
+        setFarmName(farm.name);
+      } else {
+        setFarmName('My Farm');
+      }
+
       setStats({
         breeds: breedsRes.data.length,
         employees: employeesRes.data.length,
@@ -72,7 +90,7 @@ const DashboardScreen = ({ navigation }) => {
           <Text style={styles.welcome}>Active Farm</Text>
           <View style={styles.farmRow}>
             <MapPin size={16} color={COLORS.primary} />
-            <Text style={styles.farmName}>Goatwala Estate</Text> 
+            <Text style={styles.farmName}>{farmName}</Text> 
           </View>
         </View>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>

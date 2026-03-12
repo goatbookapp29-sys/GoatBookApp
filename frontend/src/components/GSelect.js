@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Modal, FlatList, SafeAreaView } from 'react-native';
-import { COLORS, SPACING } from '../theme';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Modal, FlatList, SafeAreaView, Platform } from 'react-native';
+import { COLORS, SPACING, SHADOW } from '../theme';
 import { ChevronDown, X } from 'lucide-react-native';
 
 const GSelect = ({ 
@@ -10,7 +10,7 @@ const GSelect = ({
   onSelect, 
   error, 
   required,
-  placeholder = 'Select'
+  placeholder = 'Select option'
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
@@ -32,12 +32,16 @@ const GSelect = ({
     }),
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [15, 12],
+      outputRange: [16, 12],
     }),
-    color: COLORS.textLight,
+    color: animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [COLORS.textLight, COLORS.primary],
+    }),
     backgroundColor: value ? COLORS.white : 'transparent',
     paddingHorizontal: value ? 4 : 0,
     zIndex: 1,
+    fontWeight: value ? '600' : '400',
   };
 
   const selectedOption = options.find(opt => opt.value === value) || { label: '' };
@@ -49,14 +53,18 @@ const GSelect = ({
         onPress={() => setModalVisible(true)}
         style={[
           styles.inputWrapper, 
-          error && styles.inputError
+          error && styles.inputError,
+          modalVisible && styles.inputActive
         ]}
       >
-        <Animated.Text style={labelStyle}>
+        <Animated.Text style={labelStyle} pointerEvents="none">
           {label}{required && '*'}
         </Animated.Text>
         
-        <Text style={[styles.valueText, !value && { color: 'transparent' }]}>
+        <Text style={[
+          styles.valueText, 
+          !value && { color: 'transparent' } // FIX: Hide placeholder when label is in the way
+        ]}>
           {selectedOption.label || placeholder}
         </Text>
 
@@ -71,10 +79,14 @@ const GSelect = ({
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setModalVisible(false)}
+        >
           <SafeAreaView style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{label}</Text>
+              <Text style={styles.modalTitle}>Choose {label}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <X size={24} color={COLORS.text} />
               </TouchableOpacity>
@@ -83,6 +95,7 @@ const GSelect = ({
             <FlatList
               data={options}
               keyExtractor={(item) => item.value}
+              contentContainerStyle={styles.listContainer}
               renderItem={({ item }) => (
                 <TouchableOpacity 
                   style={[
@@ -104,7 +117,7 @@ const GSelect = ({
               )}
             />
           </SafeAreaView>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -112,19 +125,23 @@ const GSelect = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: SPACING.sm,
+    marginVertical: 4,
     width: '100%',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
     backgroundColor: COLORS.white,
-    paddingHorizontal: SPACING.sm,
-    height: 52,
+    paddingHorizontal: 12,
+    height: 56,
+  },
+  inputActive: {
+    borderColor: COLORS.primary,
+    borderWidth: 2,
   },
   inputError: {
     borderColor: COLORS.error,
@@ -137,25 +154,27 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     color: COLORS.error,
-    marginTop: 2,
+    marginTop: 4,
     marginLeft: 4,
+    fontWeight: '500',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '60%',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '70%',
+    ...SHADOW.lg,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: SPACING.lg,
+    padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
@@ -164,8 +183,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.text,
   },
+  listContainer: {
+    paddingBottom: 40,
+  },
   optionItem: {
-    padding: SPACING.lg,
+    padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },

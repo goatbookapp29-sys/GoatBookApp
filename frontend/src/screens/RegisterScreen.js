@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingV
 import { COLORS, SPACING, SHADOW } from '../theme';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
-import api, { setAuthToken } from '../api';
+import api, { setAuthToken, setSelectedFarm } from '../api';
 
 const RegisterScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -27,6 +27,7 @@ const RegisterScreen = ({ navigation }) => {
     try {
       const response = await api.post('/auth/register', formData);
       await setAuthToken(response.data.token);
+      await setSelectedFarm(response.data.farm.id);
       setLoading(false);
       navigation.replace('Dashboard');
     } catch (error) {

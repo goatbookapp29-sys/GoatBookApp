@@ -20,7 +20,7 @@ exports.getBreeds = async (req, res) => {
 
 // @desc    Add a new breed to a farm
 exports.addBreed = async (req, res) => {
-  const { name } = req.body;
+  const { name, animalType } = req.body;
   try {
     if (!req.farmId) {
       return res.status(400).json({ message: 'No farm selected' });
@@ -28,6 +28,7 @@ exports.addBreed = async (req, res) => {
 
     const breed = await Breed.create({
       name,
+      animalType: animalType || 'Goat',
       farmId: req.farmId,
       createdByEmployeeId: req.employee.id
     });
@@ -40,7 +41,7 @@ exports.addBreed = async (req, res) => {
 
 // @desc    Update a breed
 exports.updateBreed = async (req, res) => {
-  const { name } = req.body;
+  const { name, animalType } = req.body;
   try {
     const breed = await Breed.findOne({
       where: { id: req.params.id, farmId: req.farmId }
@@ -50,7 +51,7 @@ exports.updateBreed = async (req, res) => {
       return res.status(404).json({ message: 'Breed not found in this farm' });
     }
 
-    await breed.update({ name });
+    await breed.update({ name, animalType });
     res.json(breed);
   } catch (err) {
     console.error('UPDATE BREED ERROR:', err);

@@ -1,4 +1,4 @@
-const { User, Employee, FarmEmployee } = require('../models');
+const { User, Employee, Farm, FarmEmployee } = require('../models');
 const sequelize = require('../config/database');
 
 // @desc    Get current user profile
@@ -101,6 +101,12 @@ exports.updateEmployee = async (req, res) => {
 
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
+    }
+
+    // Role Protection: Check if this employee is a primary owner of any farm
+    const ownedFarm = await Farm.findOne({ where: { ownerEmployeeId: employee.id } });
+    if (ownedFarm && role && role !== 'OWNER') {
+      return res.status(403).json({ message: 'The primary owner role cannot be changed' });
     }
 
     // Update Employee Type

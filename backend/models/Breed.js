@@ -11,6 +11,11 @@ const Breed = sequelize.define('Breed', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  animalType: { // Added: Goat, Sheep, etc.
+    type: DataTypes.ENUM('Goat', 'Sheep', 'Other'),
+    defaultValue: 'Goat',
+    field: 'animal_type'
+  },
   farmId: {
     type: DataTypes.UUID,
     allowNull: false,

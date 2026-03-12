@@ -4,6 +4,7 @@ import { COLORS, SPACING } from '../theme';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
+import GSelect from '../components/GSelect';
 import api from '../api';
 
 const AddBreedScreen = ({ navigation, route }) => {
@@ -11,6 +12,7 @@ const AddBreedScreen = ({ navigation, route }) => {
   const existingBreed = route.params?.breed;
 
   const [name, setName] = useState(isEditing ? existingBreed.name : '');
+  const [animalType, setAnimalType] = useState(isEditing ? existingBreed.animalType : 'Goat');
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -23,9 +25,9 @@ const AddBreedScreen = ({ navigation, route }) => {
     setLoading(true);
     try {
       if (isEditing) {
-        await api.put(`/breeds/${existingBreed.id}`, { name });
+        await api.put(`/breeds/${existingBreed.id}`, { name, animalType });
       } else {
-        await api.post('/breeds', { name, animalType: 'Goat' });
+        await api.post('/breeds', { name, animalType });
       }
       setLoading(false);
       navigation.goBack();
@@ -51,7 +53,7 @@ const AddBreedScreen = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <GHeader 
-        title={isEditing ? "Add New Breed" : "Add New Breed"} 
+        title={isEditing ? "Edit Breed" : "Add New Breed"} 
         onBack={() => navigation.goBack()} 
       />
       
@@ -60,30 +62,39 @@ const AddBreedScreen = ({ navigation, route }) => {
         style={styles.flex}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.formRow}>
-            <View style={styles.animalTypeBox}>
-              <Text style={styles.label}>Animal Type</Text>
-              <Text style={styles.animalValue}>Goat</Text>
-            </View>
-            <View style={styles.inputBox}>
-              <GInput 
-                label="Breed" 
-                value={name} 
-                onChangeText={setName} 
-                required 
-              />
-            </View>
+          <View style={styles.formSection}>
+            <GSelect 
+              label="Animal Type" 
+              value={animalType} 
+              onSelect={setAnimalType}
+              options={[
+                { label: 'Goat', value: 'Goat' },
+                { label: 'Sheep', value: 'Sheep' },
+                { label: 'Other', value: 'Other' }
+              ]}
+              required
+            />
+            
+            <View style={styles.gap} />
+            
+            <GInput 
+              label="Breed Name" 
+              value={name} 
+              onChangeText={setName} 
+              placeholder="e.g. Boer, Sirohi, Khassi"
+              required 
+            />
           </View>
 
           <Text style={styles.note}>
             <Text style={styles.noteBold}>Note : </Text>
-            Application is designed to manage Goat & Sheep. Default Goat is enable to use. From Farm settings you can enable Sheep or both(Goat & Sheep)
+            Manage your livestock breeds. You can specify whether a breed belongs to Goats or Sheep. 
           </Text>
 
           <View style={styles.footer}>
             {isEditing ? (
               <View style={styles.buttonRow}>
-                <View style={styles.halfWidth}>
+                <View style={[styles.halfWidth, { marginRight: 8 }]}>
                   <GButton 
                     title="Delete" 
                     onPress={handleDelete} 
@@ -93,7 +104,7 @@ const AddBreedScreen = ({ navigation, route }) => {
                 </View>
                 <View style={styles.halfWidth}>
                   <GButton 
-                    title="Save" 
+                    title="Save Changes" 
                     onPress={handleSubmit} 
                     loading={loading}
                   />
@@ -101,7 +112,7 @@ const AddBreedScreen = ({ navigation, route }) => {
               </View>
             ) : (
               <GButton 
-                title="Submit" 
+                title="Create Breed" 
                 onPress={handleSubmit} 
                 loading={loading}
                 style={styles.submitBtn}
@@ -126,31 +137,11 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     flexGrow: 1,
   },
-  formRow: {
-    flexDirection: 'row',
+  formSection: {
     marginBottom: SPACING.xl,
-    gap: SPACING.md,
   },
-  animalTypeBox: {
-    backgroundColor: '#F3F4F6',
-    padding: 12,
-    borderRadius: 8,
-    flex: 1,
-    height: 60,
-    justifyContent: 'center',
-  },
-  label: {
-    fontSize: 12,
-    color: COLORS.textLight,
-    marginBottom: 2,
-  },
-  animalValue: {
-    fontSize: 16,
-    color: COLORS.text,
-    fontWeight: '500',
-  },
-  inputBox: {
-    flex: 1,
+  gap: {
+    height: 16,
   },
   note: {
     color: '#9CA3AF',
@@ -159,6 +150,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6',
     paddingTop: SPACING.lg,
+    marginTop: SPACING.md,
   },
   noteBold: {
     color: COLORS.primary,
@@ -175,7 +167,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   halfWidth: {
-    width: '48%',
+    flex: 1,
   },
   submitBtn: {
     borderRadius: 8,
