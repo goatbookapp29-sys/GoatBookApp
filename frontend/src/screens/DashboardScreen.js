@@ -8,13 +8,14 @@ import { useFocusEffect } from '@react-navigation/native';
 const DashboardScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [farmName, setFarmName] = useState('Loading...');
-  const [stats, setStats] = useState({ breeds: 0, employees: 0, animals: 0 });
+  const [stats, setStats] = useState({ breeds: 0, employees: 0, animals: 0, locations: 0 });
   const [loading, setLoading] = useState(true);
 
   const tiles = [
     { id: '1', title: 'Breed', icon: <Ghost color={COLORS.primary} size={32} />, count: stats.breeds.toString().padStart(2, '0'), screen: 'BreedList' },
     { id: '2', title: 'Employee', icon: <Users color={COLORS.primary} size={32} />, count: stats.employees.toString().padStart(2, '0'), screen: 'EmployeeList' },
     { id: '3', title: 'Animal', icon: <Bug color={COLORS.primary} size={32} />, count: stats.animals.toString(), screen: 'AnimalList' },
+    { id: '5', title: 'Location', icon: <MapPin color={COLORS.primary} size={32} />, count: stats.locations.toString().padStart(2, '0'), screen: 'LocationList' },
     { id: '4', title: 'Setting', icon: <Settings color={COLORS.primary} size={32} />, count: 'Configure', screen: 'Settings' },
   ];
 
@@ -30,12 +31,14 @@ const DashboardScreen = ({ navigation }) => {
       const breedsPromise = api.get('/breeds');
       const animalsPromise = api.get('/animals');
       const employeesPromise = api.get('/users/employees');
+      const locationsPromise = api.get('/locations');
       
-      const [profileRes, breedsRes, animalsRes, employeesRes] = await Promise.all([
+      const [profileRes, breedsRes, animalsRes, employeesRes, locationsRes] = await Promise.all([
         profilePromise, 
         breedsPromise, 
         animalsPromise, 
-        employeesPromise
+        employeesPromise,
+        locationsPromise
       ]);
       
       const userData = profileRes.data;
@@ -53,7 +56,8 @@ const DashboardScreen = ({ navigation }) => {
       setStats({
         breeds: breedsRes.data.length,
         employees: employeesRes.data.length,
-        animals: animalsRes.data.length
+        animals: animalsRes.data.length,
+        locations: locationsRes.data.length
       });
       setLoading(false);
     } catch (error) {

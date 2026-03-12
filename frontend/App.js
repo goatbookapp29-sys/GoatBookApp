@@ -18,6 +18,8 @@ import AddAnimalScreen from './src/screens/AddAnimalScreen';
 import EmployeeListScreen from './src/screens/EmployeeListScreen';
 import AddEmployeeScreen from './src/screens/AddEmployeeScreen';
 import FarmSelectionScreen from './src/screens/FarmSelectionScreen';
+import LocationListScreen from './src/screens/LocationListScreen';
+import AddLocationScreen from './src/screens/AddLocationScreen';
 import { COLORS } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -78,6 +80,9 @@ export default function App() {
         <Stack.Screen name="AddEmployee" component={AddEmployeeScreen} />
         <Stack.Screen name="EditEmployee" component={AddEmployeeScreen} />
         <Stack.Screen name="FarmSelection" component={FarmSelectionScreen} />
+        <Stack.Screen name="LocationList" component={LocationListScreen} />
+        <Stack.Screen name="AddLocation" component={AddLocationScreen} />
+        <Stack.Screen name="EditLocation" component={AddLocationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

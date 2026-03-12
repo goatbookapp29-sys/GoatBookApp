@@ -1,40 +1,34 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Animal = sequelize.define('Animal', {
+const Location = sequelize.define('Location', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
-  tagNumber: {
+  code: {
     type: DataTypes.STRING,
-    allowNull: false,
-    field: 'tag_number'
+    allowNull: false
   },
-  breedId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    field: 'breed_id'
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
   },
-  locationId: {
+  type: {
+    type: DataTypes.STRING, // Vendor, Customer, Virtual, Internal, Loss
+    allowNull: false,
+    defaultValue: 'Internal Location'
+  },
+  parentLocationId: {
     type: DataTypes.UUID,
     allowNull: true,
-    field: 'location_id'
+    field: 'parent_location_id'
   },
   farmId: {
     type: DataTypes.UUID,
     allowNull: false,
     field: 'farm_id'
-  },
-  gender: {
-    type: DataTypes.ENUM('MALE', 'FEMALE'),
-    allowNull: false
-  },
-  birthDate: {
-    type: DataTypes.DATEONLY,
-    allowNull: true,
-    field: 'birth_date'
   },
   createdByEmployeeId: {
     type: DataTypes.UUID,
@@ -42,9 +36,9 @@ const Animal = sequelize.define('Animal', {
     field: 'created_by_employee_id'
   }
 }, {
-  tableName: 'animals',
+  tableName: 'locations',
   timestamps: true,
   underscored: true
 });
 
-module.exports = Animal;
+module.exports = Location;
