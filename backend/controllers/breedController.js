@@ -9,6 +9,18 @@ exports.getBreeds = async (req, res) => {
 
     const breeds = await Breed.findAll({
       where: { farmId: req.farmId },
+      attributes: {
+        include: [
+          [
+            Breed.sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM Animals AS animal
+              WHERE animal.breedId = Breed.id
+            )`),
+            'animalCount'
+          ]
+        ]
+      },
       order: [['name', 'ASC']]
     });
     res.json(breeds);

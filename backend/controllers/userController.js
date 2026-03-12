@@ -21,7 +21,7 @@ exports.getProfile = async (req, res) => {
 
 // @desc    Update user profile
 exports.updateProfile = async (req, res) => {
-  const { name, email } = req.body;
+  const { name, email, phone } = req.body;
   try {
     const user = await User.findByPk(req.user.id);
     if (!user) {
@@ -30,6 +30,7 @@ exports.updateProfile = async (req, res) => {
 
     user.name = name || user.name;
     user.email = email || user.email;
+    user.phone = phone !== undefined ? phone : user.phone;
 
     await user.save();
     res.json(user);

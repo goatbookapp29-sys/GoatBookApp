@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import GHeader from '../components/GHeader';
-import { MapPin, ChevronRight, Bug, Edit, Info, Users, Clock } from 'lucide-react-native';
+import { MapPin, Bug, Edit, ArrowRight, Info, Users } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -25,7 +25,7 @@ const LocationDetailsScreen = ({ navigation, route }) => {
       setLoading(false);
     } catch (error) {
       console.error('Fetch location details error:', error);
-      alert('Failed to load location details');
+      alert('Failed to load location record');
       navigation.goBack();
     }
   };
@@ -43,83 +43,60 @@ const LocationDetailsScreen = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <GHeader 
-        title="Location Details" 
+        title="Location Record" 
         onBack={() => navigation.goBack()}
         rightIcon={<Edit color={COLORS.white} size={22} />}
         onRightPress={() => navigation.navigate('EditLocation', { location })}
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Location Info Card */}
+        {/* Info Card */}
         <View style={styles.infoCard}>
-          <View style={styles.pathHeader}>
-            <MapPin size={20} color={COLORS.primary} style={styles.pinIcon} />
-            <Text style={styles.pathText}>{location.displayName || location.name}</Text>
+          <View style={styles.pathRow}>
+             <MapPin size={24} color={COLORS.primary} />
+             <Text style={styles.locationTitle}>{location.displayName || location.name}</Text>
           </View>
+          <Text style={styles.locationSubtitle}>{location.code} • {location.type}</Text>
           
-          <View style={styles.metaGrid}>
-            <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>Short Code</Text>
-              <Text style={styles.metaValue}>{location.code}</Text>
+          <View style={styles.divider} />
+          
+          <View style={styles.statsRow}>
+            <View style={styles.statBox}>
+              <Text style={styles.statNum}>{totalAnimals}</Text>
+              <Text style={styles.statLabel}>Animals</Text>
             </View>
-            <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>Type</Text>
-              <Text style={styles.metaValue}>{location.type}</Text>
+            <View style={styles.verticalDivider} />
+            <View style={styles.statBox}>
+              <Text style={styles.statNum}>{distribution.length}</Text>
+              <Text style={styles.statLabel}>Breeds</Text>
             </View>
           </View>
         </View>
 
-        {/* Stats Summary */}
-        <View style={styles.statsSummary}>
-          <View style={[styles.statBox, { backgroundColor: '#E0F2FE' }]}>
-            <Bug size={24} color="#0284C7" />
-            <Text style={styles.statCount}>{totalAnimals}</Text>
-            <Text style={styles.statLabel}>Total Animals</Text>
-          </View>
-          <View style={[styles.statBox, { backgroundColor: '#F0FDF4' }]}>
-            <Users size={24} color="#16A34A" />
-            <Text style={styles.statCount}>{distribution.length}</Text>
-            <Text style={styles.statLabel}>Breeds Present</Text>
-          </View>
-        </View>
-
-        {/* Animals Grouped by Breed */}
-        <Text style={styles.sectionTitle}>Livestock by Breed</Text>
+        <Text style={styles.sectionTitle}>Livestock at this Location</Text>
         
         {distribution.length === 0 ? (
-          <View style={styles.emptyState}>
+          <View style={styles.emptyContainer}>
             <Info size={40} color="#D1D5DB" />
-            <Text style={styles.emptyText}>No animals currently assigned to this location.</Text>
+            <Text style={styles.emptyText}>No animals found in this location.</Text>
           </View>
         ) : (
           distribution.map((item, index) => (
-            <View key={index} style={styles.breedGroup}>
-              <TouchableOpacity 
-                style={styles.breedHeader}
-                onPress={() => navigation.navigate('AnimalList', { initialSearch: item.breedName })}
-              >
-                <View>
-                  <Text style={styles.groupBreedName}>{item.breedName}</Text>
-                  <Text style={styles.animalCountText}>{item.count} {item.count === 1 ? 'Animal' : 'Animals'}</Text>
-                </View>
-                <View style={styles.countBadge}>
-                  <Text style={styles.countBadgeText}>{item.count}</Text>
-                </View>
-              </TouchableOpacity>
-
-              <View style={styles.animalGrid}>
-                {item.animals.map((animal) => (
-                  <TouchableOpacity 
-                    key={animal.id} 
-                    style={styles.animalTag}
-                    onPress={() => navigation.navigate('EditAnimal', { animal })}
-                  >
-                    <Text style={styles.tagNumber}>{animal.tagNumber}</Text>
-                    <Text style={styles.genderText}>{animal.gender.toLowerCase()}</Text>
-                  </TouchableOpacity>
-                ))}
+            <TouchableOpacity 
+              key={index} 
+              style={styles.breedRow}
+              onPress={() => navigation.navigate('AnimalList', { initialSearch: item.breedName })}
+              activeOpacity={0.7}
+            >
+              <View style={styles.breedIndicator}>
+                 <Text style={styles.indicatorText}>{item.breedName[0]}</Text>
               </View>
-            </View>
+              <View style={styles.breedInfo}>
+                <Text style={styles.breedName}>{item.breedName}</Text>
+                <Text style={styles.animalCount}>{item.count} {item.count === 1 ? 'Animal' : 'Animals'}</Text>
+              </View>
+              <ArrowRight size={18} color="#D1D5DB" />
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>
@@ -130,164 +107,126 @@ const LocationDetailsScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F9FAFB',
   },
   scrollContent: {
     padding: SPACING.lg,
   },
   infoCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 24,
+    padding: 24,
     ...SHADOW.sm,
-    marginBottom: 20,
+    marginBottom: 32,
   },
-  pathHeader: {
+  pathRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  pinIcon: {
-    marginRight: 10,
-  },
-  pathText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    flex: 1,
-  },
-  metaGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  metaItem: {
-    flex: 1,
-  },
-  metaLabel: {
-    fontSize: 12,
-    color: COLORS.textLight,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  metaValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  statsSummary: {
-    flexDirection: 'row',
     gap: 12,
-    marginBottom: 24,
   },
-  statBox: {
-    flex: 1,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    ...SHADOW.sm,
-  },
-  statCount: {
-    fontSize: 24,
+  locationTitle: {
+    fontSize: 20,
     fontWeight: '800',
     color: COLORS.text,
-    marginTop: 8,
+    flex: 1,
+  },
+  locationSubtitle: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginTop: 4,
+    marginLeft: 36,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F3F4F6',
+    marginVertical: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  statBox: {
+    alignItems: 'center',
+  },
+  statNum: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.text,
   },
   statLabel: {
     fontSize: 12,
     color: COLORS.textLight,
-    marginTop: 2,
-    fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  verticalDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#E5E7EB',
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.text,
+    fontSize: 13,
+    fontWeight: '800',
+    color: COLORS.textLight,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
     marginBottom: 16,
     marginLeft: 4,
   },
-  breedGroup: {
+  breedRow: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
     ...SHADOW.sm,
   },
-  breedHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  breedIndicator: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#FFF1EA',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    marginRight: 16,
   },
-  groupBreedName: {
+  indicatorText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+  breedInfo: {
+    flex: 1,
+  },
+  breedName: {
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.text,
   },
-  animalCountText: {
-    fontSize: 12,
-    color: COLORS.textLight,
-  },
-  countBadge: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  countBadgeText: {
-    color: COLORS.white,
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  animalGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  animalTag: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 10,
-    width: '31%',
-    alignItems: 'center',
-  },
-  tagNumber: {
+  animalCount: {
     fontSize: 13,
-    fontWeight: 'bold',
-    color: COLORS.text,
-  },
-  genderText: {
-    fontSize: 10,
     color: COLORS.textLight,
     marginTop: 2,
   },
-  emptyState: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
+  emptyContainer: {
     padding: 40,
     alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
     ...SHADOW.sm,
   },
   emptyText: {
     color: COLORS.textLight,
-    textAlign: 'center',
     marginTop: 12,
-    fontSize: 14,
+    textAlign: 'center',
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F9FAFB',
   },
 });
 

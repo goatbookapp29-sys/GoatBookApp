@@ -65,7 +65,8 @@ const ProfileSettingsScreen = ({ navigation }) => {
     try {
       await api.put('/users/profile', {
         name: formData.name,
-        email: formData.email
+        email: formData.email,
+        phone: formData.phone
       });
       setOriginalData(formData);
       setSaving(false);
@@ -117,7 +118,8 @@ const ProfileSettingsScreen = ({ navigation }) => {
             <GInput 
               label="Phone Number" 
               value={formData.phone} 
-              editable={false} // Phone usually verified/fixed
+              onChangeText={(v) => setFormData({...formData, phone: v})}
+              keyboardType="phone-pad"
             />
 
             <View style={styles.gap} />
