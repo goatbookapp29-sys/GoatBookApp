@@ -10,6 +10,7 @@ const GInput = ({
   error, 
   keyboardType, 
   required,
+  placeholder, // Destructure placeholder to handle it manually
   ...props 
 }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -19,7 +20,7 @@ const GInput = ({
     Animated.timing(animatedValue, {
       toValue: (isFocused || value) ? 1 : 0,
       duration: 200,
-      useNativeDriver: false,
+      useNativeDriver: false, // Label position and font size can't use native driver
     }).start();
   }, [isFocused, value]);
 
@@ -32,15 +33,16 @@ const GInput = ({
     }),
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [15, 12],
+      outputRange: [16, 12],
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [COLORS.textLight, COLORS.textLight],
+      outputRange: [COLORS.textLight, isFocused ? COLORS.primary : COLORS.textLight],
     }),
     backgroundColor: (isFocused || value) ? COLORS.white : 'transparent',
     paddingHorizontal: (isFocused || value) ? 4 : 0,
     zIndex: 1,
+    fontWeight: (isFocused || value) ? '600' : '400',
   };
 
   return (
@@ -50,7 +52,10 @@ const GInput = ({
         isFocused && styles.inputFocused,
         error && styles.inputError
       ]}>
-        <Animated.Text style={labelStyle}>
+        <Animated.Text 
+          style={labelStyle} 
+          pointerEvents="none" // Ensure clicks pass through to the input
+        >
           {label}{required && '*'}
         </Animated.Text>
         <TextInput
@@ -61,6 +66,8 @@ const GInput = ({
           onBlur={() => setIsFocused(false)}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
+          placeholder={(isFocused || value) ? placeholder : ""} // FIX: Only show placeholder when label is out of the way
+          placeholderTextColor="#9CA3AF"
           {...props}
         />
       </View>
@@ -71,22 +78,30 @@ const GInput = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: SPACING.sm,
+    marginVertical: 4,
     width: '100%',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D1D5DB', // Light gray border
-    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB', // Lighter gray for more premium feel
+    borderRadius: 12,
     backgroundColor: COLORS.white,
-    paddingHorizontal: SPACING.sm,
-    height: 52,
+    paddingHorizontal: 12,
+    height: 56,
   },
   inputFocused: {
     borderColor: COLORS.primary,
-    borderWidth: 1.5,
+    borderWidth: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, shadowHeight: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      }
+    })
   },
   inputError: {
     borderColor: COLORS.error,
@@ -96,13 +111,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.text,
     height: '100%',
-    paddingTop: Platform.OS === 'ios' ? 0 : 4, // Adjust for vertical centering
+    textAlignVertical: 'center',
+    paddingTop: Platform.OS === 'ios' ? 0 : 4,
   },
   errorText: {
     fontSize: 12,
     color: COLORS.error,
-    marginTop: 2,
+    marginTop: 4,
     marginLeft: 4,
+    fontWeight: '500',
   },
 });
 

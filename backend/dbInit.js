@@ -10,9 +10,8 @@ const initDB = async () => {
     // Create extensions if needed
     await sequelize.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
 
-    // Sync all models
-    // CAUTION: force: false for production server startups
-    await sequelize.sync();
+    // Sync all models - use alter to update existing tables
+    await sequelize.sync({ alter: true });
     
     console.log('All models were synchronized successfully.');
   } catch (error) {
