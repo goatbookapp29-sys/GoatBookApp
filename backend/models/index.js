@@ -13,6 +13,12 @@ Employee.belongsTo(User, { foreignKey: 'userId' });
 Farm.belongsToMany(Employee, { through: FarmEmployee, foreignKey: 'farmId', as: 'staff' });
 Employee.belongsToMany(Farm, { through: FarmEmployee, foreignKey: 'employeeId', as: 'farms' });
 
+// Explicit junction associations for direct querying
+Farm.hasMany(FarmEmployee, { foreignKey: 'farmId' });
+FarmEmployee.belongsTo(Farm, { foreignKey: 'farmId' });
+Employee.hasMany(FarmEmployee, { foreignKey: 'employeeId' });
+FarmEmployee.belongsTo(Employee, { foreignKey: 'employeeId' });
+
 // 3. Farm <-> Owner (1:1 link for management)
 Farm.belongsTo(Employee, { foreignKey: 'ownerEmployeeId', as: 'owner' });
 
