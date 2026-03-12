@@ -6,7 +6,7 @@ import { Search, Plus, ChevronRight, Bug, X, MapPin } from 'lucide-react-native'
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
-const AnimalListScreen = ({ navigation }) => {
+const AnimalListScreen = ({ navigation, route }) => {
   const [animals, setAnimals] = useState([]);
   const [filteredAnimals, setFilteredAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +18,11 @@ const AnimalListScreen = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       fetchAnimals();
-    }, [])
+      if (route.params?.initialSearch) {
+        setSearchQuery(route.params.initialSearch);
+        setIsSearching(true);
+      }
+    }, [route.params])
   );
 
   useEffect(() => {

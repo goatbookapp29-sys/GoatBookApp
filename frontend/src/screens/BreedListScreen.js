@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, StatusBar } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, X } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, X, Ghost } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -25,9 +25,10 @@ const BreedListScreen = ({ navigation }) => {
     if (searchQuery.trim() === '') {
       setFilteredBreeds(breeds);
     } else {
+      const q = searchQuery.toLowerCase();
       const filtered = breeds.filter(breed => 
-        breed.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (breed.animalType && breed.animalType.toLowerCase().includes(searchQuery.toLowerCase()))
+        breed.name.toLowerCase().includes(q) ||
+        (breed.animalType && breed.animalType.toLowerCase().includes(q))
       );
       setFilteredBreeds(filtered);
     }
@@ -66,34 +67,25 @@ const BreedListScreen = ({ navigation }) => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
-      style={styles.breedItem}
-      onPress={() => navigation.navigate('EditBreed', { breed: item })}
+      style={styles.breedCard}
+      onPress={() => navigation.navigate('BreedDetails', { breedId: item.id })}
+      activeOpacity={0.7}
     >
+      <View style={styles.iconBox}>
+        <Ghost size={24} color={COLORS.primary} />
+      </View>
       <View style={styles.breedInfo}>
-        <Text style={styles.animalType}>{item.animalType}</Text>
         <Text style={styles.breedName}>{item.name}</Text>
+        <Text style={styles.animalType}>{item.animalType}</Text>
       </View>
       <ChevronRight size={20} color="#D1D5DB" />
     </TouchableOpacity>
   );
 
-  const EmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.noRecords}>
-        {searchQuery ? "No matching breeds found" : "No Records found"}
-      </Text>
-      {!searchQuery && (
-        <Text style={styles.emptyDescription}>
-          Add here list of the breeds that you owns or raised in farm. Example- Boer, Sirohi, Khassi, etc. or any sheep breed. Click "Add New Breed" button to new breed.
-        </Text>
-      )}
-    </View>
-  );
-
   return (
     <View style={styles.container}>
       <GHeader 
-        title="Breed" 
+        title="Breeds" 
         onBack={() => navigation.goBack()} 
         rightIcon={isSearching ? <X color={COLORS.white} size={24} /> : <Search color={COLORS.white} size={24} />}
         onRightPress={toggleSearch}
@@ -105,7 +97,7 @@ const BreedListScreen = ({ navigation }) => {
             <Search size={20} color={COLORS.textLight} style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search breed name..."
+              placeholder="Search breed name or type..."
               value={searchQuery}
               onChangeText={setSearchQuery}
               autoFocus
@@ -140,7 +132,13 @@ const BreedListScreen = ({ navigation }) => {
           data={filteredBreeds}
           renderItem={renderItem}
           keyExtractor={item => item.id}
-          ListEmptyComponent={EmptyState}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+                <Ghost size={64} color="#E5E7EB" />
+                <Text style={styles.noRecords}>No Breeds Found</Text>
+                <Text style={styles.emptyDesc}>Register different breeds to categorize your livestock.</Text>
+            </View>
+          }
           contentContainerStyle={[styles.listContent, isSearching && { paddingTop: 20 }]}
           keyboardShouldPersistTaps="handled"
         />
@@ -152,7 +150,7 @@ const BreedListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9FAFB',
   },
   searchBarContainer: {
     backgroundColor: COLORS.white,
@@ -180,6 +178,7 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     padding: SPACING.lg,
+    paddingBottom: SPACING.sm,
     alignItems: 'flex-end',
   },
   addButton: {
@@ -188,7 +187,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 8,
     ...SHADOW.sm,
   },
   plusIcon: {
@@ -202,43 +201,54 @@ const styles = StyleSheet.create({
   listContent: {
     flexGrow: 1,
     paddingHorizontal: SPACING.lg,
+    paddingBottom: 40,
   },
-  breedItem: {
+  breedCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    ...SHADOW.sm,
+  },
+  iconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#FFF1EA',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  breedInfo: {
+    flex: 1,
+  },
+  breedName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
   },
   animalType: {
     fontSize: 12,
     color: COLORS.textLight,
-    marginBottom: 2,
-  },
-  breedName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
+    marginTop: 2,
   },
   emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 100,
-    paddingHorizontal: SPACING.xl,
+    marginTop: 80,
+    paddingHorizontal: 40,
   },
   noRecords: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#9CA3AF',
-    marginBottom: SPACING.md,
+    color: COLORS.textLight,
+    marginTop: 16,
   },
-  emptyDescription: {
-    fontSize: 14,
-    color: '#9CA3AF',
+  emptyDesc: {
     textAlign: 'center',
-    lineHeight: 20,
+    color: '#9CA3AF',
+    marginTop: 8,
   },
   center: {
     flex: 1,

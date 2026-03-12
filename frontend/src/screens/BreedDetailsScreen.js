@@ -2,30 +2,30 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import GHeader from '../components/GHeader';
-import { MapPin, ChevronRight, Bug, Edit, Info, Users, Clock } from 'lucide-react-native';
+import { Ghost, ChevronRight, Bug, Edit, Info, MapPin } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
-const LocationDetailsScreen = ({ navigation, route }) => {
-  const { locationId } = route.params;
+const BreedDetailsScreen = ({ navigation, route }) => {
+  const { breedId } = route.params;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
       fetchDetails();
-    }, [locationId])
+    }, [breedId])
   );
 
   const fetchDetails = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/locations/${locationId}/stats`);
+      const response = await api.get(`/breeds/${breedId}/stats`);
       setData(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Fetch location details error:', error);
-      alert('Failed to load location details');
+      console.error('Fetch breed details error:', error);
+      alert('Failed to load breed details');
       navigation.goBack();
     }
   };
@@ -38,72 +38,68 @@ const LocationDetailsScreen = ({ navigation, route }) => {
     );
   }
 
-  const { location, totalAnimals, distribution } = data;
+  const { breed, totalAnimals, distribution } = data;
 
   return (
     <View style={styles.container}>
       <GHeader 
-        title="Location Details" 
+        title="Breed Details" 
         onBack={() => navigation.goBack()}
         rightIcon={<Edit color={COLORS.white} size={22} />}
-        onRightPress={() => navigation.navigate('EditLocation', { location })}
+        onRightPress={() => navigation.navigate('EditBreed', { breed })}
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Location Info Card */}
+        {/* Breed Info Card */}
         <View style={styles.infoCard}>
-          <View style={styles.pathHeader}>
-            <MapPin size={20} color={COLORS.primary} style={styles.pinIcon} />
-            <Text style={styles.pathText}>{location.displayName || location.name}</Text>
+          <View style={styles.titleRow}>
+            <Ghost size={24} color={COLORS.primary} style={styles.icon} />
+            <Text style={styles.breedName}>{breed.name}</Text>
           </View>
           
-          <View style={styles.metaGrid}>
+          <View style={styles.metaRow}>
             <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>Short Code</Text>
-              <Text style={styles.metaValue}>{location.code}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Text style={styles.metaLabel}>Type</Text>
-              <Text style={styles.metaValue}>{location.type}</Text>
+              <Text style={styles.metaLabel}>Animal Type</Text>
+              <Text style={styles.metaValue}>{breed.animalType}</Text>
             </View>
           </View>
         </View>
 
         {/* Stats Summary */}
         <View style={styles.statsSummary}>
-          <View style={[styles.statBox, { backgroundColor: '#E0F2FE' }]}>
-            <Bug size={24} color="#0284C7" />
+          <View style={[styles.statBox, { backgroundColor: '#FFF7ED' }]}>
+            <Bug size={24} color="#C2410C" />
             <Text style={styles.statCount}>{totalAnimals}</Text>
-            <Text style={styles.statLabel}>Total Animals</Text>
+            <Text style={styles.statLabel}>Total {breed.name}s</Text>
           </View>
-          <View style={[styles.statBox, { backgroundColor: '#F0FDF4' }]}>
-            <Users size={24} color="#16A34A" />
+          <View style={[styles.statBox, { backgroundColor: '#F0F9FF' }]}>
+            <MapPin size={24} color="#0369A1" />
             <Text style={styles.statCount}>{distribution.length}</Text>
-            <Text style={styles.statLabel}>Breeds Present</Text>
+            <Text style={styles.statLabel}>Locations Used</Text>
           </View>
         </View>
 
-        {/* Animals Grouped by Breed */}
-        <Text style={styles.sectionTitle}>Livestock by Breed</Text>
+        {/* Animals Grouped by Location */}
+        <Text style={styles.sectionTitle}>Distribution across Farm</Text>
         
         {distribution.length === 0 ? (
           <View style={styles.emptyState}>
             <Info size={40} color="#D1D5DB" />
-            <Text style={styles.emptyText}>No animals currently assigned to this location.</Text>
+            <Text style={styles.emptyText}>No animals of this breed found in farm records.</Text>
           </View>
         ) : (
           distribution.map((item, index) => (
-            <View key={index} style={styles.breedGroup}>
+            <View key={index} style={styles.locationGroup}>
               <TouchableOpacity 
-                style={styles.breedHeader}
-                onPress={() => navigation.navigate('AnimalList', { initialSearch: item.breedName })}
+                style={styles.groupHeader}
+                onPress={() => navigation.navigate('AnimalList', { initialSearch: item.locationName })}
               >
                 <View>
-                  <Text style={styles.groupBreedName}>{item.breedName}</Text>
-                  <Text style={styles.animalCountText}>{item.count} {item.count === 1 ? 'Animal' : 'Animals'}</Text>
+                  <Text style={styles.groupTitle}>{item.locationName}</Text>
+                  <Text style={styles.subText}>{item.count} Animals</Text>
                 </View>
-                <View style={styles.countBadge}>
-                  <Text style={styles.countBadgeText}>{item.count}</Text>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{item.count}</Text>
                 </View>
               </TouchableOpacity>
 
@@ -114,7 +110,7 @@ const LocationDetailsScreen = ({ navigation, route }) => {
                     style={styles.animalTag}
                     onPress={() => navigation.navigate('EditAnimal', { animal })}
                   >
-                    <Text style={styles.tagNumber}>{animal.tagNumber}</Text>
+                    <Text style={styles.tagNum}>{animal.tagNumber}</Text>
                     <Text style={styles.genderText}>{animal.gender.toLowerCase()}</Text>
                   </TouchableOpacity>
                 ))}
@@ -130,7 +126,7 @@ const LocationDetailsScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F9FAFB',
   },
   scrollContent: {
     padding: SPACING.lg,
@@ -142,26 +138,24 @@ const styles = StyleSheet.create({
     ...SHADOW.sm,
     marginBottom: 20,
   },
-  pathHeader: {
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
-  pinIcon: {
-    marginRight: 10,
+  icon: {
+    marginRight: 12,
   },
-  pathText: {
-    fontSize: 18,
+  breedName: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: COLORS.text,
-    flex: 1,
   },
-  metaGrid: {
+  metaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
   },
   metaItem: {
     flex: 1,
@@ -170,7 +164,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textLight,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
     marginBottom: 4,
   },
   metaValue: {
@@ -192,7 +185,7 @@ const styles = StyleSheet.create({
   },
   statCount: {
     fontSize: 24,
-    fontWeight: '800',
+    fontWeight: 'bold',
     color: COLORS.text,
     marginTop: 8,
   },
@@ -200,7 +193,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textLight,
     marginTop: 2,
-    fontWeight: '500',
   },
   sectionTitle: {
     fontSize: 16,
@@ -209,14 +201,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginLeft: 4,
   },
-  breedGroup: {
+  locationGroup: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     ...SHADOW.sm,
   },
-  breedHeader: {
+  groupHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -225,25 +217,25 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
-  groupBreedName: {
+  groupTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.text,
   },
-  animalCountText: {
+  subText: {
     fontSize: 12,
     color: COLORS.textLight,
   },
-  countBadge: {
+  badge: {
     backgroundColor: COLORS.primary,
     borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
-  countBadgeText: {
+  badgeText: {
     color: COLORS.white,
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 12,
   },
   animalGrid: {
     flexDirection: 'row',
@@ -251,15 +243,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   animalTag: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F3F4F6',
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
     padding: 10,
     width: '31%',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
-  tagNumber: {
+  tagNum: {
     fontSize: 13,
     fontWeight: 'bold',
     color: COLORS.text,
@@ -274,21 +266,19 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 40,
     alignItems: 'center',
-    justifyContent: 'center',
     ...SHADOW.sm,
   },
   emptyText: {
     color: COLORS.textLight,
     textAlign: 'center',
     marginTop: 12,
-    fontSize: 14,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F9FAFB',
   },
 });
 
-export default LocationDetailsScreen;
+export default BreedDetailsScreen;

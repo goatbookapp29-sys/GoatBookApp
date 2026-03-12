@@ -21,6 +21,7 @@ import FarmSelectionScreen from './src/screens/FarmSelectionScreen';
 import LocationListScreen from './src/screens/LocationListScreen';
 import AddLocationScreen from './src/screens/AddLocationScreen';
 import LocationDetailsScreen from './src/screens/LocationDetailsScreen';
+import BreedDetailsScreen from './src/screens/BreedDetailsScreen';
 import { COLORS } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -85,6 +86,7 @@ export default function App() {
         <Stack.Screen name="AddLocation" component={AddLocationScreen} />
         <Stack.Screen name="EditLocation" component={AddLocationScreen} />
         <Stack.Screen name="LocationDetails" component={LocationDetailsScreen} />
+        <Stack.Screen name="BreedDetails" component={BreedDetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
