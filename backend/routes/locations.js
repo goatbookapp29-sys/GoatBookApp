@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { getLocations, addLocation, updateLocation, deleteLocation, getLocationStats } = require('../controllers/locationController');
-const { protect, farmContext } = require('../middleware/authMiddleware');
+const auth = require('../middleware/auth');
 
-router.use(protect);
-router.use(farmContext);
+router.use(auth);
 
 router.route('/')
   .get(getLocations)
