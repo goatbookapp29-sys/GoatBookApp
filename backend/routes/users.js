@@ -16,4 +16,14 @@ router.get('/profile', auth, userController.getProfile);
 // @access  Private
 router.post('/change-password', auth, userController.changePassword);
 
+// @route   GET api/users/employees
+// @desc    Get all employees linked to the current active farm
+// @access  Private (Owner Only)
+router.get('/employees', auth, userController.getEmployees);
+
+// @route   POST api/users/employees
+// @desc    Owner creates an employee account and links to current farm
+// @access  Private (Owner Only)
+router.post('/employees', auth, userController.createEmployee);
+
 module.exports = router;

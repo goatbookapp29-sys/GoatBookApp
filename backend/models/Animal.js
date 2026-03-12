@@ -1,20 +1,35 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Breed = sequelize.define('Breed', {
+const Animal = sequelize.define('Animal', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
-  name: {
+  tagNumber: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    field: 'tag_number'
+  },
+  breedId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    field: 'breed_id'
   },
   farmId: {
     type: DataTypes.UUID,
     allowNull: false,
     field: 'farm_id'
+  },
+  gender: {
+    type: DataTypes.ENUM('MALE', 'FEMALE'),
+    allowNull: false
+  },
+  birthDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    field: 'birth_date'
   },
   createdByEmployeeId: {
     type: DataTypes.UUID,
@@ -22,9 +37,9 @@ const Breed = sequelize.define('Breed', {
     field: 'created_by_employee_id'
   }
 }, {
-  tableName: 'breeds',
+  tableName: 'animals',
   timestamps: true,
   underscored: true
 });
 
-module.exports = Breed;
+module.exports = Animal;

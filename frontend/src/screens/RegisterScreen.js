@@ -1,172 +1,175 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { COLORS, SPACING } from '../theme';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { COLORS, SPACING, SHADOW } from '../theme';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
-import { ChevronLeft } from 'lucide-react-native';
-import api from '../api';
+import api, { setAuthToken } from '../api';
 
 const RegisterScreen = ({ navigation }) => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    farmName: '',
+    farmLocation: ''
+  });
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      alert('All fields are required');
+    // Basic validation
+    if (!formData.name || !formData.phone || !formData.password || !formData.farmName) {
+      alert('Please fill in all required fields (Name, Phone, Password, and Farm Name)');
       return;
     }
-    if (password !== confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-    
+
     setLoading(true);
     try {
-      await api.post('/auth/register', { 
-        first_name: firstName, 
-        last_name: lastName, 
-        email, 
-        password 
-      });
+      const response = await api.post('/auth/register', formData);
+      await setAuthToken(response.data.token);
       setLoading(false);
-      alert('Registration successful! Please login.');
-      navigation.navigate('Login');
+      navigation.replace('Dashboard');
     } catch (error) {
       setLoading(false);
-      const message = error.response?.data?.message || 'Registration failed.';
+      const message = error.response?.data?.message || 'Registration failed';
       alert(message);
     }
   };
 
+  const updateField = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <ChevronLeft color={COLORS.primary} size={32} />
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Register as a Farm Owner</Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Personal Details</Text>
+          <GInput 
+            label="Full Name" 
+            value={formData.name} 
+            onChangeText={(v) => updateField('name', v)} 
+            required 
+          />
+          <View style={styles.gap} />
+          <GInput 
+            label="Phone Number" 
+            value={formData.phone} 
+            onChangeText={(v) => updateField('phone', v)} 
+            keyboardType="phone-pad"
+            required 
+          />
+          <View style={styles.gap} />
+          <GInput 
+            label="Email (Optional)" 
+            value={formData.email} 
+            onChangeText={(v) => updateField('email', v)} 
+            keyboardType="email-address"
+          />
+          <View style={styles.gap} />
+          <GInput 
+            label="Password" 
+            value={formData.password} 
+            onChangeText={(v) => updateField('password', v)} 
+            secureTextEntry 
+            required 
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Farm Details</Text>
+          <GInput 
+            label="Farm Name" 
+            value={formData.farmName} 
+            onChangeText={(v) => updateField('farmName', v)} 
+            required 
+          />
+          <View style={styles.gap} />
+          <GInput 
+            label="Farm Location" 
+            value={formData.farmLocation} 
+            onChangeText={(v) => updateField('farmLocation', v)} 
+          />
+        </View>
+
+        <GButton 
+          title="Register & Create Farm" 
+          onPress={handleRegister} 
+          loading={loading}
+          style={styles.btn}
+        />
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.link}>Login</Text>
           </TouchableOpacity>
-
-          <View style={styles.header}>
-            <Text style={styles.title}>Register</Text>
-            <Text style={styles.subtitle}>Start your journey to smarter goat farming.</Text>
-          </View>
-
-          <View style={styles.form}>
-            <View style={styles.row}>
-              <View style={{ flex: 1, marginRight: SPACING.sm }}>
-                <GInput
-                  label="First Name"
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  required
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <GInput
-                  label="Last Name"
-                  value={lastName}
-                  onChangeText={setLastName}
-                  required
-                />
-              </View>
-            </View>
-
-            <GInput
-              label="Email/Phone"
-              value={email}
-              onChangeText={setEmail}
-              required
-            />
-            <GInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              required
-            />
-            <GInput
-              label="Re-Type Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              required
-            />
-
-            <GButton 
-              title="Next" 
-              onPress={handleRegister} 
-              loading={loading}
-              style={styles.registerBtn}
-            />
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.linkText}>Login</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
   },
   scrollContent: {
-    flexGrow: 1,
-    padding: SPACING.lg,
-  },
-  backBtn: {
-    marginTop: SPACING.sm,
-    marginLeft: -SPACING.sm,
+    padding: SPACING.xl,
+    paddingTop: 60,
   },
   header: {
-    marginVertical: SPACING.lg,
+    marginBottom: SPACING.xl,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.primary,
-    marginBottom: SPACING.xs,
+    color: COLORS.text,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: COLORS.textLight,
+    marginTop: 4,
   },
-  form: {
-    width: '100%',
+  section: {
+    marginBottom: SPACING.xl,
   },
-  row: {
-    flexDirection: 'row',
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: SPACING.md,
   },
-  registerBtn: {
+  gap: {
+    height: 12,
+  },
+  btn: {
     marginTop: SPACING.lg,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: SPACING.xl,
-    paddingBottom: SPACING.lg,
+    paddingBottom: SPACING.xl,
   },
   footerText: {
     color: COLORS.textLight,
   },
-  linkText: {
+  link: {
     color: COLORS.primary,
     fontWeight: 'bold',
-  },
+  }
 });
 
 export default RegisterScreen;

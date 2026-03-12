@@ -16,6 +16,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/breeds', require('./routes/breeds'));
+app.use('/api/animals', require('./routes/animals'));
 
 // Basic route for testing
 app.get('/', (req, res) => res.send('GoatBook API Running'));

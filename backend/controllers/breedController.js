@@ -1,11 +1,15 @@
 const { Breed } = require('../models');
 
-// @desc    Get all breeds for the current user
+// @desc    Get all breeds for the current farm
 exports.getBreeds = async (req, res) => {
   try {
+    if (!req.farmId) {
+      return res.status(400).json({ message: 'No farm selected' });
+    }
+
     const breeds = await Breed.findAll({
-      where: { userId: req.user.id },
-      order: [['createdAt', 'DESC']]
+      where: { farmId: req.farmId },
+      order: [['name', 'ASC']]
     });
     res.json(breeds);
   } catch (err) {
@@ -14,38 +18,39 @@ exports.getBreeds = async (req, res) => {
   }
 };
 
-// @desc    Add a new breed
+// @desc    Add a new breed to a farm
 exports.addBreed = async (req, res) => {
-  const { name, animalType } = req.body;
+  const { name } = req.body;
   try {
+    if (!req.farmId) {
+      return res.status(400).json({ message: 'No farm selected' });
+    }
+
     const breed = await Breed.create({
       name,
-      animalType: animalType || 'Goat',
-      userId: req.user.id
+      farmId: req.farmId,
+      createdByEmployeeId: req.employee.id
     });
     res.status(201).json(breed);
   } catch (err) {
     console.error('ADD BREED ERROR:', err);
-    if (err.name === 'SequelizeUniqueConstraintError') {
-      return res.status(400).json({ message: 'Breed name already exists' });
-    }
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
 // @desc    Update a breed
 exports.updateBreed = async (req, res) => {
-  const { name, animalType } = req.body;
+  const { name } = req.body;
   try {
     const breed = await Breed.findOne({
-      where: { id: req.params.id, userId: req.user.id }
+      where: { id: req.params.id, farmId: req.farmId }
     });
 
     if (!breed) {
-      return res.status(404).json({ message: 'Breed not found' });
+      return res.status(404).json({ message: 'Breed not found in this farm' });
     }
 
-    await breed.update({ name, animalType });
+    await breed.update({ name });
     res.json(breed);
   } catch (err) {
     console.error('UPDATE BREED ERROR:', err);
@@ -57,11 +62,11 @@ exports.updateBreed = async (req, res) => {
 exports.deleteBreed = async (req, res) => {
   try {
     const breed = await Breed.findOne({
-      where: { id: req.params.id, userId: req.user.id }
+      where: { id: req.params.id, farmId: req.farmId }
     });
 
     if (!breed) {
-      return res.status(404).json({ message: 'Breed not found' });
+      return res.status(404).json({ message: 'Breed not found in this farm' });
     }
 
     await breed.destroy();

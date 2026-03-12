@@ -1,60 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
-import { COLORS, SPACING } from '../theme';
+import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { COLORS, SPACING, SHADOW } from '../theme';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
-import GSelect from '../components/GSelect';
 import GButton from '../components/GButton';
+import GSelect from '../components/GSelect';
 import api from '../api';
 
 const ProfileSettingsScreen = ({ navigation }) => {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  
-  // Data Options
-  const employeeTypes = [
-    { label: 'Owner', value: 'Owner' },
-    { label: 'Manager', value: 'Manager' },
-    { label: 'Worker', value: 'Worker' },
-    { label: 'Administrative', value: 'Administrative' }
-  ];
-
-  const countries = [
-    { label: 'India', value: 'India' },
-    { label: 'United States', value: 'USA' },
-    { label: 'United Kingdom', value: 'UK' }
-  ];
-
-  const states = [
-    { label: 'Madhya Pradesh', value: 'Madhya Pradesh' },
-    { label: 'Maharashtra', value: 'Maharashtra' },
-    { label: 'Rajasthan', value: 'Rajasthan' },
-    { label: 'Uttar Pradesh', value: 'Uttar Pradesh' }
-  ];
-
-  const cities = [
-    { label: 'Indore', value: 'Indore' },
-    { label: 'Bhopal', value: 'Bhopal' },
-    { label: 'Mumbai', value: 'Mumbai' },
-    { label: 'Pune', value: 'Pune' }
-  ];
-
-  // Form values
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     phone: '',
-    employeeType: 'Owner',
-    companyName: '',
     address: '',
-    city: 'Indore',
-    state: 'Madhya Pradesh',
+    city: '',
+    state: '',
     country: 'India',
+    employeeType: ''
   });
-
-  // Original data for comparison
-  const [originalData, setOriginalData] = useState({});
+  
+  const [originalData, setOriginalData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -67,173 +34,141 @@ const ProfileSettingsScreen = ({ navigation }) => {
       const data = response.data;
       
       const mappedData = {
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
+        name: data.name || '',
         email: data.email || '',
-        phone: data.phoneNumber || '',
-        employeeType: data.role === 'user' ? 'Owner' : data.role,
-        companyName: '',
-        address: data.address || '',
-        city: data.city || 'Indore',
-        state: 'Madhya Pradesh',
-        country: 'India',
+        phone: data.phone || '',
+        employeeType: data.employeeProfile?.employeeType || '',
+        // These fields would be in a separate Profile model in a real app
+        address: '',
+        city: '',
+        state: '',
+        country: 'India'
       };
-      
+
       setFormData(mappedData);
       setOriginalData(mappedData);
       setLoading(false);
     } catch (error) {
       console.error('Fetch profile error:', error);
       setLoading(false);
-      alert('Failed to load profile data');
     }
   };
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
 
   const handleReset = () => {
     setFormData(originalData);
   };
 
   const handleSave = async () => {
+    setSaving(true);
     try {
-      setSaving(true);
       await api.put('/users/profile', {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone_number: formData.phone,
-        bio: '',
-        address: formData.address,
-        city: formData.city,
+        name: formData.name,
+        email: formData.email
       });
-      
       setOriginalData(formData);
       setSaving(false);
-      alert('Profile updated successfully!');
+      Alert.alert('Success', 'Profile updated successfully');
     } catch (error) {
       setSaving(false);
-      alert('Failed to update profile');
+      Alert.alert('Error', 'Failed to update profile');
     }
   };
 
-  const hasChanges = Object.keys(formData).some(
-    key => formData[key] !== originalData[key]
-  );
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <GHeader title="Profile Settings" onBack={() => navigation.goBack()} />
+      
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={styles.flex}
       >
-        {loading ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={styles.loadingText}>Fetching profile...</Text>
-          </View>
-        ) : (
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            <View style={styles.row}>
-              <View style={styles.halfWidth}>
-                <GInput 
-                  label="First Name" 
-                  value={formData.firstName} 
-                  onChangeText={(val) => handleInputChange('firstName', val)} 
-                  required 
-                />
-              </View>
-              <View style={styles.halfWidth}>
-                <GInput 
-                  label="Last Name" 
-                  value={formData.lastName} 
-                  onChangeText={(val) => handleInputChange('lastName', val)} 
-                  required 
-                />
-              </View>
-            </View>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.formContainer}>
+            <Text style={styles.sectionTitle}>Basic Information</Text>
+            
+            <GInput 
+              label="Full Name" 
+              value={formData.name} 
+              onChangeText={(v) => setFormData({...formData, name: v})} 
+              required 
+            />
+            
+            <View style={styles.gap} />
+            
+            <GInput 
+              label="Email Address" 
+              value={formData.email} 
+              onChangeText={(v) => setFormData({...formData, email: v})} 
+              keyboardType="email-address"
+            />
+            
+            <View style={styles.gap} />
+            
+            <GInput 
+              label="Phone Number" 
+              value={formData.phone} 
+              editable={false} // Phone usually verified/fixed
+            />
+
+            <View style={styles.gap} />
 
             <GInput 
-              label="Email" 
-              value={formData.email} 
-              onChangeText={(val) => handleInputChange('email', val)} 
-              required 
-              keyboardType="email-address"
+              label="Role" 
+              value={formData.employeeType} 
               editable={false}
             />
 
-            <GInput 
-              label="Phone" 
-              value={formData.phone} 
-              onChangeText={(val) => handleInputChange('phone', val)} 
-              required 
-              keyboardType="phone-pad"
-            />
-
-            <GSelect 
-              label="Employee Type" 
-              value={formData.employeeType} 
-              options={employeeTypes}
-              onSelect={(val) => handleInputChange('employeeType', val)} 
-              required 
-            />
-
-            <GInput 
-              label="Company Name(Optional)" 
-              value={formData.companyName} 
-              onChangeText={(val) => handleInputChange('companyName', val)} 
-            />
-
+            <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>Address Details</Text>
+            
             <GInput 
               label="Address" 
               value={formData.address} 
-              onChangeText={(val) => handleInputChange('address', val)} 
-              multiline
+              onChangeText={(v) => setFormData({...formData, address: v})} 
             />
-
+            
+            <View style={styles.gap} />
+            
             <GSelect 
               label="Country" 
               value={formData.country} 
-              options={countries}
-              onSelect={(val) => handleInputChange('country', val)} 
+              onSelect={(v) => setFormData({...formData, country: v})}
+              options={[
+                { label: 'India', value: 'India' },
+                { label: 'USA', value: 'USA' },
+                { label: 'UK', value: 'UK' }
+              ]}
             />
+          </View>
 
-            <GSelect 
-              label="State" 
-              value={formData.state} 
-              options={states}
-              onSelect={(val) => handleInputChange('state', val)} 
-            />
-
-            <GSelect 
-              label="City" 
-              value={formData.city} 
-              options={cities}
-              onSelect={(val) => handleInputChange('city', val)} 
-            />
-
-            {hasChanges && (
-              <View style={styles.buttonContainer}>
-                <View style={styles.halfWidth}>
-                  <GButton 
-                    title="Reset" 
-                    onPress={handleReset} 
-                    variant="outline"
-                  />
-                </View>
-                <View style={styles.halfWidth}>
-                  <GButton 
-                    title="Save" 
-                    onPress={handleSave} 
-                    loading={saving}
-                  />
-                </View>
+          {hasChanges && (
+            <View style={styles.buttonRow}>
+              <View style={styles.halfBtn}>
+                <GButton 
+                  title="Reset" 
+                  variant="outline" 
+                  onPress={handleReset}
+                />
               </View>
-            )}
-          </ScrollView>
-        )}
+              <View style={styles.halfBtn}>
+                <GButton 
+                  title="Save" 
+                  onPress={handleSave}
+                  loading={saving}
+                />
+              </View>
+            </View>
+          )}
+        </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
@@ -242,38 +177,40 @@ const ProfileSettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.white,
   },
   flex: {
     flex: 1,
-  },
-  scrollContent: {
-    padding: SPACING.lg,
-    paddingBottom: SPACING.xxl,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingText: {
+  scrollContent: {
+    padding: SPACING.lg,
+    paddingBottom: 40,
+  },
+  formContainer: {
+    marginBottom: SPACING.xl,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#374151',
+    marginBottom: SPACING.lg,
+  },
+  gap: {
+    height: 12,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: SPACING.md,
-    color: COLORS.textLight,
   },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  halfWidth: {
+  halfBtn: {
     width: '48%',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: SPACING.xl,
-    width: '100%',
-  },
+  }
 });
 
 export default ProfileSettingsScreen;

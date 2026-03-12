@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
-import { Power, Ghost, Users, Bug, Settings } from 'lucide-react-native';
-import api, { setAuthToken } from '../api';
+import { Power, Ghost, Users, Bug, Settings, MapPin } from 'lucide-react-native';
+import api, { setAuthToken, setSelectedFarm } from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
 const DashboardScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
-  const [stats, setStats] = useState({ breeds: 0, employees: 8, animals: 145 });
+  const [activeFarm, setActiveFarm] = useState(null);
+  const [stats, setStats] = useState({ breeds: 0, employees: 0, animals: 0 });
   const [loading, setLoading] = useState(true);
 
   const tiles = [
     { id: '1', title: 'Breed', icon: <Ghost color={COLORS.primary} size={32} />, count: stats.breeds.toString().padStart(2, '0'), screen: 'BreedList' },
-    { id: '2', title: 'Employee', icon: <Users color={COLORS.primary} size={32} />, count: stats.employees.toString().padStart(2, '0') },
-    { id: '3', title: 'Animal', icon: <Bug color={COLORS.primary} size={32} />, count: stats.animals.toString() },
+    { id: '2', title: 'Employee', icon: <Users color={COLORS.primary} size={32} />, count: stats.employees.toString().padStart(2, '0'), screen: 'EmployeeList' },
+    { id: '3', title: 'Animal', icon: <Bug color={COLORS.primary} size={32} />, count: stats.animals.toString(), screen: 'AnimalList' },
     { id: '4', title: 'Setting', icon: <Settings color={COLORS.primary} size={32} />, count: 'Configure', screen: 'Settings' },
   ];
 
@@ -25,13 +26,17 @@ const DashboardScreen = ({ navigation }) => {
 
   const fetchDashboardData = async () => {
     try {
-      const profilePromise = api.get('/users/profile');
       const breedsPromise = api.get('/breeds');
+      const animalsPromise = api.get('/animals');
+      const employeesPromise = api.get('/users/employees');
       
-      const [profileRes, breedsRes] = await Promise.all([profilePromise, breedsPromise]);
+      const [breedsRes, animalsRes, employeesRes] = await Promise.all([breedsPromise, animalsPromise, employeesPromise]);
       
-      setUser(profileRes.data);
-      setStats(prev => ({ ...prev, breeds: breedsRes.data.length }));
+      setStats({
+        breeds: breedsRes.data.length,
+        employees: employeesRes.data.length,
+        animals: animalsRes.data.length
+      });
       setLoading(false);
     } catch (error) {
       console.error('Fetch dashboard error:', error);
@@ -41,6 +46,7 @@ const DashboardScreen = ({ navigation }) => {
 
   const handleLogout = async () => {
     await setAuthToken(null);
+    await setSelectedFarm(null);
     navigation.replace('Login');
   };
 
@@ -62,15 +68,12 @@ const DashboardScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.welcome}>Welcome back,</Text>
-          {loading ? (
-            <ActivityIndicator size="small" color={COLORS.primary} />
-          ) : (
-            <Text style={styles.userName}>
-              {user ? `${user.firstName} ${user.lastName}` : 'Guest'}
-            </Text>
-          )}
+        <View style={styles.userInfo}>
+          <Text style={styles.welcome}>Active Farm</Text>
+          <View style={styles.farmRow}>
+            <MapPin size={16} color={COLORS.primary} />
+            <Text style={styles.farmName}>Goatwala Estate</Text> 
+          </View>
         </View>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
           <Power color={COLORS.error} size={24} />
@@ -78,7 +81,11 @@ const DashboardScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Overview</Text>
+        <View style={styles.welcomeSection}>
+          <Text style={styles.hiText}>Management Overview</Text>
+          <Text style={styles.subHi}>Control your operations from one place</Text>
+        </View>
+
         <FlatList
           data={tiles}
           renderItem={renderTile}
@@ -105,14 +112,25 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     ...SHADOW.sm,
   },
-  welcome: {
-    fontSize: 14,
-    color: COLORS.textLight,
+  userInfo: {
+    flex: 1,
   },
-  userName: {
-    fontSize: 20,
+  welcome: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  farmRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  farmName: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.text,
+    marginLeft: 6,
   },
   logoutBtn: {
     padding: SPACING.sm,
@@ -123,11 +141,18 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     flex: 1,
   },
-  sectionTitle: {
-    fontSize: 18,
+  welcomeSection: {
+    marginBottom: SPACING.xl,
+  },
+  hiText: {
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.text,
-    marginBottom: SPACING.lg,
+  },
+  subHi: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginTop: 4,
   },
   row: {
     justifyContent: 'space-between',
@@ -138,15 +163,15 @@ const styles = StyleSheet.create({
   tile: {
     backgroundColor: COLORS.white,
     width: '48%',
-    borderRadius: 16,
+    borderRadius: 20,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
     ...SHADOW.md,
   },
   tileIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     backgroundColor: '#FFF1EA',
     justifyContent: 'center',
     alignItems: 'center',

@@ -1,135 +1,173 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { COLORS, SPACING } from '../theme';
+import { StyleSheet, View, Text, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { COLORS, SPACING, SHADOW } from '../theme';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
-import api, { setAuthToken } from '../api';
+import api, { setAuthToken, setSelectedFarm } from '../api';
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState(''); // Can be email or phone
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      alert('Please enter both email/phone and password');
+    if (!identifier || !password) {
+      alert('Please enter your credentials');
       return;
     }
-    
+
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', { email, password });
-      const { token, user } = response.data;
+      // Logic to check if identifier is email-like or phone-like
+      const isEmail = identifier.includes('@');
+      
+      const payload = isEmail 
+        ? { email: identifier, password } 
+        : { phone: identifier, password };
+
+      const response = await api.post('/auth/login', payload);
+      const { token, farms, user } = response.data;
       
       await setAuthToken(token);
-      setLoading(false);
-      navigation.replace('Dashboard');
+      
+      // Multi-farm logic
+      if (farms && farms.length > 1) {
+        setLoading(false);
+        navigation.replace('FarmSelection', { farms });
+      } else if (farms && farms.length === 1) {
+        await setSelectedFarm(farms[0].id);
+        setLoading(false);
+        navigation.replace('Dashboard');
+      } else {
+        alert('No farms found for this account.');
+        setLoading(false);
+      }
     } catch (error) {
       setLoading(false);
-      const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      const message = error.response?.data?.message || 'Login failed';
       alert(message);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Login</Text>
-            <Text style={styles.subtitle}>Login to Goatwala Farm APP!</Text>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.logoContainer}>
+          <View style={styles.logoCircle}>
+            <Text style={styles.logoText}>GB</Text>
           </View>
+          <Text style={styles.appName}>GoatBook</Text>
+          <Text style={styles.appTagline}>Farm Management System</Text>
+        </View>
 
-          <View style={styles.form}>
-            <GInput
-              label="Email/Phone"
-              value={email}
-              onChangeText={setEmail}
-            />
-            <GInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            
-            <TouchableOpacity style={styles.forgotBtn}>
-              <Text style={styles.forgotText}>Forgot password?</Text>
-            </TouchableOpacity>
+        <View style={styles.form}>
+          <GInput 
+            label="Email or Phone Number" 
+            value={identifier} 
+            onChangeText={setIdentifier} 
+            placeholder="example@mail.com or 1234567890"
+            required 
+          />
+          <View style={styles.gap} />
+          <GInput 
+            label="Password" 
+            value={password} 
+            onChangeText={setPassword} 
+            secureTextEntry 
+            required 
+          />
+          
+          <TouchableOpacity style={styles.forgotPass}>
+            <Text style={styles.forgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
 
-            <GButton 
-              title="Login" 
-              onPress={handleLogin} 
-              loading={loading}
-              style={styles.loginBtn}
-            />
+          <GButton 
+            title="Login" 
+            onPress={handleLogin} 
+            loading={loading}
+          />
+        </View>
 
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                <Text style={styles.linkText}>Register</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>New to GoatBook? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <Text style={styles.link}>Create Account</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: SPACING.lg,
+    padding: SPACING.xl,
     justifyContent: 'center',
   },
-  header: {
-    marginBottom: SPACING.xl,
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
   },
-  title: {
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...SHADOW.md,
+  },
+  logoText: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.primary,
-    marginBottom: SPACING.xs,
+    color: COLORS.white,
   },
-  subtitle: {
+  appName: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginTop: 16,
+  },
+  appTagline: {
     fontSize: 14,
     color: COLORS.textLight,
+    marginTop: 4,
   },
   form: {
-    width: '100%',
+    marginTop: SPACING.md,
   },
-  forgotBtn: {
+  gap: {
+    height: 16,
+  },
+  forgotPass: {
     alignSelf: 'flex-end',
-    marginBottom: SPACING.lg,
+    marginVertical: SPACING.md,
+    marginBottom: SPACING.xl,
   },
   forgotText: {
     color: COLORS.primary,
     fontWeight: '600',
-    fontSize: 12,
-  },
-  loginBtn: {
-    marginTop: SPACING.md,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: SPACING.xl,
+    marginTop: 40,
   },
   footerText: {
     color: COLORS.textLight,
   },
-  linkText: {
+  link: {
     color: COLORS.primary,
     fontWeight: 'bold',
-  },
+  }
 });
 
 export default LoginScreen;
