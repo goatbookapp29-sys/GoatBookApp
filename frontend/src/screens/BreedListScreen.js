@@ -27,7 +27,7 @@ const BreedListScreen = ({ navigation }) => {
     } else {
       const filtered = breeds.filter(breed => 
         breed.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        breed.animalType.toLowerCase().includes(searchQuery.toLowerCase())
+        (breed.animalType && breed.animalType.toLowerCase().includes(searchQuery.toLowerCase()))
       );
       setFilteredBreeds(filtered);
     }
@@ -139,7 +139,7 @@ const BreedListScreen = ({ navigation }) => {
         <FlatList
           data={filteredBreeds}
           renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={item => item.id}
           ListEmptyComponent={EmptyState}
           contentContainerStyle={[styles.listContent, isSearching && { paddingTop: 20 }]}
           keyboardShouldPersistTaps="handled"
