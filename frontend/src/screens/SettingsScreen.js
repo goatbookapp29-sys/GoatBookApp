@@ -1,45 +1,81 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import GHeader from '../components/GHeader';
-import { User, Lock } from 'lucide-react-native';
+import { User, Lock, Home } from 'lucide-react-native';
+import api from '../api';
 
 const SettingsScreen = ({ navigation }) => {
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await api.get('/users/profile');
+      setRole(response.data?.employeeProfile?.employeeType);
+    } catch (error) {
+      console.error('Error fetching profile in settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const settingsOptions = [
     { 
       id: 'profile', 
       title: 'Profile Settings', 
       icon: <User color={COLORS.primary} size={40} />, 
-      onPress: () => navigation.navigate('ProfileSettings') 
+      onPress: () => navigation.navigate('ProfileSettings'),
+      visible: true
+    },
+    { 
+      id: 'farm', 
+      title: 'Farm Settings', 
+      icon: <Home color={COLORS.primary} size={40} />, 
+      onPress: () => navigation.navigate('FarmSettings'),
+      visible: role === 'OWNER'
     },
     { 
       id: 'password', 
       title: 'Change Password', 
       icon: <Lock color={COLORS.primary} size={40} />, 
-      onPress: () => navigation.navigate('ChangePassword') 
+      onPress: () => navigation.navigate('ChangePassword'),
+      visible: true
     },
   ];
+
+  const visibleOptions = settingsOptions.filter(option => option.visible);
 
   return (
     <View style={styles.container}>
       <GHeader title="Settings" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.row}>
-          {settingsOptions.map((item) => (
-            <TouchableOpacity 
-              key={item.id} 
-              style={styles.card} 
-              onPress={item.onPress}
-              activeOpacity={0.7}
-            >
-              <View style={styles.iconContainer}>
-                {item.icon}
-              </View>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-            </TouchableOpacity>
-          ))}
+      {loading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
-      </ScrollView>
+      ) : (
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.grid}>
+            {visibleOptions.map((item) => (
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.card} 
+                onPress={item.onPress}
+                activeOpacity={0.7}
+              >
+                <View style={styles.iconContainer}>
+                  {item.icon}
+                </View>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -47,32 +83,42 @@ const SettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9FAFB', // Light gray background for better card contrast
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
-    padding: SPACING.lg,
+    padding: SPACING.md,
   },
-  row: {
+  grid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
   card: {
     backgroundColor: COLORS.white,
-    width: '48%',
-    height: 160,
-    borderRadius: 12,
+    width: '47%', // Slightly less than 50% to allow for spacing
+    height: 140,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: '#F3F4F6', // Very light gray border
+    borderColor: '#E5E7EB',
     ...SHADOW.sm,
   },
   iconContainer: {
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
+    backgroundColor: '#F3F4F6', // Subtle background for icon
+    padding: 12,
+    borderRadius: 50,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '700',
     color: COLORS.text,
     textAlign: 'center',
   },

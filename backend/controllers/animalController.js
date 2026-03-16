@@ -1,4 +1,5 @@
 const { Animal, Breed, Location } = require('../models');
+const { Op } = require('sequelize');
 
 // @desc    Get all animals for the current farm
 exports.getAnimals = async (req, res) => {
@@ -218,6 +219,23 @@ exports.deleteAnimal = async (req, res) => {
 
     if (!animal) {
       return res.status(404).json({ message: 'Animal not found' });
+    }
+
+    // Check if this animal is registered as a parent (mother/father) for any other animal
+    const parentCheck = await Animal.findOne({
+      where: {
+        farmId: req.farmId,
+        [Op.or]: [
+          { motherTagId: animal.tagNumber },
+          { fatherTagId: animal.tagNumber }
+        ]
+      }
+    });
+
+    if (parentCheck) {
+      return res.status(400).json({ 
+        message: `Cannot delete animal ${animal.tagNumber} because it is registered as a parent of animal ${parentCheck.tagNumber}` 
+      });
     }
 
     await animal.destroy();

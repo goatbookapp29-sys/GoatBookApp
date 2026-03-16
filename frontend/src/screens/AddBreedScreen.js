@@ -46,7 +46,8 @@ const AddBreedScreen = ({ navigation, route }) => {
       navigation.goBack();
     } catch (error) {
       setDeleting(false);
-      alert('Failed to delete breed');
+      const message = error.response?.data?.message || 'Failed to delete breed';
+      alert(message);
     }
   };
 

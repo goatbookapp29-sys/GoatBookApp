@@ -31,12 +31,11 @@ export default StyleSheet.create({
     marginTop: 4,
   },
   farmName: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: COLORS.primary, // Changed to primary for active look
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.text,
     marginLeft: 6,
     letterSpacing: 0.5,
-    fontStyle: 'italic', // Added unique touch
   },
   logoutBtn: {
     padding: SPACING.sm,

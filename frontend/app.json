@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile_apk",
-    "slug": "mobile_apk",
+    "name": "GoatBook",
+    "slug": "GoatBook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

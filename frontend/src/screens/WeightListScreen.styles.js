@@ -97,4 +97,8 @@ export default StyleSheet.create({
     fontSize: 16,
     color: COLORS.textLight,
   },
+  deleteBtn: {
+    padding: 8,
+    marginLeft: 8,
+  }
 });

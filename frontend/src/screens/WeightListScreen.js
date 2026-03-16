@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Search, Plus, Scale, Calendar, Info } from 'lucide-react-native';
+import { Search, Plus, Scale, Calendar, Info, Trash2 } from 'lucide-react-native';
 import { COLORS } from '../theme';
 import GHeader from '../components/GHeader';
 import api from '../api';
@@ -58,6 +58,29 @@ const WeightListScreen = ({ navigation }) => {
     }
   };
 
+  const handleDelete = async (id) => {
+    Alert.alert(
+      'Delete Weight Record',
+      'Are you sure you want to remove this weight record?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive', 
+          onPress: async () => {
+            try {
+              await api.delete(`/weights/${id}`);
+              fetchWeights();
+            } catch (error) {
+              console.error('Delete weight error:', error);
+              alert('Failed to delete weight record');
+            }
+          } 
+        }
+      ]
+    );
+  };
+
   const renderWeightItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.iconBox}>
@@ -71,6 +94,12 @@ const WeightListScreen = ({ navigation }) => {
         <Text style={styles.weightValue}>{item.weight} KG</Text>
         {item.height && <Text style={styles.heightValue}>H: {item.height}</Text>}
       </View>
+      <TouchableOpacity 
+        style={styles.deleteBtn} 
+        onPress={() => handleDelete(item.id)}
+      >
+        <Trash2 size={20} color="#EF4444" />
+      </TouchableOpacity>
     </View>
   );
 

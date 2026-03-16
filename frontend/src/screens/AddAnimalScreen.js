@@ -11,7 +11,7 @@ import GDatePicker from '../components/GDatePicker';
 import { Check } from 'lucide-react-native';
 import api from '../api';
 import { getFromCache } from '../utils/cache';
-import { HelpCircle, ChevronDown, Plus, Scale } from 'lucide-react-native';
+import { HelpCircle, ChevronDown, ChevronUp, Plus, Scale } from 'lucide-react-native';
 
 const CheckBox = ({ label, value, onToggle }) => (
   <TouchableOpacity style={styles.checkboxContainer} onPress={onToggle} activeOpacity={0.7}>
@@ -25,6 +25,7 @@ const CheckBox = ({ label, value, onToggle }) => (
 const AddAnimalScreen = ({ navigation, route }) => {
   const isEditing = !!route.params?.animal;
   const existingAnimal = route.params?.animal || {};
+  const [weightExpanded, setWeightExpanded] = useState(false);
 
   const [tagNumber, setTagNumber] = useState(existingAnimal.tagNumber || '');
   const [weights, setWeights] = useState([]);
@@ -221,7 +222,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const handleDelete = async () => {
     Alert.alert(
       'Delete Animal',
-      'Are you sure you want to remove this animal from the farm records?',
+      'Are you sure you want to delete this animal?',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
@@ -232,16 +233,19 @@ const AddAnimalScreen = ({ navigation, route }) => {
             try {
               await api.delete(`/animals/${existingAnimal.id}`);
               setDeleting(false);
-              navigation.goBack();
+              navigation.navigate('AnimalList');
             } catch (error) {
               setDeleting(false);
-              alert('Failed to delete animal');
+              const msg = error.response?.data?.message || 'Failed to delete animal';
+              alert(msg);
             }
           } 
         }
       ]
     );
   };
+
+
 
   return (
     <View style={styles.container}>
@@ -464,55 +468,62 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
           {isEditing && (
             <View style={styles.weightSection}>
-              <View style={styles.weightHeader}>
+              <TouchableOpacity 
+                style={styles.weightHeader}
+                activeOpacity={0.7}
+                onPress={() => setWeightExpanded(!weightExpanded)}
+              >
                 <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
                   <Text style={styles.sectionTitle}>Weight Record</Text>
                   <HelpCircle size={16} color="#9CA3AF" style={{ marginLeft: 6 }} />
                 </View>
-                <ChevronDown size={20} color="#9CA3AF" />
-              </View>
-              <View style={styles.weightContent}>
-                <TouchableOpacity 
-                   style={styles.addNewBtn}
-                   onPress={() => navigation.navigate('AddWeight', { tagNumber: existingAnimal.tagNumber })}
-                >
-                  <Plus size={16} color={COLORS.white} />
-                  <Text style={styles.addNewText}>Add New Record</Text>
-                </TouchableOpacity>
+                {weightExpanded ? <ChevronUp size={20} color="#9CA3AF" /> : <ChevronDown size={20} color="#9CA3AF" />}
+              </TouchableOpacity>
+              
+              {weightExpanded && (
+                <View style={styles.weightContent}>
+                  <TouchableOpacity 
+                    style={styles.addNewBtn}
+                    onPress={() => navigation.navigate('AddWeight', { tagNumber: existingAnimal.tagNumber })}
+                  >
+                    <Plus size={16} color={COLORS.white} />
+                    <Text style={styles.addNewText}>Add New Record</Text>
+                  </TouchableOpacity>
 
-                {weightsLoading ? (
-                  <ActivityIndicator color={COLORS.primary} style={{ marginTop: 20 }} />
-                ) : weights.length > 0 ? (
-                  <View style={styles.weightList}>
-                    {weights.map((w, idx) => (
-                      <View key={w.id} style={[styles.weightItem, idx === weights.length - 1 && { borderBottomWidth: 0 }]}>
-                        <View style={styles.weightIconBox}>
-                          <Scale size={16} color={COLORS.primary} />
-                        </View>
-                        <View style={styles.weightInfoBlock}>
-                          <Text style={styles.weightKg}>{w.weight} KG</Text>
-                          <Text style={styles.weightDate}>{w.date}</Text>
-                        </View>
-                        {w.height && (
-                          <View style={styles.heightInfoBlock}>
-                            <Text style={styles.weightLabel}>Height</Text>
-                            <Text style={styles.weightValue}>{w.height}</Text>
+                  {weightsLoading ? (
+                    <ActivityIndicator color={COLORS.primary} style={{ marginTop: 20 }} />
+                  ) : weights.length > 0 ? (
+                    <View style={styles.weightList}>
+                      {weights.map((w, idx) => (
+                        <View key={w.id} style={[styles.weightItem, idx === weights.length - 1 && { borderBottomWidth: 0 }]}>
+                          <View style={styles.weightIconBox}>
+                            <Scale size={16} color={COLORS.primary} />
                           </View>
-                        )}
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  <Text style={styles.noRecordsText}>No Records Found</Text>
-                )}
-              </View>
+                          <View style={styles.weightInfoBlock}>
+                            <Text style={styles.weightKg}>{w.weight} KG</Text>
+                            <Text style={styles.weightDate}>{w.date}</Text>
+                          </View>
+                          {w.height && (
+                            <View style={styles.heightInfoBlock}>
+                              <Text style={styles.weightLabel}>Height</Text>
+                              <Text style={styles.weightValue}>{w.height}</Text>
+                            </View>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={styles.noRecordsText}>No Records Found</Text>
+                  )}
+                </View>
+              )}
             </View>
           )}
 
           <View style={styles.footer}>
             {isEditing ? (
               <View style={styles.buttonRow}>
-                <View style={styles.halfBtn}>
+                <View style={[styles.halfBtn, { marginRight: 8 }]}>
                   <GButton 
                     title="Delete" 
                     variant="outline" 
@@ -522,7 +533,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 </View>
                 <View style={styles.halfBtn}>
                   <GButton 
-                    title="Save" 
+                    title="Save Changes" 
                     onPress={handleSave}
                     loading={loading}
                   />
@@ -530,7 +541,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               </View>
             ) : (
               <GButton 
-                title="Save" 
+                title="Create Animal" 
                 onPress={handleSave}
                 loading={loading}
               />
