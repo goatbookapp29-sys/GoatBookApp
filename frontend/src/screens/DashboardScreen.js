@@ -4,6 +4,7 @@ import { COLORS, SPACING, SHADOW } from '../theme';
 import { Power, Ghost, Users, Bug, Settings, MapPin } from 'lucide-react-native';
 import api, { setAuthToken, setSelectedFarm } from '../api';
 import { useFocusEffect } from '@react-navigation/native';
+import { getFromCache, saveToCache } from '../utils/cache';
 
 const DashboardScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
@@ -27,6 +28,8 @@ const DashboardScreen = ({ navigation }) => {
 
   const fetchDashboardData = async () => {
     try {
+      setLoading(true);
+      
       const profilePromise = api.get('/users/profile');
       const breedsPromise = api.get('/breeds');
       const animalsPromise = api.get('/animals');
@@ -44,14 +47,17 @@ const DashboardScreen = ({ navigation }) => {
       const userData = profileRes.data;
       setUser(userData);
 
-      // Find the name of the farm we are currently looking at
+      // Save to cache
+      await saveToCache('profile', userData);
+      await saveToCache('breeds', breedsRes.data);
+      await saveToCache('animals', animalsRes.data);
+      await saveToCache('employees', employeesRes.data);
+      await saveToCache('locations', locationsRes.data);
+      
+      // Find current farm name
       const currentFarmId = api.defaults.headers.common['X-Farm-ID'];
       const farm = userData.employeeProfile?.farms?.find(f => f.id === currentFarmId);
-      if (farm) {
-        setFarmName(farm.name);
-      } else {
-        setFarmName('My Farm');
-      }
+      if (farm) setFarmName(farm.name);
 
       setStats({
         breeds: Array.isArray(breedsRes.data) ? breedsRes.data.length : 0,
@@ -61,9 +67,31 @@ const DashboardScreen = ({ navigation }) => {
       });
       setLoading(false);
     } catch (error) {
-      console.error('Fetch dashboard error:', error);
-      const msg = error.response?.data?.error || error.response?.data?.message || error.message;
-      alert('Dashboard Error: ' + msg);
+      console.warn('Network fetch failed, attempting cache...', error);
+      
+      // Attempt to load from cache
+      const cachedProfile = await getFromCache('profile');
+      const cachedBreeds = await getFromCache('breeds');
+      const cachedAnimals = await getFromCache('animals');
+      const cachedEmployees = await getFromCache('employees');
+      const cachedLocations = await getFromCache('locations');
+
+      if (cachedProfile) {
+        setUser(cachedProfile);
+        const currentFarmId = api.defaults.headers.common['X-Farm-ID'];
+        const farm = cachedProfile.employeeProfile?.farms?.find(f => f.id === currentFarmId);
+        if (farm) setFarmName(farm.name + ' (Offline)');
+        
+        setStats({
+          breeds: Array.isArray(cachedBreeds) ? cachedBreeds.length : 0,
+          employees: Array.isArray(cachedEmployees) ? cachedEmployees.length : 0,
+          animals: Array.isArray(cachedAnimals) ? cachedAnimals.length : 0,
+          locations: Array.isArray(cachedLocations) ? cachedLocations.length : 0
+        });
+      } else {
+        const msg = error.response?.data?.error || error.response?.data?.message || error.message;
+        alert('Offline & No Cache: ' + msg);
+      }
       setLoading(false);
     }
   };

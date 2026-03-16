@@ -5,6 +5,7 @@ import GHeader from '../components/GHeader';
 import { Search, Plus, ChevronRight, Bug, X, MapPin } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
+import { getFromCache, saveToCache } from '../utils/cache';
 
 const AnimalListScreen = ({ navigation, route }) => {
   const [animals, setAnimals] = useState([]);
@@ -53,11 +54,23 @@ const AnimalListScreen = ({ navigation, route }) => {
     try {
       setLoading(true);
       const response = await api.get('/animals');
+      
+      // Cache data
+      await saveToCache('animals', response.data);
+      
       setAnimals(response.data);
       setFilteredAnimals(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Fetch animals error:', error);
+      console.warn('Fetch animals failed, looking for cache...', error);
+      
+      const cachedData = await getFromCache('animals');
+      if (cachedData) {
+        setAnimals(cachedData);
+        setFilteredAnimals(cachedData);
+      } else {
+        console.error('No cached animals found.');
+      }
       setLoading(false);
     }
   };

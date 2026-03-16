@@ -5,6 +5,7 @@ import GHeader from '../components/GHeader';
 import { Search, Plus, ChevronRight, X, Ghost } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
+import { getFromCache, saveToCache } from '../utils/cache';
 
 const BreedListScreen = ({ navigation }) => {
   const [breeds, setBreeds] = useState([]);
@@ -38,13 +39,24 @@ const BreedListScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await api.get('/breeds');
+      
+      // Cache data
+      await saveToCache('breeds', response.data);
+      
       setBreeds(response.data);
       setFilteredBreeds(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Fetch breeds error:', error);
-      const msg = error.response?.data?.error || error.message;
-      alert('Fetch Breeds Error: ' + msg);
+      console.warn('Fetch breeds failed, looking for cache...', error);
+      
+      const cachedData = await getFromCache('breeds');
+      if (cachedData) {
+        setBreeds(cachedData);
+        setFilteredBreeds(cachedData);
+      } else {
+        const msg = error.response?.data?.error || error.message;
+        alert('Offline & No Cache: ' + msg);
+      }
       setLoading(false);
     }
   };

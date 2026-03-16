@@ -10,7 +10,8 @@ const GSelect = ({
   onSelect, 
   error, 
   required,
-  placeholder = ''
+  placeholder = '',
+  containerStyle
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
@@ -47,7 +48,7 @@ const GSelect = ({
   const selectedOption = options.find(opt => opt.value === value);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <TouchableOpacity 
         activeOpacity={0.7}
         onPress={() => setModalVisible(true)}

@@ -11,6 +11,7 @@ const GInput = ({
   keyboardType, 
   required,
   placeholder, // Destructure placeholder to handle it manually
+  containerStyle,
   ...props 
 }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -46,7 +47,7 @@ const GInput = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <View style={[
         styles.inputWrapper, 
         isFocused && styles.inputFocused,
@@ -66,7 +67,7 @@ const GInput = ({
           onBlur={() => setIsFocused(false)}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
-          placeholder={(isFocused || value) ? placeholder : ""} // FIX: Only show placeholder when label is out of the way
+          placeholder={(isFocused && !value) ? placeholder : ""} // FIX: Only show placeholder when focused and empty
           placeholderTextColor="#9CA3AF"
           {...props}
         />
