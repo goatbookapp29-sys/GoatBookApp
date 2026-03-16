@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
-import { Power, Ghost, Users, Bug, Settings, MapPin, Scale } from 'lucide-react-native';
+import { Power, Dna, User, PawPrint, Settings, MapPin, Scale, Syringe, Heart, ClipboardList, Languages, FolderKanban } from 'lucide-react-native';
 import api, { setAuthToken, setSelectedFarm } from '../api';
 import styles from './DashboardScreen.styles';
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,12 +14,18 @@ const DashboardScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
 
   const tiles = [
-    { id: '1', title: 'Breed', icon: <Ghost color={COLORS.primary} size={32} />, count: stats.breeds.toString().padStart(2, '0'), screen: 'BreedList' },
-    { id: '2', title: 'Employee', icon: <Users color={COLORS.primary} size={32} />, count: stats.employees.toString().padStart(2, '0'), screen: 'EmployeeList' },
-    { id: '3', title: 'Animal', icon: <Bug color={COLORS.primary} size={32} />, count: stats.animals.toString(), screen: 'AnimalList' },
-    { id: '5', title: 'Weight', icon: <Scale color={COLORS.primary} size={32} />, count: stats.weights.toString(), screen: 'WeightList' },
-    { id: '6', title: 'Location', icon: <MapPin color={COLORS.primary} size={32} />, count: stats.locations.toString().padStart(2, '0'), screen: 'LocationList' },
-    { id: '4', title: 'Setting', icon: <Settings color={COLORS.primary} size={32} />, count: 'Configure', screen: 'Settings' },
+    { id: '1', title: 'Breed', icon: <Dna color={COLORS.primary} size={32} />, count: stats.breeds.toString().padStart(2, '0'), screen: 'BreedList' },
+    { id: '2', title: 'Animals', icon: <PawPrint color={COLORS.primary} size={32} />, count: stats.animals.toString().padStart(2, '0'), screen: 'AnimalList' },
+    { id: '3', title: 'Employee', icon: <User color={COLORS.primary} size={32} />, count: stats.employees.toString().padStart(2, '0'), screen: 'EmployeeList' },
+    { id: '4', title: 'Location', icon: <MapPin color={COLORS.primary} size={32} />, count: stats.locations.toString().padStart(2, '0'), screen: 'LocationList' },
+    { id: '5', title: 'Vaccines', icon: <Syringe color={COLORS.primary} size={32} />, count: 'Upcoming', screen: null },
+    { id: '6', title: 'Weight', icon: <Scale color={COLORS.primary} size={32} />, count: stats.weights.toString().padStart(2, '0'), screen: 'WeightList' },
+    { id: '7', title: 'Mating', icon: <Heart color={COLORS.primary} size={32} />, count: 'History', screen: null },
+    { id: '8', title: 'Breeding', icon: <PawPrint color={COLORS.primary} size={32} />, count: 'Tracking', screen: null },
+    { id: '9', title: 'Report', icon: <ClipboardList color={COLORS.primary} size={32} />, count: 'View', screen: null },
+    { id: '10', title: 'Language', icon: <Languages color={COLORS.primary} size={32} />, count: 'Settings', screen: null },
+    { id: '11', title: 'Settings', icon: <Settings color={COLORS.primary} size={32} />, count: 'Configure', screen: 'Settings' },
+    { id: '12', title: 'Financials', icon: <FolderKanban color={COLORS.primary} size={32} />, count: 'Analysis', screen: null },
   ];
 
   useFocusEffect(
