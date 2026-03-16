@@ -21,10 +21,15 @@ const Breed = sequelize.define('Breed', {
     allowNull: false,
     field: 'farm_id'
   },
-  createdByEmployeeId: {
+  createdByUserId: {
     type: DataTypes.UUID,
-    allowNull: false,
-    field: 'created_by_employee_id'
+    allowNull: true,
+    field: 'created_by_user_id'
+  },
+  updatedByUserId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'updated_by_user_id'
   }
 }, {
   tableName: 'breeds',

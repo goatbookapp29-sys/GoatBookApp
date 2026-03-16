@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING } from '../theme';
+import styles from './AddAnimalScreen.styles';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
@@ -9,6 +11,7 @@ import GDatePicker from '../components/GDatePicker';
 import { Check } from 'lucide-react-native';
 import api from '../api';
 import { getFromCache } from '../utils/cache';
+import { HelpCircle, ChevronDown, Plus, Scale } from 'lucide-react-native';
 
 const CheckBox = ({ label, value, onToggle }) => (
   <TouchableOpacity style={styles.checkboxContainer} onPress={onToggle} activeOpacity={0.7}>
@@ -24,6 +27,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const existingAnimal = route.params?.animal || {};
 
   const [tagNumber, setTagNumber] = useState(existingAnimal.tagNumber || '');
+  const [weights, setWeights] = useState([]);
+  const [weightsLoading, setWeightsLoading] = useState(false);
   const [breedId, setBreedId] = useState(existingAnimal.breedId || '');
   const [color, setColor] = useState(existingAnimal.color || '');
   const [gender, setGender] = useState(existingAnimal.gender || 'FEMALE');
@@ -57,10 +62,27 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    fetchBreeds();
-    fetchLocations();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchBreeds();
+      fetchLocations();
+      if (isEditing) {
+        fetchWeights();
+      }
+    }, [])
+  );
+
+  const fetchWeights = async () => {
+    try {
+      setWeightsLoading(true);
+      const response = await api.get(`/weights?animalId=${existingAnimal.id}`);
+      setWeights(response.data);
+    } catch (error) {
+      console.error('Fetch weights error:', error);
+    } finally {
+      setWeightsLoading(false);
+    }
+  };
 
   // Rules: Uncheck male specific boxes if gender changes to FEMALE
   useEffect(() => {
@@ -440,6 +462,53 @@ const AddAnimalScreen = ({ navigation, route }) => {
             />
           </View>
 
+          {isEditing && (
+            <View style={styles.weightSection}>
+              <View style={styles.weightHeader}>
+                <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
+                  <Text style={styles.sectionTitle}>Weight Record</Text>
+                  <HelpCircle size={16} color="#9CA3AF" style={{ marginLeft: 6 }} />
+                </View>
+                <ChevronDown size={20} color="#9CA3AF" />
+              </View>
+              <View style={styles.weightContent}>
+                <TouchableOpacity 
+                   style={styles.addNewBtn}
+                   onPress={() => navigation.navigate('AddWeight', { tagNumber: existingAnimal.tagNumber })}
+                >
+                  <Plus size={16} color={COLORS.white} />
+                  <Text style={styles.addNewText}>Add New Record</Text>
+                </TouchableOpacity>
+
+                {weightsLoading ? (
+                  <ActivityIndicator color={COLORS.primary} style={{ marginTop: 20 }} />
+                ) : weights.length > 0 ? (
+                  <View style={styles.weightList}>
+                    {weights.map((w, idx) => (
+                      <View key={w.id} style={[styles.weightItem, idx === weights.length - 1 && { borderBottomWidth: 0 }]}>
+                        <View style={styles.weightIconBox}>
+                          <Scale size={16} color={COLORS.primary} />
+                        </View>
+                        <View style={styles.weightInfoBlock}>
+                          <Text style={styles.weightKg}>{w.weight} KG</Text>
+                          <Text style={styles.weightDate}>{w.date}</Text>
+                        </View>
+                        {w.height && (
+                          <View style={styles.heightInfoBlock}>
+                            <Text style={styles.weightLabel}>Height</Text>
+                            <Text style={styles.weightValue}>{w.height}</Text>
+                          </View>
+                        )}
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  <Text style={styles.noRecordsText}>No Records Found</Text>
+                )}
+              </View>
+            </View>
+          )}
+
           <View style={styles.footer}>
             {isEditing ? (
               <View style={styles.buttonRow}>
@@ -473,75 +542,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-  },
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: SPACING.lg,
-    flexGrow: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.primary, // Orange styling seen in design
-    marginBottom: SPACING.md,
-  },
-  formContainer: {
-    marginTop: 0,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: SPACING.sm,
-  },
-  halfWidth: {
-    flex: 1,
-    marginHorizontal: 4, // 8px gap between (4+4)
-  },
-  footer: {
-    marginTop: SPACING.xl,
-    paddingVertical: SPACING.md,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  halfBtn: {
-    width: '48%',
-  },
-  maleLabel: {
-    fontSize: 14,
-    color: COLORS.text,
-    fontWeight: '500',
-    marginRight: 12,
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderWidth: 2,
-    borderColor: '#D1D5DB', // Tailwind gray-300
-    borderRadius: 4,
-    marginRight: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-  checkboxLabel: {
-    fontSize: 14,
-    color: COLORS.text,
-  }
-});
+
 
 export default AddAnimalScreen;

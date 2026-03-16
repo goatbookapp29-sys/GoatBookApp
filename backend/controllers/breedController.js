@@ -30,7 +30,7 @@ exports.addBreed = async (req, res) => {
       name,
       animalType: animalType || 'Goat',
       farmId: req.farmId,
-      createdByEmployeeId: req.employee.id
+      createdByUserId: req.user.id
     });
     res.status(201).json(breed);
   } catch (err) {
@@ -51,7 +51,7 @@ exports.updateBreed = async (req, res) => {
       return res.status(404).json({ message: 'Breed not found in this farm' });
     }
 
-    await breed.update({ name, animalType });
+    await breed.update({ name, animalType, updatedByUserId: req.user.id });
     res.json(breed);
   } catch (err) {
     console.error('UPDATE BREED ERROR:', err);

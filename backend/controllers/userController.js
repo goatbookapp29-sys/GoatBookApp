@@ -32,6 +32,7 @@ exports.updateProfile = async (req, res) => {
     user.email = email || user.email;
     user.phone = phone !== undefined ? phone : user.phone;
 
+    user.updatedByUserId = req.user.id;
     await user.save();
     res.json(user);
   } catch (err) {
@@ -63,12 +64,13 @@ exports.createEmployee = async (req, res) => {
       return res.status(400).json({ message: 'A user with this email already exists' });
     }
 
-    user = await User.create({ name, email, password }, { transaction: t });
+    user = await User.create({ name, email, password, createdByUserId: req.user.id }, { transaction: t });
 
     // 3. Step 2: Create Employee identity
     const employee = await Employee.create({
       userId: user.id,
-      employeeType: role || 'EMPLOYEE'
+      employeeType: role || 'EMPLOYEE',
+      createdByUserId: req.user.id
     }, { transaction: t });
 
     // 4. Step 3: Attach Employee to the CURRENT Farm
@@ -79,7 +81,8 @@ exports.createEmployee = async (req, res) => {
 
     await FarmEmployee.create({
       farmId: req.farmId,
-      employeeId: employee.id
+      employeeId: employee.id,
+      createdByUserId: req.user.id
     }, { transaction: t });
 
     await t.commit();
@@ -116,12 +119,14 @@ exports.updateEmployee = async (req, res) => {
 
     // Update Employee Type
     if (role) employee.employeeType = role;
+    employee.updatedByUserId = req.user.id;
     await employee.save();
 
     // Update Linked User Name
     if (name) {
       const user = await User.findByPk(employee.userId);
       user.name = name;
+      user.updatedByUserId = req.user.id;
       await user.save();
     }
 
@@ -147,6 +152,7 @@ exports.resetEmployeePassword = async (req, res) => {
 
     const user = await User.findByPk(employee.userId);
     user.password = newPassword;
+    user.updatedByUserId = req.user.id;
     await user.save();
 
     res.json({ message: 'Password reset successfully' });
@@ -200,6 +206,7 @@ exports.changePassword = async (req, res) => {
     }
 
     user.password = newPassword;
+    user.updatedByUserId = req.user.id;
     await user.save();
 
     res.json({ message: 'Password updated successfully' });

@@ -26,6 +26,16 @@ const User = sequelize.define('User', {
   password: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  createdByUserId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'created_by_user_id'
+  },
+  updatedByUserId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'updated_by_user_id'
   }
 }, {
   tableName: 'users',

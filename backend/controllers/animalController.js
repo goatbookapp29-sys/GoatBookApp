@@ -83,7 +83,7 @@ exports.addAnimal = async (req, res) => {
       birthWeight,
       locationId: locationId || null,
       farmId: req.farmId,
-      createdByEmployeeId: req.employee.id,
+      createdByUserId: req.user.id,
       isBreeder: finalIsBreeder,
       isQurbani: finalIsQurbani,
       batchNo,
@@ -199,7 +199,8 @@ exports.updateAnimal = async (req, res) => {
         birthType,
         motherTagId: (acquisitionMethod || animal.acquisitionMethod) === 'BORN' ? motherTagId : null,
         fatherTagId: (acquisitionMethod || animal.acquisitionMethod) === 'BORN' ? fatherTagId : null,
-        remark
+        remark,
+        updatedByUserId: req.user.id
     });
     res.json(animal);
   } catch (err) {

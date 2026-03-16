@@ -37,20 +37,23 @@ exports.register = async (req, res) => {
     // 3. Step 2: Create Employee record with type OWNER
     const employee = await Employee.create({
       userId: user.id,
-      employeeType: 'OWNER'
+      employeeType: 'OWNER',
+      createdByUserId: user.id
     }, { transaction: t });
 
     // 4. Step 3: Create Farm
     const farm = await Farm.create({
       name: farmName,
       location: farmLocation,
-      ownerEmployeeId: employee.id
+      ownerEmployeeId: employee.id,
+      createdByUserId: user.id
     }, { transaction: t });
 
     // 5. Step 4: Link Owner to Farm
     await FarmEmployee.create({
       farmId: farm.id,
-      employeeId: employee.id
+      employeeId: employee.id,
+      createdByUserId: user.id
     }, { transaction: t });
 
     await t.commit();

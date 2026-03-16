@@ -1,5 +1,5 @@
 const sequelize = require('./config/database');
-const { User, Employee, Farm, FarmEmployee, Breed, Animal } = require('./models');
+const { User, Employee, Farm, FarmEmployee, Breed, Animal, Location, Weight } = require('./models');
 
 const initDB = async () => {
   try {

@@ -17,6 +17,16 @@ const Employee = sequelize.define('Employee', {
     allowNull: false,
     defaultValue: 'EMPLOYEE',
     field: 'employee_type'
+  },
+  createdByUserId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'created_by_user_id'
+  },
+  updatedByUserId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'updated_by_user_id'
   }
 }, {
   tableName: 'employees',

@@ -110,10 +110,15 @@ const Animal = sequelize.define('Animal', {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  createdByEmployeeId: {
+  createdByUserId: {
     type: DataTypes.UUID,
-    allowNull: false,
-    field: 'created_by_employee_id'
+    allowNull: true,
+    field: 'created_by_user_id'
+  },
+  updatedByUserId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'updated_by_user_id'
   }
 }, {
   tableName: 'animals',

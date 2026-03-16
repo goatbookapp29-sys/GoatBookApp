@@ -1,34 +1,43 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Location = sequelize.define('Location', {
+const Weight = sequelize.define('Weight', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
-  code: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  type: {
-    type: DataTypes.STRING, // Vendor, Customer, Virtual, Internal, Loss
-    allowNull: false,
-    defaultValue: 'Internal Location'
-  },
-  parentLocationId: {
+  animalId: {
     type: DataTypes.UUID,
-    allowNull: true,
-    field: 'parent_location_id'
+    allowNull: false,
+    field: 'animal_id'
   },
   farmId: {
     type: DataTypes.UUID,
     allowNull: false,
     field: 'farm_id'
+  },
+  weight: {
+    type: DataTypes.DECIMAL(6, 2),
+    allowNull: false
+  },
+  height: {
+    type: DataTypes.DECIMAL(6, 2),
+    allowNull: true
+  },
+  date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  tagNumber: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    field: 'tag_number'
+  },
+  remark: {
+    type: DataTypes.TEXT,
+    allowNull: true
   },
   createdByUserId: {
     type: DataTypes.UUID,
@@ -41,9 +50,9 @@ const Location = sequelize.define('Location', {
     field: 'updated_by_user_id'
   }
 }, {
-  tableName: 'locations',
+  tableName: 'weights',
   timestamps: true,
   underscored: true
 });
 
-module.exports = Location;
+module.exports = Weight;

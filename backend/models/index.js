@@ -5,6 +5,7 @@ const FarmEmployee = require('./FarmEmployee');
 const Breed = require('./Breed');
 const Animal = require('./Animal');
 const Location = require('./Location');
+const Weight = require('./Weight');
 
 // 1. User <-> Employee (1:1 per profile)
 User.hasOne(Employee, { foreignKey: 'userId', as: 'employeeProfile' });
@@ -27,10 +28,12 @@ Farm.belongsTo(Employee, { foreignKey: 'ownerEmployeeId', as: 'owner' });
 Farm.hasMany(Breed, { foreignKey: 'farmId' });
 Farm.hasMany(Animal, { foreignKey: 'farmId' });
 Farm.hasMany(Location, { foreignKey: 'farmId' });
+Farm.hasMany(Weight, { foreignKey: 'farmId' });
 
 Breed.belongsTo(Farm, { foreignKey: 'farmId' });
 Animal.belongsTo(Farm, { foreignKey: 'farmId' });
 Location.belongsTo(Farm, { foreignKey: 'farmId' });
+Weight.belongsTo(Farm, { foreignKey: 'farmId' });
 
 // 5. Breed <-> Animal
 Breed.hasMany(Animal, { foreignKey: 'breedId' });
@@ -40,14 +43,34 @@ Animal.belongsTo(Breed, { foreignKey: 'breedId' });
 Location.hasMany(Animal, { foreignKey: 'locationId' });
 Animal.belongsTo(Location, { foreignKey: 'locationId' });
 
-// 7. Recursive Association for Location Hierarchy
+// 7. Animal <-> Weight association
+Animal.hasMany(Weight, { foreignKey: 'animalId', as: 'weights' });
+Weight.belongsTo(Animal, { foreignKey: 'animalId' });
+
+// 8. Recursive Association for Location Hierarchy
 Location.hasMany(Location, { as: 'subLocations', foreignKey: 'parentLocationId' });
 Location.belongsTo(Location, { as: 'parentLocation', foreignKey: 'parentLocationId' });
 
-// 8. Creator Trackers
-Employee.hasMany(Breed, { foreignKey: 'createdByEmployeeId' });
-Employee.hasMany(Animal, { foreignKey: 'createdByEmployeeId' });
-Employee.hasMany(Location, { foreignKey: 'createdByEmployeeId', as: 'createdLocations' });
+// 9. Creator/Updater Trackers (Audit)
+User.hasMany(Animal, { foreignKey: 'createdByUserId', as: 'createdAnimals' });
+User.hasMany(Animal, { foreignKey: 'updatedByUserId', as: 'updatedAnimals' });
+Animal.belongsTo(User, { foreignKey: 'createdByUserId', as: 'creator' });
+Animal.belongsTo(User, { foreignKey: 'updatedByUserId', as: 'updater' });
+
+User.hasMany(Breed, { foreignKey: 'createdByUserId', as: 'createdBreeds' });
+User.hasMany(Breed, { foreignKey: 'updatedByUserId', as: 'updatedBreeds' });
+Breed.belongsTo(User, { foreignKey: 'createdByUserId', as: 'creator' });
+Breed.belongsTo(User, { foreignKey: 'updatedByUserId', as: 'updater' });
+
+User.hasMany(Location, { foreignKey: 'createdByUserId', as: 'createdLocations' });
+User.hasMany(Location, { foreignKey: 'updatedByUserId', as: 'updatedLocations' });
+Location.belongsTo(User, { foreignKey: 'createdByUserId', as: 'creator' });
+Location.belongsTo(User, { foreignKey: 'updatedByUserId', as: 'updater' });
+
+User.hasMany(Weight, { foreignKey: 'createdByUserId', as: 'createdWeights' });
+User.hasMany(Weight, { foreignKey: 'updatedByUserId', as: 'updatedWeights' });
+Weight.belongsTo(User, { foreignKey: 'createdByUserId', as: 'creator' });
+Weight.belongsTo(User, { foreignKey: 'updatedByUserId', as: 'updater' });
 
 module.exports = {
   User,
@@ -56,5 +79,6 @@ module.exports = {
   FarmEmployee,
   Breed,
   Animal,
-  Location
+  Location,
+  Weight
 };

@@ -51,7 +51,7 @@ exports.addLocation = async (req, res) => {
       type,
       parentLocationId: parentLocationId || null,
       farmId: req.farmId,
-      createdByEmployeeId: req.employee.id
+      createdByUserId: req.user.id
     });
     res.status(201).json(location);
   } catch (err) {
@@ -77,7 +77,7 @@ exports.updateLocation = async (req, res) => {
         return res.status(400).json({ message: 'Location cannot be its own parent' });
     }
 
-    await location.update({ code, name, type, parentLocationId: parentLocationId || null });
+    await location.update({ code, name, type, parentLocationId: parentLocationId || null, updatedByUserId: req.user.id });
     res.json(location);
   } catch (err) {
     console.error('UPDATE LOCATION ERROR:', err);
