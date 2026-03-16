@@ -61,6 +61,15 @@ const AddWeightScreen = ({ route, navigation }) => {
 
     try {
       setLoading(true);
+      
+      // Explicit validation check to ensure tag exists
+      const checkRes = await api.get(`/animals?tagNumber=${tagNumber}`);
+      if (!checkRes.data || checkRes.data.length === 0) {
+        Alert.alert('Invalid Tag ID', 'The scanned Tag ID does not exist in our system. Please check and try again.');
+        setLoading(false);
+        return;
+      }
+
       await api.post('/weights', {
         tagNumber,
         weight,
@@ -100,9 +109,6 @@ const AddWeightScreen = ({ route, navigation }) => {
                 rightIcon={<Scan size={20} color={COLORS.primary} />}
               />
             </View>
-            <TouchableOpacity style={styles.addButton} onPress={() => fetchAnimalDetails(tagNumber)}>
-              <Text style={styles.addButtonText}>ADD</Text>
-            </TouchableOpacity>
           </View>
 
           {fetchingAnimal && (

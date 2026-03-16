@@ -24,21 +24,6 @@ export default StyleSheet.create({
   flex: {
     flex: 1,
   },
-  addButtonText: {
-    color: COLORS.white,
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  addButton: {
-    backgroundColor: '#FF6B00',
-    marginLeft: SPACING.md,
-    height: 50,
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 0,
-  },
   infoBox: {
     backgroundColor: '#EFF6FF',
     padding: 10,
