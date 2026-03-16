@@ -23,6 +23,7 @@ import AddLocationScreen from './src/screens/AddLocationScreen';
 import LocationDetailsScreen from './src/screens/LocationDetailsScreen';
 import BreedDetailsScreen from './src/screens/BreedDetailsScreen';
 import AddWeightScreen from './src/screens/AddWeightScreen';
+import WeightListScreen from './src/screens/WeightListScreen';
 import { COLORS } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -89,6 +90,7 @@ export default function App() {
         <Stack.Screen name="LocationDetails" component={LocationDetailsScreen} />
         <Stack.Screen name="BreedDetails" component={BreedDetailsScreen} />
         <Stack.Screen name="AddWeight" component={AddWeightScreen} />
+        <Stack.Screen name="WeightList" component={WeightListScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

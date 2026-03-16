@@ -17,7 +17,7 @@ const DashboardScreen = ({ navigation }) => {
     { id: '1', title: 'Breed', icon: <Ghost color={COLORS.primary} size={32} />, count: stats.breeds.toString().padStart(2, '0'), screen: 'BreedList' },
     { id: '2', title: 'Employee', icon: <Users color={COLORS.primary} size={32} />, count: stats.employees.toString().padStart(2, '0'), screen: 'EmployeeList' },
     { id: '3', title: 'Animal', icon: <Bug color={COLORS.primary} size={32} />, count: stats.animals.toString(), screen: 'AnimalList' },
-    { id: '5', title: 'Weight', icon: <Scale color={COLORS.primary} size={32} />, count: stats.weights.toString(), screen: 'AddWeight' },
+    { id: '5', title: 'Weight', icon: <Scale color={COLORS.primary} size={32} />, count: stats.weights.toString(), screen: 'WeightList' },
     { id: '6', title: 'Location', icon: <MapPin color={COLORS.primary} size={32} />, count: stats.locations.toString().padStart(2, '0'), screen: 'LocationList' },
     { id: '4', title: 'Setting', icon: <Settings color={COLORS.primary} size={32} />, count: 'Configure', screen: 'Settings' },
   ];

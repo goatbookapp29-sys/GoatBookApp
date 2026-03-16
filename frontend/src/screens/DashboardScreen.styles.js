@@ -7,7 +7,9 @@ export default StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   header: {
-    padding: SPACING.lg,
+    paddingTop: 50, // Added more space for status bar / upside issue
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -29,10 +31,12 @@ export default StyleSheet.create({
     marginTop: 4,
   },
   farmName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text,
+    fontSize: 20,
+    fontWeight: '800',
+    color: COLORS.primary, // Changed to primary for active look
     marginLeft: 6,
+    letterSpacing: 0.5,
+    fontStyle: 'italic', // Added unique touch
   },
   logoutBtn: {
     padding: SPACING.sm,
