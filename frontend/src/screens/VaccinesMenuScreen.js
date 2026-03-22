@@ -17,13 +17,13 @@ const VaccinesMenuScreen = ({ navigation }) => {
       id: 'single_vaccination', 
       title: 'Single Vaccination', 
       icon: <Syringe color="#3B82F6" size={40} />, 
-      onPress: () => navigation.navigate('VaccinationList', { mode: 'SINGLE' }) 
+      onPress: () => navigation.navigate('AddVaccination', { mode: 'single' }) 
     },
     { 
       id: 'mass_vaccination', 
       title: 'Mass Vaccination', 
       icon: <Users color="#3B82F6" size={40} />, 
-      onPress: () => navigation.navigate('VaccinationList', { mode: 'MASS' }) 
+      onPress: () => navigation.navigate('AddVaccination', { mode: 'mass' }) 
     },
     { 
       id: 'history', 
