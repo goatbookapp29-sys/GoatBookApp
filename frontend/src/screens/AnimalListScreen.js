@@ -111,6 +111,9 @@ const AnimalListScreen = ({ navigation, route }) => {
           </View>
         )}
       </View>
+      <View style={[styles.statusBadge, styles[`status${item.status}`]]}>
+        <Text style={styles.statusText}>{item.status}</Text>
+      </View>
       <ChevronRight size={20} color="#D1D5DB" />
     </TouchableOpacity>
   );
@@ -310,6 +313,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: 'white',
+  },
+  statusLIVE: {
+    backgroundColor: '#10B981',
+  },
+  statusSOLD: {
+    backgroundColor: '#3B82F6',
+  },
+  statusDEAD: {
+    backgroundColor: '#EF4444',
   },
 });
 
