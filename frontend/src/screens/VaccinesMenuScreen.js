@@ -10,22 +10,22 @@ const VaccinesMenuScreen = ({ navigation }) => {
       id: 'add_vaccine', 
       title: 'Add Vaccine Name', 
       icon: <ListPlus color="#3B82F6" size={40} />, 
-      description: 'Define a new type of vaccine for your farm.',
-      onPress: () => navigation.navigate('AddVaccineName') 
+      description: 'Define and manage vaccine types for your farm.',
+      onPress: () => navigation.navigate('VaccineDefinitions') 
     },
     { 
       id: 'single_vaccination', 
       title: 'Single Vaccination', 
       icon: <Syringe color="#3B82F6" size={40} />, 
-      description: 'Record a vaccination for a specific animal.',
-      onPress: () => navigation.navigate('AddVaccination', { mode: 'single' }) 
+      description: 'View and record vaccinations for a specific animal.',
+      onPress: () => navigation.navigate('VaccinationList') 
     },
     { 
       id: 'mass_vaccination', 
       title: 'Mass Vaccination', 
       icon: <Users color="#3B82F6" size={40} />, 
-      description: 'Record a vaccination for multiple animals at once.',
-      onPress: () => navigation.navigate('AddVaccination', { mode: 'mass' }) 
+      description: 'View and record vaccinations for multiple animals.',
+      onPress: () => navigation.navigate('VaccinationList') 
     },
     { 
       id: 'history', 

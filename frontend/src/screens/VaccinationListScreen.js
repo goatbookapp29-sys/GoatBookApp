@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import GHeader from '../components/GHeader';
-import { Syringe, Calendar, User, ChevronRight } from 'lucide-react-native';
+import { Syringe, Calendar, User, Plus } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -82,6 +82,24 @@ const VaccinationListScreen = ({ navigation }) => {
           }
         />
       )}
+
+      {/* Floating Action Button to Add */}
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => {
+          Alert.alert(
+            'Add Vaccination',
+            'Choose vaccination mode',
+            [
+              { text: 'Single Vaccination', onPress: () => navigation.navigate('AddVaccination', { mode: 'single' }) },
+              { text: 'Mass Vaccination', onPress: () => navigation.navigate('AddVaccination', { mode: 'mass' }) },
+              { text: 'Cancel', style: 'cancel' },
+            ]
+          );
+        }}
+      >
+        <Plus size={30} color={COLORS.white} />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -187,6 +205,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textLight,
   },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...SHADOW.md,
+    elevation: 8,
+  }
 });
 
 export default VaccinationListScreen;

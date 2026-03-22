@@ -65,7 +65,8 @@ const GInput = ({
         <TextInput
           style={[
             styles.input,
-            isMultiline && { textAlignVertical: 'top', height: 'auto', minHeight: 60 }
+            isMultiline && { textAlignVertical: 'top', height: 'auto', minHeight: 60 },
+            props.style
           ]}
           value={value}
           onChangeText={onChangeText}

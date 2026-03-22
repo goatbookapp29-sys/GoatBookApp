@@ -27,6 +27,7 @@ import WeightListScreen from './src/screens/WeightListScreen';
 import FarmSettingsScreen from './src/screens/FarmSettingsScreen';
 import VaccinesMenuScreen from './src/screens/VaccinesMenuScreen';
 import AddVaccineNameScreen from './src/screens/AddVaccineNameScreen';
+import VaccineDefinitionsScreen from './src/screens/VaccineDefinitionsScreen';
 import AddVaccinationScreen from './src/screens/AddVaccinationScreen';
 import VaccinationListScreen from './src/screens/VaccinationListScreen';
 import { COLORS } from './src/theme';
@@ -98,6 +99,7 @@ export default function App() {
         <Stack.Screen name="WeightList" component={WeightListScreen} />
         <Stack.Screen name="FarmSettings" component={FarmSettingsScreen} />
         <Stack.Screen name="VaccinesMenu" component={VaccinesMenuScreen} />
+        <Stack.Screen name="VaccineDefinitions" component={VaccineDefinitionsScreen} />
         <Stack.Screen name="AddVaccineName" component={AddVaccineNameScreen} />
         <Stack.Screen name="AddVaccination" component={AddVaccinationScreen} />
         <Stack.Screen name="VaccinationList" component={VaccinationListScreen} />
