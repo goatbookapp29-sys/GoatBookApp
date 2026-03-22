@@ -63,7 +63,7 @@ exports.getVaccinationRecords = async (req, res) => {
       where,
       include: [
         { model: Vaccine, as: 'vaccine', attributes: ['name', 'daysBetween'] },
-        { model: Animal, as: 'animal', attributes: ['tagId'] },
+        { model: Animal, as: 'animal', attributes: ['tagNumber'] },
         { model: User, as: 'creator', attributes: ['name'] }
       ],
       order: [['date', 'DESC']]
