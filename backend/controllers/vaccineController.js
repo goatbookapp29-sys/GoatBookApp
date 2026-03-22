@@ -122,3 +122,53 @@ exports.createVaccinationRecord = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+// @desc    Update a vaccination record
+// @route   PUT /api/vaccines/records/:id
+exports.updateVaccinationRecord = async (req, res) => {
+  const { date, validTill, remark } = req.body;
+  try {
+    const record = await VaccinationRecord.findByPk(req.params.id, {
+      include: [{ model: Vaccine, as: 'vaccine' }]
+    });
+
+    if (!record) return res.status(404).json({ message: 'Record not found' });
+    if (record.farmId !== req.farmId) return res.status(403).json({ message: 'Not authorized' });
+
+    // Update fields
+    if (date) record.date = date;
+    if (validTill !== undefined) record.validTill = validTill;
+    if (remark !== undefined) record.remark = remark;
+
+    // Recalculate next due date if date changed
+    if (date && record.vaccine?.daysBetween > 0) {
+      const baseDate = new Date(date);
+      baseDate.setDate(baseDate.getDate() + record.vaccine.daysBetween);
+      record.nextDueDate = baseDate.toISOString().split('T')[0];
+    }
+
+    record.updatedByUserId = req.user.id;
+    await record.save();
+
+    res.json(record);
+  } catch (err) {
+    console.error('UPDATE RECORD ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Delete a vaccination record
+// @route   DELETE /api/vaccines/records/:id
+exports.deleteVaccinationRecord = async (req, res) => {
+  try {
+    const record = await VaccinationRecord.findByPk(req.params.id);
+    if (!record) return res.status(404).json({ message: 'Record not found' });
+    if (record.farmId !== req.farmId) return res.status(403).json({ message: 'Not authorized' });
+
+    await record.destroy();
+    res.json({ message: 'Record removed' });
+  } catch (err) {
+    console.error('DELETE RECORD ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};

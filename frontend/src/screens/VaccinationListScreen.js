@@ -29,7 +29,10 @@ const VaccinationListScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.recordItem}>
+    <TouchableOpacity 
+      style={styles.recordItem}
+      onPress={() => navigation.navigate('AddVaccination', { mode: 'single', record: item })}
+    >
       <View style={styles.recordHeader}>
         <View style={styles.iconBox}>
           <Syringe size={20} color={COLORS.primary} />
@@ -62,7 +65,7 @@ const VaccinationListScreen = ({ navigation }) => {
       {item.remark ? (
         <Text style={styles.remarkText} numberOfLines={2}>Note: {item.remark}</Text>
       ) : null}
-    </View>
+    </TouchableOpacity>
   );
 
   return (

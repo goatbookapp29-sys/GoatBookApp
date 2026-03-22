@@ -565,7 +565,11 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   ) : vaccinations.length > 0 ? (
                     <View style={styles.weightList}>
                       {vaccinations.map((v, idx) => (
-                        <View key={v.id} style={[styles.weightItem, idx === vaccinations.length - 1 && { borderBottomWidth: 0 }]}>
+                        <TouchableOpacity 
+                          key={v.id} 
+                          style={[styles.weightItem, idx === vaccinations.length - 1 && { borderBottomWidth: 0 }]}
+                          onPress={() => navigation.navigate('AddVaccination', { mode: 'single', record: v })}
+                        >
                           <View style={styles.weightIconBox}>
                             <Syringe size={16} color={COLORS.primary} />
                           </View>
@@ -579,7 +583,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                               <Text style={styles.weightValue}>{v.nextDueDate}</Text>
                             </View>
                           )}
-                        </View>
+                        </TouchableOpacity>
                       ))}
                     </View>
                   ) : (

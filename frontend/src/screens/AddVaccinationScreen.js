@@ -11,21 +11,24 @@ import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
 const AddVaccinationScreen = ({ navigation, route }) => {
-  const mode = route.params?.mode || 'single';
+  const existingRecord = route.params?.record;
+  const isEditing = !!existingRecord;
+  const mode = route.params?.mode || (isEditing ? 'single' : 'single');
   const isMass = mode === 'mass';
 
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [vaccineId, setVaccineId] = useState('');
+  const [date, setDate] = useState(existingRecord?.date || new Date().toISOString().split('T')[0]);
+  const [vaccineId, setVaccineId] = useState(existingRecord?.vaccineId || '');
   const [daysBetween, setDaysBetween] = useState('0');
-  const [validTill, setValidTill] = useState('');
-  const [remark, setRemark] = useState('');
+  const [validTill, setValidTill] = useState(existingRecord?.validTill || '');
+  const [remark, setRemark] = useState(existingRecord?.remark || '');
   const [tagInput, setTagInput] = useState('');
-  const [selectedAnimals, setSelectedAnimals] = useState([]);
+  const [selectedAnimals, setSelectedAnimals] = useState(existingRecord?.animal ? [existingRecord.animal] : []);
   
   // UI Data
   const [vaccines, setVaccines] = useState([]);
   const [allAnimals, setAllAnimals] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [searching, setSearching] = useState(false);
 
   useFocusEffect(
@@ -33,10 +36,10 @@ const AddVaccinationScreen = ({ navigation, route }) => {
       fetchVaccines();
       fetchAnimals();
       
-      if (route.params?.preSelectedAnimal) {
+      if (!isEditing && route.params?.preSelectedAnimal) {
         setSelectedAnimals([route.params.preSelectedAnimal]);
       }
-    }, [route.params])
+    }, [route.params, isEditing])
   );
 
   // Auto-fill daysBetween from selected vaccine
@@ -118,40 +121,64 @@ const AddVaccinationScreen = ({ navigation, route }) => {
     }
 
     if (!vaccineId || currentSelected.length === 0 || !date) {
-      Alert.alert('Error', 'Please fill all required fields and select at least one animal (Hit ADD if entering Tag ID manually)');
+      Alert.alert('Error', isEditing ? 'Please leave at least one animal' : 'Please fill all required fields and select at least one animal');
       return;
     }
 
     setLoading(true);
     try {
-      await api.post('/vaccines/records', {
-        vaccineId,
-        animalIds: currentSelected.map(a => a.id),
-        date,
-        validTill: validTill || null,
-        remark,
-        creationMode: isMass ? 'MASS' : 'SINGLE'
-      });
+      if (isEditing) {
+        await api.put(`/vaccines/records/${existingRecord.id}`, {
+          date,
+          validTill: validTill || null,
+          remark
+        });
+      } else {
+        await api.post('/vaccines/records', {
+          vaccineId,
+          animalIds: currentSelected.map(a => a.id),
+          date,
+          validTill: validTill || null,
+          remark,
+          creationMode: isMass ? 'MASS' : 'SINGLE'
+        });
+      }
       setLoading(false);
-      Alert.alert('Success', `${isMass ? 'Mass' : 'Single'} vaccination recorded successfully`, [
+      Alert.alert('Success', isEditing ? 'Vaccination record updated' : 'Vaccination recorded successfully', [
         { text: 'OK', onPress: () => navigation.navigate('VaccinationList') }
       ]);
-      
-      // Reset form fields
-      setSelectedAnimals([]);
-      setRemark('');
-      setTagInput('');
     } catch (error) {
       setLoading(false);
-      const msg = error.response?.data?.message || 'Failed to record vaccination';
+      const msg = error.response?.data?.message || 'Failed to save record';
       Alert.alert('Error', msg);
     }
+  };
+
+  const handleDelete = async () => {
+    Alert.alert('Delete Record', 'Are you sure you want to remove this vaccination record?', [
+      { text: 'Cancel', style: 'cancel' },
+      { 
+        text: 'Delete', 
+        style: 'destructive', 
+        onPress: async () => {
+          try {
+            setDeleting(true);
+            await api.delete(`/vaccines/records/${existingRecord.id}`);
+            setDeleting(false);
+            navigation.navigate('VaccinationList');
+          } catch (error) {
+            setDeleting(false);
+            Alert.alert('Error', 'Failed to delete record');
+          }
+        }
+      }
+    ]);
   };
 
   return (
     <View style={styles.container}>
       <GHeader 
-        title={isMass ? "Add Mass Vaccination" : "Add Vaccination"} 
+        title={isEditing ? "Edit Vaccination" : (isMass ? "Add Mass Vaccination" : "Add Vaccination")} 
         onBack={() => navigation.goBack()} 
       />
       
@@ -175,6 +202,7 @@ const AddVaccinationScreen = ({ navigation, route }) => {
               options={vaccines}
               placeholder="Select vaccine..."
               required
+              disabled={isEditing}
             />
 
             <View style={styles.inlineStats}>
@@ -203,39 +231,52 @@ const AddVaccinationScreen = ({ navigation, route }) => {
               style={{ minHeight: 60, paddingTop: 10 }}
             />
 
-            <Text style={styles.sectionTitle}>
-              {isMass ? "Animals to Vaccinate" : "Select Animal"}
-            </Text>
+            {!isEditing && (
+              <>
+                <Text style={styles.sectionTitle}>
+                  {isMass ? "Animals to Vaccinate" : "Select Animal"}
+                </Text>
 
-            <View style={styles.tagInputRow}>
-              <GInput 
-                containerStyle={styles.tagInputBox}
-                value={tagInput} 
-                onChangeText={setTagInput} 
-                placeholder="Scan or Enter Tag Id*"
-                keyboardType="default"
-              />
-              <TouchableOpacity 
-                style={styles.addTagBtn} 
-                onPress={handleAddAnimalByTag}
-                disabled={searching}
-              >
-                {searching ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.addTagBtnText}>ADD</Text>}
-              </TouchableOpacity>
-            </View>
+                <View style={styles.tagInputRow}>
+                  <GInput 
+                    containerStyle={styles.tagInputBox}
+                    value={tagInput} 
+                    onChangeText={setTagInput} 
+                    placeholder="Scan or Enter Tag Id*"
+                    keyboardType="default"
+                  />
+                  <TouchableOpacity 
+                    style={styles.addTagBtn} 
+                    onPress={handleAddAnimalByTag}
+                    disabled={searching}
+                  >
+                    {searching ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.addTagBtnText}>ADD</Text>}
+                  </TouchableOpacity>
+                </View>
 
-            {/* List of selected animals */}
-            {selectedAnimals.length > 0 && (
-              <View style={styles.selectedContainer}>
-                {selectedAnimals.map(animal => (
-                  <View key={animal.id} style={styles.animalChip}>
-                    <CheckCircle2 size={16} color={COLORS.success} />
-                    <Text style={styles.chipText}>{animal.tagNumber}</Text>
-                    <TouchableOpacity onPress={() => removeAnimal(animal.id)}>
-                      <X size={16} color="#9CA3AF" />
-                    </TouchableOpacity>
+                {selectedAnimals.length > 0 && (
+                  <View style={styles.selectedContainer}>
+                    {selectedAnimals.map(animal => (
+                      <View key={animal.id} style={styles.animalChip}>
+                        <CheckCircle2 size={16} color={COLORS.success} />
+                        <Text style={styles.chipText}>{animal.tagNumber}</Text>
+                        <TouchableOpacity onPress={() => removeAnimal(animal.id)}>
+                          <X size={16} color="#9CA3AF" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
                   </View>
-                ))}
+                )}
+              </>
+            )}
+
+            {isEditing && (
+              <View style={styles.editInfoSection}>
+                <Text style={styles.editInfoLabel}>Animal Tag</Text>
+                <View style={styles.editInfoValue}>
+                  <CheckCircle2 size={16} color={COLORS.success} />
+                  <Text style={styles.editTagText}>{existingRecord?.animal?.tagNumber}</Text>
+                </View>
               </View>
             )}
 
@@ -245,12 +286,35 @@ const AddVaccinationScreen = ({ navigation, route }) => {
           </View>
 
           <View style={styles.footer}>
-            <GButton 
-              title="SAVE" 
-              onPress={handleSave} 
-              loading={loading}
-              containerStyle={styles.saveBtn}
-            />
+            {isEditing ? (
+              <View style={styles.buttonRow}>
+                <View style={styles.halfBtn}>
+                  <GButton 
+                    title="DELETE" 
+                    variant="outline"
+                    onPress={handleDelete} 
+                    loading={deleting}
+                    containerStyle={{ borderColor: COLORS.error }}
+                    titleStyle={{ color: COLORS.error }}
+                  />
+                </View>
+                <View style={styles.halfBtn}>
+                  <GButton 
+                    title="SAVE" 
+                    onPress={handleSave} 
+                    loading={loading}
+                    containerStyle={styles.saveBtn}
+                  />
+                </View>
+              </View>
+            ) : (
+              <GButton 
+                title="SAVE" 
+                onPress={handleSave} 
+                loading={loading}
+                containerStyle={styles.saveBtn}
+              />
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -366,6 +430,38 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: 20,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  halfBtn: {
+    width: '48%',
+  },
+  editInfoSection: {
+    marginTop: 20,
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  editInfoLabel: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    fontWeight: '600',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  editInfoValue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  editTagText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginLeft: 8,
   },
   saveBtn: {
     backgroundColor: '#1E40AF',
