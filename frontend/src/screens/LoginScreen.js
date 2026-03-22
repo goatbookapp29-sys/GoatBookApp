@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import api, { setAuthToken, setSelectedFarm } from '../api';
 
 const LoginScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,22 +45,22 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
-        <View style={styles.header}>
-            <View style={styles.logoCircle}>
+        <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
+            <View style={[styles.logoCircle, { backgroundColor: '#FFFFFF' }]}>
                 <Text style={styles.logoText}>GB</Text>
             </View>
-            <Text style={styles.appName}>GoatBook</Text>
-            <Text style={styles.appTagline}>Modern Farm Management</Text>
+            <Text style={[styles.appName, { color: '#FFFFFF' }]}>GoatBook</Text>
+            <Text style={[styles.appTagline, { color: 'rgba(255,255,255,0.8)' }]}>Modern Farm Management</Text>
         </View>
 
         <View style={styles.formContainer}>
-            <View style={styles.card}>
-                <Text style={styles.welcomeTitle}>Welcome Back</Text>
-                <Text style={styles.welcomeSub}>Manage your farm with ease</Text>
+            <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <Text style={[styles.welcomeTitle, { color: theme.colors.text }]}>Welcome Back</Text>
+                <Text style={[styles.welcomeSub, { color: theme.colors.textLight }]}>Manage your farm with ease</Text>
 
                 <View style={styles.form}>
                 <GInput 
@@ -70,7 +72,7 @@ const LoginScreen = ({ navigation }) => {
                     autoCapitalize="none"
                     required 
                 />
-                <View style={{ height: 12 }} />
+                <View style={{ height: 16 }} />
                 <GInput 
                     label="Password" 
                     value={password} 
@@ -80,7 +82,7 @@ const LoginScreen = ({ navigation }) => {
                 />
                 
                 <TouchableOpacity style={styles.forgotPass}>
-                    <Text style={styles.forgotText}>Forgot Password?</Text>
+                    <Text style={[styles.forgotText, { color: theme.colors.primary }]}>Forgot Password?</Text>
                 </TouchableOpacity>
 
                 <GButton 
@@ -92,9 +94,9 @@ const LoginScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>New to GoatBook? </Text>
+                <Text style={[styles.footerText, { color: theme.colors.textLight }]}>New to GoatBook? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <Text style={styles.link}>Create Account</Text>
+                    <Text style={[styles.link, { color: theme.colors.primary }]}>Create Account</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -106,70 +108,63 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
   },
   scrollContent: {
     flexGrow: 1,
   },
   header: {
-    backgroundColor: COLORS.primary,
     paddingTop: 80,
-    paddingBottom: 60,
+    paddingBottom: 70,
     alignItems: 'center',
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
-    ...SHADOW.lg,
   },
   logoCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 30,
-    backgroundColor: COLORS.white,
+    width: 96,
+    height: 96,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOW.md,
   },
   logoText: {
-    fontSize: 40,
+    fontSize: 44,
     fontWeight: '900',
-    color: COLORS.primary,
+    color: '#312E81',
   },
   appName: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '900',
-    color: COLORS.white,
     marginTop: 16,
-    letterSpacing: 1,
+    letterSpacing: -0.5,
   },
   appTagline: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
     marginTop: 4,
-    fontWeight: '500',
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   formContainer: {
     paddingHorizontal: 20,
     marginTop: -40,
   },
   card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 28,
+    borderRadius: 32,
     padding: 24,
-    ...SHADOW.lg,
+    borderWidth: 1,
   },
   welcomeTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: COLORS.text,
+    fontSize: 26,
+    fontWeight: '900',
     textAlign: 'center',
+    letterSpacing: -0.5,
   },
   welcomeSub: {
     fontSize: 14,
-    color: COLORS.textLight,
     textAlign: 'center',
-    marginTop: 4,
-    marginBottom: 24,
-    fontWeight: '500',
+    marginTop: 6,
+    marginBottom: 32,
+    fontWeight: '600',
   },
   form: {
     marginTop: 0,
@@ -177,11 +172,10 @@ const styles = StyleSheet.create({
   forgotPass: {
     alignSelf: 'flex-end',
     marginVertical: 16,
-    marginBottom: 24,
+    marginBottom: 32,
   },
   forgotText: {
-    color: COLORS.primary,
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 14,
   },
   footer: {
@@ -191,12 +185,10 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   footerText: {
-    color: COLORS.textLight,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   link: {
-    color: COLORS.primary,
-    fontWeight: '800',
+    fontWeight: '900',
     textDecorationLine: 'underline',
   }
 });

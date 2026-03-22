@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { COLORS, SPACING } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
@@ -8,6 +9,7 @@ import GSelect from '../components/GSelect';
 import api from '../api';
 
 const AddLocationScreen = ({ navigation, route }) => {
+  const { theme } = useTheme();
   const isEditing = !!route.params?.location;
   const existingLocation = route.params?.location;
 
@@ -91,7 +93,7 @@ const AddLocationScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title={isEditing ? "Edit Location" : "Add Location"} 
         onBack={() => navigation.goBack()} 
@@ -184,7 +186,6 @@ const AddLocationScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
   },
   flex: {
     flex: 1,
@@ -195,6 +196,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     marginTop: SPACING.md,
+    paddingTop: 8,
   },
   gap: {
     height: 16,

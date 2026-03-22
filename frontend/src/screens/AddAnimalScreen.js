@@ -2,27 +2,31 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import styles from './AddAnimalScreen.styles';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
 import GDatePicker from '../components/GDatePicker';
-import { Check } from 'lucide-react-native';
+import { Check, HelpCircle, ChevronDown, ChevronUp, Plus, Scale, Syringe } from 'lucide-react-native';
 import api from '../api';
 import { getFromCache } from '../utils/cache';
-import { HelpCircle, ChevronDown, ChevronUp, Plus, Scale, Syringe } from 'lucide-react-native';
 
-const CheckBox = ({ label, value, onToggle }) => (
-  <TouchableOpacity style={styles.checkboxContainer} onPress={onToggle} activeOpacity={0.7}>
-    <View style={[styles.checkbox, value && styles.checkboxActive]}>
-      {value && <Check size={14} color={COLORS.white} />}
-    </View>
-    <Text style={styles.checkboxLabel}>{label}</Text>
-  </TouchableOpacity>
-);
+const CheckBox = ({ label, value, onToggle }) => {
+  const { theme } = useTheme();
+  return (
+    <TouchableOpacity style={styles.checkboxContainer} onPress={onToggle} activeOpacity={0.7}>
+      <View style={[styles.checkbox, { borderColor: theme.colors.border }, value && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }]}>
+        {value && <Check size={14} color="white" />}
+      </View>
+      <Text style={[styles.checkboxLabel, { color: theme.colors.text }]}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
 
 const AddAnimalScreen = ({ navigation, route }) => {
+  const { isDarkMode, theme } = useTheme();
   const isEditing = !!route.params?.animal;
   const existingAnimal = route.params?.animal || {};
   const [weightExpanded, setWeightExpanded] = useState(false);
@@ -269,10 +273,10 @@ const AddAnimalScreen = ({ navigation, route }) => {
     );
   };
 
-
+  const sectionHeaderStyle = [styles.sectionTitle, { color: theme.colors.primary, borderLeftWidth: 4, borderLeftColor: theme.colors.primary, paddingLeft: 10, marginTop: 10 }];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title={isEditing ? "Edit Animal" : "Add New Animal"} 
         onBack={() => navigation.goBack()} 
@@ -280,7 +284,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
       
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Text style={styles.sectionTitle}>Identification</Text>
+          <Text style={sectionHeaderStyle}>Identification</Text>
 
           <View style={styles.formContainer}>
             {/* ROW 1 */}
@@ -298,7 +302,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 label="Animal Type" 
                 value={breedId ? breeds.find(b => b.value === breedId)?.animalType || 'Goat' : 'Goat'} 
                 editable={false}
-                style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }} // Grey out text input feeling
+                style={{ backgroundColor: theme.colors.surface, color: theme.colors.textMuted }}
               />
             </View>
 
@@ -328,8 +332,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
             {/* MALE CONDITIONAL ROW */}
             {gender === 'MALE' && (
-              <View style={[styles.row, { paddingVertical: 8, alignItems: 'center' }]}>
-                <Text style={styles.maleLabel}>Male Options:</Text>
+              <View style={[styles.row, { paddingVertical: 12, alignItems: 'center' }]}>
+                <Text style={[styles.maleLabel, { color: theme.colors.text }]}>Male Options:</Text>
                 <CheckBox label="Breeder" value={isBreeder} onToggle={toggleBreeder} />
                 <View style={{ width: 16 }} />
                 <CheckBox label="Qurbani" value={isQurbani} onToggle={toggleQurbani} />
@@ -376,6 +380,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 placeholder="Select..."
               />
             </View>
+
+            <Text style={sectionHeaderStyle}>Growth & Background</Text>
 
             {/* UNIVERSAL ROW: Birth Date and Birth Wt */}
             <View style={styles.row}>
@@ -480,9 +486,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
               </View>
             )}
 
-            <View style={styles.sectionDivider} />
+            <View style={[styles.sectionDivider, { backgroundColor: theme.colors.border }]} />
 
-            <View style={{ marginBottom: SPACING.md }}>
+            <View style={{ marginBottom: 16 }}>
               <GSelect 
                 label="Animal Status" 
                 value={animalStatus} 
@@ -496,20 +502,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
             </View>
 
             <View style={styles.readyForSaleRow}>
-              <Text style={styles.readyLabel}>Ready for Sale?</Text>
-              <TouchableOpacity 
-                style={styles.checkboxContainer}
-                onPress={() => setIsReadyForSale(!isReadyForSale)}
-              >
-                <View style={[styles.checkbox, isReadyForSale && styles.checkboxActive]}>
-                  {isReadyForSale && <Check size={14} color={COLORS.white} />}
-                </View>
-                <Text style={styles.checkboxLabel}>{isReadyForSale ? 'Yes' : 'No'}</Text>
-              </TouchableOpacity>
+              <Text style={[styles.readyLabel, { color: theme.colors.primary }]}>Ready for Sale?</Text>
+              <CheckBox label={isReadyForSale ? 'Yes' : 'No'} value={isReadyForSale} onToggle={() => setIsReadyForSale(!isReadyForSale)} />
             </View>
 
             {isReadyForSale && (
-              <View style={[styles.row, { marginTop: SPACING.sm }]}>
+              <View style={[styles.row, { marginTop: 12 }]}>
                 <GInput 
                   containerStyle={styles.halfWidth}
                   label="Current Weight (KG)" 
@@ -531,7 +529,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               </View>
             )}
 
-            <View style={styles.sectionDivider} />
+            <View style={[styles.sectionDivider, { backgroundColor: theme.colors.border }]} />
 
             <GInput 
               label="Remark" 
@@ -539,58 +537,58 @@ const AddAnimalScreen = ({ navigation, route }) => {
               onChangeText={setRemark} 
               placeholder="e.g. Good!"
               multiline
-              style={{ minHeight: 80, paddingTop: 12 }}
+              style={{ minHeight: 80, paddingTop: 12, color: theme.colors.text }}
             />
           </View>
 
           {isEditing && (
-            <View style={styles.weightSection}>
+            <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
               <TouchableOpacity 
-                style={styles.weightHeader}
+                style={[styles.weightHeader, { borderBottomColor: theme.colors.border }]}
                 activeOpacity={0.7}
                 onPress={() => setWeightExpanded(!weightExpanded)}
               >
                 <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                  <Text style={styles.sectionTitle}>Weight Record</Text>
-                  <HelpCircle size={16} color="#9CA3AF" style={{ marginLeft: 6 }} />
+                  <Text style={[styles.sectionTitle, { color: theme.colors.primary, marginBottom: 0 }]}>Weight Records</Text>
+                  <Scale size={16} color={theme.colors.textMuted} style={{ marginLeft: 8 }} />
                 </View>
-                {weightExpanded ? <ChevronUp size={20} color="#9CA3AF" /> : <ChevronDown size={20} color="#9CA3AF" />}
+                {weightExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
               </TouchableOpacity>
               
               {weightExpanded && (
                 <View style={styles.weightContent}>
                   <TouchableOpacity 
-                    style={styles.addNewBtn}
+                    style={[styles.addNewBtn, { backgroundColor: theme.colors.secondary }]}
                     onPress={() => navigation.navigate('AddWeight', { tagNumber: existingAnimal.tagNumber })}
                   >
-                    <Plus size={16} color={COLORS.white} />
-                    <Text style={styles.addNewText}>Add New Record</Text>
+                    <Plus size={16} color="white" />
+                    <Text style={styles.addNewText}>Add Record</Text>
                   </TouchableOpacity>
 
                   {weightsLoading ? (
-                    <ActivityIndicator color={COLORS.primary} style={{ marginTop: 20 }} />
+                    <ActivityIndicator color={theme.colors.primary} style={{ marginTop: 20 }} />
                   ) : weights.length > 0 ? (
                     <View style={styles.weightList}>
                       {weights.map((w, idx) => (
-                        <View key={w.id} style={[styles.weightItem, idx === weights.length - 1 && { borderBottomWidth: 0 }]}>
-                          <View style={styles.weightIconBox}>
-                            <Scale size={16} color={COLORS.primary} />
+                        <View key={w.id} style={[styles.weightItem, { borderBottomColor: theme.colors.border }, idx === weights.length - 1 && { borderBottomWidth: 0 }]}>
+                          <View style={[styles.weightIconBox, { backgroundColor: isDarkMode ? theme.colors.surface : '#FFF1EA' }]}>
+                            <Scale size={16} color={theme.colors.primary} />
                           </View>
                           <View style={styles.weightInfoBlock}>
-                            <Text style={styles.weightKg}>{w.weight} KG</Text>
-                            <Text style={styles.weightDate}>{w.date}</Text>
+                            <Text style={[styles.weightKg, { color: theme.colors.text }]}>{w.weight} KG</Text>
+                            <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{w.date}</Text>
                           </View>
                           {w.height && (
                             <View style={styles.heightInfoBlock}>
-                              <Text style={styles.weightLabel}>Height</Text>
-                              <Text style={styles.weightValue}>{w.height}</Text>
+                              <Text style={[styles.weightLabel, { color: theme.colors.textLight }]}>Height</Text>
+                              <Text style={[styles.weightValue, { color: theme.colors.text }]}>{w.height}</Text>
                             </View>
                           )}
                         </View>
                       ))}
                     </View>
                   ) : (
-                    <Text style={styles.noRecordsText}>No Records Found</Text>
+                    <Text style={[styles.noRecordsText, { color: theme.colors.textMuted }]}>No records found</Text>
                   )}
                 </View>
               )}
@@ -598,57 +596,57 @@ const AddAnimalScreen = ({ navigation, route }) => {
           )}
 
           {isEditing && (
-            <View style={styles.weightSection}>
+            <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
               <TouchableOpacity 
-                style={styles.weightHeader}
+                style={[styles.weightHeader, { borderBottomColor: theme.colors.border }]}
                 activeOpacity={0.7}
                 onPress={() => setVaccinationExpanded(!vaccinationExpanded)}
               >
                 <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                  <Text style={styles.sectionTitle}>Vaccination Record</Text>
-                  <Syringe size={16} color="#9CA3AF" style={{ marginLeft: 6 }} />
+                  <Text style={[styles.sectionTitle, { color: theme.colors.primary, marginBottom: 0 }]}>Vaccinations</Text>
+                  <Syringe size={16} color={theme.colors.textMuted} style={{ marginLeft: 8 }} />
                 </View>
-                {vaccinationExpanded ? <ChevronUp size={20} color="#9CA3AF" /> : <ChevronDown size={20} color="#9CA3AF" />}
+                {vaccinationExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
               </TouchableOpacity>
               
               {vaccinationExpanded && (
                 <View style={styles.weightContent}>
                   <TouchableOpacity 
-                    style={styles.addNewBtn}
+                    style={[styles.addNewBtn, { backgroundColor: theme.colors.secondary }]}
                     onPress={() => navigation.navigate('AddVaccination', { mode: 'single', preSelectedAnimal: existingAnimal })}
                   >
-                    <Plus size={16} color={COLORS.white} />
-                    <Text style={styles.addNewText}>Add New Record</Text>
+                    <Plus size={16} color="white" />
+                    <Text style={styles.addNewText}>Add Record</Text>
                   </TouchableOpacity>
 
                   {vaccinationsLoading ? (
-                    <ActivityIndicator color={COLORS.primary} style={{ marginTop: 20 }} />
+                    <ActivityIndicator color={theme.colors.primary} style={{ marginTop: 20 }} />
                   ) : vaccinations.length > 0 ? (
                     <View style={styles.weightList}>
                       {vaccinations.map((v, idx) => (
                         <TouchableOpacity 
                           key={v.id} 
-                          style={[styles.weightItem, idx === vaccinations.length - 1 && { borderBottomWidth: 0 }]}
+                          style={[styles.weightItem, { borderBottomColor: theme.colors.border }, idx === vaccinations.length - 1 && { borderBottomWidth: 0 }]}
                           onPress={() => navigation.navigate('AddVaccination', { mode: 'single', record: v })}
                         >
-                          <View style={styles.weightIconBox}>
-                            <Syringe size={16} color={COLORS.primary} />
+                          <View style={[styles.weightIconBox, { backgroundColor: isDarkMode ? theme.colors.surface : '#F0F9FF' }]}>
+                            <Syringe size={16} color={theme.colors.primary} />
                           </View>
                           <View style={styles.weightInfoBlock}>
-                            <Text style={styles.weightKg}>{v.vaccine?.name}</Text>
-                            <Text style={styles.weightDate}>{v.date}</Text>
+                            <Text style={[styles.weightKg, { color: theme.colors.text }]}>{v.vaccine?.name}</Text>
+                            <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{v.date}</Text>
                           </View>
                           {v.nextDueDate && (
                             <View style={[styles.heightInfoBlock, { minWidth: 100 }]}>
-                              <Text style={[styles.weightLabel, { color: COLORS.primary }]}>Due Date</Text>
-                              <Text style={styles.weightValue}>{v.nextDueDate}</Text>
+                              <Text style={[styles.weightLabel, { color: theme.colors.primary }]}>Due Date</Text>
+                              <Text style={[styles.weightValue, { color: theme.colors.text }]}>{v.nextDueDate}</Text>
                             </View>
                           )}
                         </TouchableOpacity>
                       ))}
                     </View>
                   ) : (
-                    <Text style={styles.noRecordsText}>No Records Found</Text>
+                    <Text style={[styles.noRecordsText, { color: theme.colors.textMuted }]}>No records found</Text>
                   )}
                 </View>
               )}
@@ -676,7 +674,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               </View>
             ) : (
               <GButton 
-                title="Create Animal" 
+                title="Create Animal Record" 
                 onPress={handleSave}
                 loading={loading}
               />

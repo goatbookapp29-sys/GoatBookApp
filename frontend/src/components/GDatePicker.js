@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Platform, Animated } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { COLORS, SPACING } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
+import { lightTheme } from '../theme';
 import { Calendar } from 'lucide-react-native';
 
 const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Select Date', containerStyle, error }) => {
+  const { isDarkMode, theme } = useTheme();
   const [show, setShow] = useState(false);
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
@@ -50,12 +52,12 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [COLORS.textLight, error ? COLORS.error : COLORS.primary],
+      outputRange: [theme.colors.textLight, error ? theme.colors.error : theme.colors.primary],
     }),
-    backgroundColor: (value || show) ? COLORS.white : 'transparent',
+    backgroundColor: (value || show) ? theme.colors.surface : 'transparent',
     paddingHorizontal: (value || show) ? 4 : 0,
     zIndex: 1,
-    fontWeight: (value || show) ? '600' : '400',
+    fontWeight: (value || show) ? '700' : '500',
   };
 
   return (
@@ -63,8 +65,9 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
       <TouchableOpacity 
         style={[
           styles.inputWrapper,
-          error && styles.inputError,
-          show && styles.inputActive
+          { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+          error && { borderColor: theme.colors.error, borderWidth: 2 },
+          show && { borderColor: theme.colors.primary, borderWidth: 2 }
         ]} 
         onPress={() => setShow(true)}
         activeOpacity={0.7}
@@ -74,17 +77,17 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
         </Animated.Text>
 
         {value || show ? (
-          <Text style={[styles.valueText, !value && styles.placeholder]}>
+          <Text style={[styles.valueText, { color: theme.colors.text }, !value && { color: theme.colors.textMuted }]}>
             {value ? formatDate(value) : placeholder}
           </Text>
         ) : <View style={{ flex: 1 }} />}
 
-        <Calendar size={20} color={COLORS.textLight} />
+        <Calendar size={20} color={theme.colors.textLight} />
       </TouchableOpacity>
 
       {error ? (
         <View style={styles.errorContainer}>
-           <Text style={styles.errorText}>{error}</Text>
+           <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
         </View>
       ) : null}
 
@@ -107,43 +110,18 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     width: '100%',
   },
-  label: {
-    fontSize: 12,
-    color: COLORS.textLight,
-    marginBottom: 4,
-    marginLeft: 4,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  required: {
-    color: COLORS.error,
-  },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    backgroundColor: COLORS.white,
+    borderRadius: 14,
     paddingHorizontal: 12,
     height: 56,
   },
-  inputActive: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-  },
-  inputError: {
-    borderColor: COLORS.error,
-    borderWidth: 2,
-  },
   valueText: {
     fontSize: 16,
-    color: COLORS.text,
-  },
-  placeholder: {
-    color: '#9CA3AF',
+    fontWeight: '500',
   },
   errorContainer: {
     flexDirection: 'row',
@@ -153,7 +131,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 12,
-    color: COLORS.error,
     fontWeight: '600',
   }
 });

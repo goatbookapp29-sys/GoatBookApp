@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { COLORS, SPACING } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
@@ -8,6 +9,7 @@ import GSelect from '../components/GSelect';
 import api from '../api';
 
 const AddBreedScreen = ({ navigation, route }) => {
+  const { isDarkMode, theme } = useTheme();
   const isEditing = !!route.params?.breed;
   const existingBreed = route.params?.breed;
 
@@ -52,7 +54,7 @@ const AddBreedScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title={isEditing ? "Edit Breed" : "Add New Breed"} 
         onBack={() => navigation.goBack()} 
@@ -87,10 +89,12 @@ const AddBreedScreen = ({ navigation, route }) => {
             />
           </View>
 
-          <Text style={styles.note}>
-            <Text style={styles.noteBold}>Note : </Text>
-            Manage your livestock breeds. You can specify whether a breed belongs to Goats or Sheep. 
-          </Text>
+          <View style={[styles.noteContainer, { backgroundColor: isDarkMode ? theme.colors.surface : '#F8FAFC', borderColor: theme.colors.border }]}>
+            <Text style={[styles.note, { color: theme.colors.textMuted }]}>
+              <Text style={[styles.noteBold, { color: theme.colors.primary }]}>Note : </Text>
+              Manage your livestock breeds. You can specify whether a breed belongs to Goats or Sheep. 
+            </Text>
+          </View>
 
           <View style={styles.footer}>
             {isEditing ? (
@@ -116,7 +120,6 @@ const AddBreedScreen = ({ navigation, route }) => {
                 title="Create Breed" 
                 onPress={handleSubmit} 
                 loading={loading}
-                style={styles.submitBtn}
               />
             )}
           </View>
@@ -129,7 +132,6 @@ const AddBreedScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   flex: {
     flex: 1,
@@ -140,22 +142,24 @@ const styles = StyleSheet.create({
   },
   formSection: {
     marginBottom: SPACING.xl,
+    paddingTop: 8,
   },
   gap: {
     height: 16,
   },
-  note: {
-    color: '#9CA3AF',
-    fontSize: 13,
-    lineHeight: 18,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    paddingTop: SPACING.lg,
+  noteContainer: {
+    padding: SPACING.lg,
+    borderRadius: 16,
+    borderWidth: 1,
     marginTop: SPACING.md,
   },
+  note: {
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
   noteBold: {
-    color: COLORS.primary,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   footer: {
     marginTop: 'auto',
@@ -169,10 +173,6 @@ const styles = StyleSheet.create({
   },
   halfWidth: {
     flex: 1,
-  },
-  submitBtn: {
-    borderRadius: 8,
-    height: 52,
   },
 });
 

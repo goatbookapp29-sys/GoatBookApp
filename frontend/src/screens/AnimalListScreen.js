@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform } from 'react-native';
-import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
+import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
 import { Search, Plus, ChevronRight, Bug, X, MapPin } from 'lucide-react-native';
 import api from '../api';
@@ -8,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
 
 const AnimalListScreen = ({ navigation, route }) => {
+  const { isDarkMode, theme } = useTheme();
   const [animals, setAnimals] = useState([]);
   const [filteredAnimals, setFilteredAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -110,37 +112,37 @@ const AnimalListScreen = ({ navigation, route }) => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
-      style={styles.animalItem}
+      style={[styles.animalItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
       onPress={() => navigation.navigate('EditAnimal', { animal: item })}
     >
-      <View style={styles.iconBox}>
-        <Bug size={24} color={COLORS.primary} />
+      <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1E293B' : '#FFF1EA' }]}>
+        <Bug size={24} color={theme.colors.primary} />
       </View>
       <View style={styles.animalInfo}>
-        <Text style={styles.tagNumber}>Tag: {item.tagNumber}</Text>
-        <Text style={styles.breedName}>{item.Breed?.name} • {item.gender}</Text>
+        <Text style={[styles.tagNumber, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
+        <Text style={[styles.breedName, { color: theme.colors.textLight }]}>{item.Breed?.name} • {item.gender}</Text>
         {item.Location && (
-          <View style={styles.locationTag}>
-            <MapPin size={12} color={COLORS.textLight} style={styles.locIcon} />
-            <Text style={styles.locationName}>{item.Location.name}</Text>
+          <View style={[styles.locationTag, { backgroundColor: isDarkMode ? '#334155' : '#F3F4F6' }]}>
+            <MapPin size={12} color={theme.colors.textLight} style={styles.locIcon} />
+            <Text style={[styles.locationName, { color: theme.colors.textLight }]}>{item.Location.name}</Text>
           </View>
         )}
       </View>
       <View style={[styles.statusBadge, styles[`status${item.status}`]]}>
         <Text style={styles.statusText}>{item.status}</Text>
       </View>
-      <ChevronRight size={20} color="#D1D5DB" />
+      <ChevronRight size={20} color={theme.colors.textMuted} />
     </TouchableOpacity>
   );
 
   const EmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Bug size={64} color="#E5E7EB" />
-      <Text style={styles.noRecords}>
+      <Bug size={64} color={theme.colors.border} />
+      <Text style={[styles.noRecords, { color: theme.colors.text }]}>
         {searchQuery ? "No matching animals found" : "No Animals found"}
       </Text>
       {!searchQuery && (
-        <Text style={styles.emptyDescription}>
+        <Text style={[styles.emptyDescription, { color: theme.colors.textLight }]}>
           Start managing your farm by adding your first goat or sheep. Click the button below to register an animal.
         </Text>
       )}
@@ -148,28 +150,29 @@ const AnimalListScreen = ({ navigation, route }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
-        title="Animals" 
+        title="Animals List" 
         onBack={() => navigation.goBack()} 
-        rightIcon={isSearching ? <X color={COLORS.white} size={24} /> : <Search color={COLORS.white} size={24} />}
+        rightIcon={isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
         onRightPress={toggleSearch}
       />
 
       {isSearching && (
-        <Animated.View style={[styles.searchBarContainer, { transform: [{ translateY: searchBarTranslateY }] }]}>
-          <View style={styles.searchInner}>
-            <Search size={20} color={COLORS.textLight} style={styles.searchIcon} />
+        <Animated.View style={[styles.searchBarContainer, { backgroundColor: theme.colors.surface, transform: [{ translateY: searchBarTranslateY }] }]}>
+          <View style={[styles.searchInner, { backgroundColor: theme.colors.background }]}>
+            <Search size={20} color={theme.colors.textLight} style={styles.searchIcon} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: theme.colors.text }]}
               placeholder="Search tag, breed or location..."
+              placeholderTextColor={theme.colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
               autoFocus
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <X size={18} color={COLORS.textLight} />
+                <X size={18} color={theme.colors.textLight} />
               </TouchableOpacity>
             )}
           </View>
@@ -179,10 +182,10 @@ const AnimalListScreen = ({ navigation, route }) => {
       {!isSearching && (
         <View style={styles.actionRow}>
           <TouchableOpacity 
-            style={styles.addButton}
+            style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
             onPress={() => navigation.navigate('AddAnimal')}
           >
-            <Plus color={COLORS.white} size={20} style={styles.plusIcon} />
+            <Plus color={theme.colors.white} size={20} style={styles.plusIcon} />
             <Text style={styles.addButtonText}>Add Animal</Text>
           </TouchableOpacity>
         </View>
@@ -190,7 +193,7 @@ const AnimalListScreen = ({ navigation, route }) => {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -209,22 +212,19 @@ const AnimalListScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   searchBarContainer: {
-    backgroundColor: COLORS.white,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    ...SHADOW.sm,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    ...lightTheme.shadow.sm,
     zIndex: 5,
   },
   searchInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
-    height: 44,
+    height: 48,
   },
   searchIcon: {
     marginRight: 8,
@@ -232,29 +232,28 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: COLORS.text,
     paddingVertical: 8,
+    fontWeight: '500',
   },
   actionRow: {
-    padding: SPACING.lg,
-    paddingBottom: SPACING.sm,
+    padding: 16,
+    paddingBottom: 8,
     alignItems: 'flex-end',
   },
   addButton: {
-    backgroundColor: COLORS.primary,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    ...SHADOW.sm,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    ...lightTheme.shadow.md,
   },
   plusIcon: {
-    marginRight: 6,
+    marginRight: 8,
   },
   addButtonText: {
-    color: COLORS.white,
-    fontWeight: 'bold',
+    color: 'white',
+    fontWeight: '800',
     fontSize: 14,
   },
   listContent: {
@@ -264,21 +263,18 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   animalItem: {
-    backgroundColor: COLORS.white,
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     marginBottom: 12,
-    borderRadius: 16,
-    ...SHADOW.sm,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    ...lightTheme.shadow.sm,
   },
   iconBox: {
     width: 52,
     height: 52,
-    borderRadius: 14,
-    backgroundColor: '#FFF1EA',
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -288,52 +284,47 @@ const styles = StyleSheet.create({
   },
   tagNumber: {
     fontSize: 18,
-    fontWeight: '800',
-    color: COLORS.text,
+    fontWeight: '900',
   },
   breedName: {
     fontSize: 14,
-    color: COLORS.textLight,
     marginTop: 2,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   locationTag: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 6,
-    backgroundColor: '#F3F4F6',
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   locIcon: {
     marginRight: 4,
   },
   locationName: {
     fontSize: 11,
-    color: COLORS.textLight,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 80,
-    paddingHorizontal: SPACING.xl,
+    paddingHorizontal: 32,
   },
   noRecords: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#374151',
-    marginTop: SPACING.lg,
-    marginBottom: SPACING.sm,
+    fontWeight: '800',
+    marginTop: 24,
+    marginBottom: 8,
   },
   emptyDescription: {
     fontSize: 15,
-    color: '#9CA3AF',
     textAlign: 'center',
     lineHeight: 22,
+    fontWeight: '500',
   },
   center: {
     flex: 1,
@@ -348,18 +339,12 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '900',
     color: 'white',
   },
-  statusLIVE: {
-    backgroundColor: '#10B981',
-  },
-  statusSOLD: {
-    backgroundColor: '#3B82F6',
-  },
-  statusDEAD: {
-    backgroundColor: '#EF4444',
-  },
+  statusLIVE: { backgroundColor: '#10B981' },
+  statusSOLD: { backgroundColor: '#3B82F6' },
+  statusDEAD: { backgroundColor: '#EF4444' },
 });
 
 export default AnimalListScreen;

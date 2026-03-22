@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
@@ -11,6 +12,7 @@ import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
 const AddVaccinationScreen = ({ navigation, route }) => {
+  const { isDarkMode, theme } = useTheme();
   const existingRecord = route.params?.record;
   const isEditing = !!existingRecord;
   const mode = route.params?.mode || (isEditing ? 'single' : 'single');
@@ -176,7 +178,7 @@ const AddVaccinationScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title={isEditing ? "Edit Vaccination" : (isMass ? "Add Mass Vaccination" : "Add Vaccination")} 
         onBack={() => navigation.goBack()} 
@@ -206,12 +208,12 @@ const AddVaccinationScreen = ({ navigation, route }) => {
             />
 
             <View style={styles.inlineStats}>
-              <View style={styles.statBox}>
-                <Text style={styles.statLabel}>Given Every</Text>
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{daysBetween}</Text>
+              <View style={[styles.statBox, { backgroundColor: isDarkMode ? '#1E293B' : '#F1F5F9' }]}>
+                <Text style={[styles.statLabel, { color: theme.colors.textLight }]}>Given Every</Text>
+                <View style={[styles.badge, { backgroundColor: isDarkMode ? theme.colors.primary + '33' : '#E2E8F0' }]}>
+                  <Text style={[styles.badgeText, { color: theme.colors.primary }]}>{daysBetween}</Text>
                 </View>
-                <Text style={styles.statSuffix}>Days</Text>
+                <Text style={[styles.statSuffix, { color: theme.colors.textLight }]}>Days</Text>
               </View>
             </View>
 
@@ -228,12 +230,12 @@ const AddVaccinationScreen = ({ navigation, route }) => {
               onChangeText={setRemark} 
               placeholder="Add notes..."
               multiline
-              style={{ minHeight: 60, paddingTop: 10 }}
+              style={{ minHeight: 60, paddingTop: 10, color: theme.colors.text }}
             />
 
             {!isEditing && (
               <>
-                <Text style={styles.sectionTitle}>
+                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
                   {isMass ? "Animals to Vaccinate" : "Select Animal"}
                 </Text>
 
@@ -246,7 +248,7 @@ const AddVaccinationScreen = ({ navigation, route }) => {
                     keyboardType="default"
                   />
                   <TouchableOpacity 
-                    style={styles.addTagBtn} 
+                    style={[styles.addTagBtn, { backgroundColor: theme.colors.primary }]} 
                     onPress={handleAddAnimalByTag}
                     disabled={searching}
                   >
@@ -257,11 +259,11 @@ const AddVaccinationScreen = ({ navigation, route }) => {
                 {selectedAnimals.length > 0 && (
                   <View style={styles.selectedContainer}>
                     {selectedAnimals.map(animal => (
-                      <View key={animal.id} style={styles.animalChip}>
-                        <CheckCircle2 size={16} color={COLORS.success} />
-                        <Text style={styles.chipText}>{animal.tagNumber}</Text>
+                      <View key={animal.id} style={[styles.animalChip, { backgroundColor: isDarkMode ? '#1E293B' : '#F0F9FF', borderColor: isDarkMode ? theme.colors.primary + '66' : theme.colors.border }]}>
+                        <CheckCircle2 size={16} color={theme.colors.success} />
+                        <Text style={[styles.chipText, { color: isDarkMode ? theme.colors.white : theme.colors.primary }]}>{animal.tagNumber}</Text>
                         <TouchableOpacity onPress={() => removeAnimal(animal.id)}>
-                          <X size={16} color="#9CA3AF" />
+                          <X size={16} color={theme.colors.textLight} />
                         </TouchableOpacity>
                       </View>
                     ))}
@@ -271,17 +273,17 @@ const AddVaccinationScreen = ({ navigation, route }) => {
             )}
 
             {isEditing && (
-              <View style={styles.editInfoSection}>
-                <Text style={styles.editInfoLabel}>Animal Tag</Text>
+              <View style={[styles.editInfoSection, { backgroundColor: isDarkMode ? '#1E293B' : theme.colors.surface, borderColor: theme.colors.border }]}>
+                <Text style={[styles.editInfoLabel, { color: theme.colors.textLight }]}>Animal Tag</Text>
                 <View style={styles.editInfoValue}>
-                  <CheckCircle2 size={16} color={COLORS.success} />
-                  <Text style={styles.editTagText}>{existingRecord?.animal?.tagNumber}</Text>
+                  <CheckCircle2 size={16} color={theme.colors.success} />
+                  <Text style={[styles.editTagText, { color: theme.colors.text }]}>{existingRecord?.animal?.tagNumber}</Text>
                 </View>
               </View>
             )}
 
             {isMass && selectedAnimals.length === 0 && (
-              <Text style={styles.emptyText}>No animals selected. Add animals by tag number or scan.</Text>
+              <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>No animals selected. Add animals by tag number or scan.</Text>
             )}
           </View>
 
@@ -294,8 +296,8 @@ const AddVaccinationScreen = ({ navigation, route }) => {
                     variant="outline"
                     onPress={handleDelete} 
                     loading={deleting}
-                    containerStyle={{ borderColor: COLORS.error }}
-                    titleStyle={{ color: COLORS.error }}
+                    containerStyle={{ borderColor: theme.colors.error }}
+                    titleStyle={{ color: theme.colors.error }}
                   />
                 </View>
                 <View style={styles.halfBtn}>
@@ -303,16 +305,14 @@ const AddVaccinationScreen = ({ navigation, route }) => {
                     title="SAVE" 
                     onPress={handleSave} 
                     loading={loading}
-                    containerStyle={styles.saveBtn}
                   />
                 </View>
               </View>
             ) : (
               <GButton 
-                title="SAVE" 
+                title="SAVE RECORD" 
                 onPress={handleSave} 
                 loading={loading}
-                containerStyle={styles.saveBtn}
               />
             )}
           </View>
@@ -325,7 +325,6 @@ const AddVaccinationScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   flex: {
     flex: 1,
@@ -343,38 +342,35 @@ const styles = StyleSheet.create({
   statBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 12,
     alignSelf: 'flex-start',
   },
   statLabel: {
     fontSize: 14,
-    color: COLORS.textLight,
     marginRight: 8,
+    fontWeight: '600',
   },
   badge: {
-    backgroundColor: '#D1D5DB',
     paddingHorizontal: 12,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   badgeText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontWeight: '800',
   },
   statSuffix: {
     fontSize: 14,
-    color: COLORS.textLight,
     marginLeft: 8,
+    fontWeight: '600',
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginVertical: SPACING.md,
+    fontSize: 18,
+    fontWeight: '800',
+    marginVertical: SPACING.lg,
+    letterSpacing: -0.5,
   },
   tagInputRow: {
     flexDirection: 'row',
@@ -386,17 +382,15 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   addTagBtn: {
-    backgroundColor: '#1E40AF', // Darker Blue as shown in UI
-    height: 48,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    height: 56,
+    paddingHorizontal: 24,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOW.sm,
   },
   addTagBtnText: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 14,
   },
   selectedContainer: {
@@ -407,26 +401,23 @@ const styles = StyleSheet.create({
   animalChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F9FF',
     borderWidth: 1,
-    borderColor: '#BAE6FD',
-    borderRadius: 20,
+    borderRadius: 14,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 8,
     marginRight: 8,
     marginBottom: 8,
   },
   chipText: {
     marginHorizontal: 8,
     fontSize: 14,
-    fontWeight: '600',
-    color: '#0369A1',
+    fontWeight: '800',
   },
   emptyText: {
-    color: '#9CA3AF',
-    fontStyle: 'italic',
+    fontSize: 14,
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 24,
+    fontWeight: '500',
   },
   footer: {
     marginTop: 20,
@@ -439,84 +430,27 @@ const styles = StyleSheet.create({
     width: '48%',
   },
   editInfoSection: {
-    marginTop: 20,
-    backgroundColor: '#F9FAFB',
+    marginTop: 24,
     padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderRadius: 16,
+    borderWidth: 1.5,
   },
   editInfoLabel: {
     fontSize: 12,
-    color: COLORS.textLight,
-    fontWeight: '600',
+    fontWeight: '800',
     marginBottom: 8,
     textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   editInfoValue: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   editTagText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginLeft: 8,
+    fontSize: 22,
+    fontWeight: '900',
+    marginLeft: 10,
   },
-  saveBtn: {
-    backgroundColor: '#1E40AF',
-  },
-  recentSection: {
-    marginTop: 30,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  recentItem: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#F3F4F6',
-  },
-  itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  itemVaccine: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  itemDate: {
-    fontSize: 12,
-    color: COLORS.textLight,
-  },
-  itemSubHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  itemTag: {
-    fontSize: 13,
-    color: COLORS.textLight,
-  },
-  itemDue: {
-    fontSize: 12,
-    color: '#D97706',
-    fontWeight: '600',
-  },
-  viewAllBtn: {
-    marginTop: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  viewAllBtnText: {
-    color: COLORS.primary,
-    fontSize: 14,
-    fontWeight: '600',
-  }
 });
 
 export default AddVaccinationScreen;

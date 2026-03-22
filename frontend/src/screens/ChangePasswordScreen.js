@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
-import { COLORS, SPACING } from '../theme';
+import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import api from '../api';
 
 const ChangePasswordScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,7 +41,7 @@ const ChangePasswordScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title="Change Password" onBack={() => navigation.goBack()} />
       
       <KeyboardAvoidingView 
@@ -57,7 +59,7 @@ const ChangePasswordScreen = ({ navigation }) => {
             />
             
             <View style={styles.inputGap} />
-
+ 
             <GInput 
               label="New Password" 
               value={newPassword} 
@@ -66,13 +68,13 @@ const ChangePasswordScreen = ({ navigation }) => {
               required 
             />
           </View>
-
+ 
           <View style={styles.footer}>
             <GButton 
-              title="Save" 
+              title="SAVE PASSWORD" 
               onPress={handleSave} 
               loading={loading}
-              style={styles.saveBtn}
+              containerStyle={styles.saveBtn}
             />
           </View>
         </ScrollView>
@@ -84,7 +86,6 @@ const ChangePasswordScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   flex: {
     flex: 1,
@@ -97,15 +98,15 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   inputGap: {
-    height: 10,
+    height: 16,
   },
   footer: {
     marginTop: 'auto',
     paddingBottom: SPACING.lg,
+    paddingTop: SPACING.xl,
   },
   saveBtn: {
-    height: 52,
-    borderRadius: 8,
+    height: 56,
   },
 });
 

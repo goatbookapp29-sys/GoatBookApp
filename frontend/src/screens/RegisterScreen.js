@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import api, { setAuthToken, setSelectedFarm } from '../api';
 
 const RegisterScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -44,18 +46,18 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
-        <View style={styles.header}>
-            <Text style={styles.title}>Get Started</Text>
-            <Text style={styles.subtitle}>Register your farm to continue</Text>
+        <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
+            <Text style={[styles.title, { color: '#FFFFFF' }]}>Get Started</Text>
+            <Text style={[styles.subtitle, { color: 'rgba(255,255,255,0.8)' }]}>Register your farm to continue</Text>
         </View>
 
         <View style={styles.formContainer}>
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Personal Details</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Personal Details</Text>
                     <GInput 
                         label="Full Name" 
                         value={formData.name} 
@@ -90,7 +92,7 @@ const RegisterScreen = ({ navigation }) => {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Farm Details</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Farm Details</Text>
                     <GInput 
                         label="Farm Name" 
                         value={formData.farmName} 
@@ -106,7 +108,7 @@ const RegisterScreen = ({ navigation }) => {
                 </View>
 
                 <GButton 
-                    title="Complete Registration" 
+                    title="Register Now" 
                     onPress={handleRegister} 
                     loading={loading}
                     containerStyle={styles.btn}
@@ -114,9 +116,9 @@ const RegisterScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>Already have an account? </Text>
+                <Text style={[styles.footerText, { color: theme.colors.textLight }]}>Already have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                    <Text style={styles.link}>Sign In</Text>
+                    <Text style={[styles.link, { color: theme.colors.primary }]}>Sign In</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -128,55 +130,48 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
   },
   scrollContent: {
     flexGrow: 1,
   },
   header: {
-    backgroundColor: COLORS.primary,
     paddingTop: 80,
-    paddingBottom: 60,
+    paddingBottom: 70,
     paddingHorizontal: 24,
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
-    ...SHADOW.lg,
   },
   title: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '900',
-    color: COLORS.white,
-    letterSpacing: 0.5,
+    letterSpacing: -1,
   },
   subtitle: {
     fontSize: 16,
-    color: 'rgba(255,255,255,0.8)',
-    marginTop: 4,
-    fontWeight: '500',
+    marginTop: 6,
+    fontWeight: '600',
   },
   formContainer: {
     paddingHorizontal: 20,
     marginTop: -40,
   },
   card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 28,
+    borderRadius: 32,
     padding: 24,
-    ...SHADOW.lg,
+    borderWidth: 1,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '800',
-    color: COLORS.secondary,
+    fontWeight: '900',
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    letterSpacing: 2.5,
     marginBottom: 16,
   },
   gap: {
-    height: 12,
+    height: 14,
   },
   btn: {
     marginTop: 12,
@@ -188,12 +183,10 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   footerText: {
-    color: COLORS.textLight,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   link: {
-    color: COLORS.primary,
-    fontWeight: '800',
+    fontWeight: '900',
     textDecorationLine: 'underline',
   }
 });

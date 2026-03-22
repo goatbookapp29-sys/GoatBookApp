@@ -1,12 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
+import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
 import { UserPlus, ChevronRight, User } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
 const EmployeeListScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,40 +32,40 @@ const EmployeeListScreen = ({ navigation }) => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
-      style={styles.item}
+      style={[styles.item, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
       onPress={() => navigation.navigate('EditEmployee', { employee: item })}
     >
-      <View style={styles.avatar}>
-        <User size={24} color={COLORS.primary} />
+      <View style={[styles.avatar, { backgroundColor: isDarkMode ? '#1E293B' : '#FFF1EA' }]}>
+        <User size={24} color={theme.colors.primary} />
       </View>
       <View style={styles.info}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.role}>{item.role} • {item.email}</Text>
+        <Text style={[styles.name, { color: theme.colors.text }]}>{item.name}</Text>
+        <Text style={[styles.role, { color: theme.colors.textLight }]}>{item.role} • {item.email}</Text>
       </View>
-      <ChevronRight size={20} color="#D1D5DB" />
+      <ChevronRight size={20} color={theme.colors.textMuted} />
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
-        title="Employees" 
+        title="Employee List" 
         onBack={() => navigation.goBack()} 
       />
       
       <View style={styles.actionRow}>
         <TouchableOpacity 
-          style={styles.addButton}
+          style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
           onPress={() => navigation.navigate('AddEmployee')}
         >
-          <UserPlus color={COLORS.white} size={20} style={styles.plusIcon} />
+          <UserPlus color={theme.colors.white} size={20} style={styles.plusIcon} />
           <Text style={styles.addButtonText}>Add Employee</Text>
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -73,7 +75,7 @@ const EmployeeListScreen = ({ navigation }) => {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyText}>No employees added yet.</Text>
+              <Text style={[styles.emptyText, { color: theme.colors.textLight }]}>No employees added yet.</Text>
             </View>
           }
         />
@@ -85,41 +87,43 @@ const EmployeeListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   actionRow: {
-    padding: SPACING.lg,
+    padding: 16,
     alignItems: 'flex-end',
   },
   addButton: {
-    backgroundColor: COLORS.primary,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    ...SHADOW.sm,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    ...lightTheme.shadow.sm,
   },
   addButtonText: {
-    color: COLORS.white,
-    fontWeight: 'bold',
-    marginLeft: 6,
+    color: 'white',
+    fontWeight: '800',
+    marginLeft: 8,
+    fontSize: 14,
   },
   listContent: {
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 40,
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    padding: 16,
+    marginBottom: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    ...lightTheme.shadow.sm,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#FFF1EA',
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -128,15 +132,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
   role: {
-    fontSize: 14,
-    color: COLORS.textLight,
+    fontSize: 13,
     marginTop: 2,
-    textTransform: 'capitalize',
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   center: {
     flex: 1,
@@ -144,11 +148,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   empty: {
-    padding: 40,
+    padding: 60,
     alignItems: 'center',
   },
   emptyText: {
-    color: COLORS.textLight,
+    fontSize: 15,
+    fontWeight: '500',
   }
 });
 

@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
@@ -9,6 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ListPlus } from 'lucide-react-native';
 
 const AddVaccineNameScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [name, setName] = useState('');
   const [daysBetween, setDaysBetween] = useState('');
   const [remark, setRemark] = useState('');
@@ -61,7 +63,7 @@ const AddVaccineNameScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title="Add Vaccine" onBack={() => navigation.goBack()} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.content}>
@@ -75,7 +77,7 @@ const AddVaccineNameScreen = ({ navigation }) => {
             />
             
             <View style={styles.daysRow}>
-              <Text style={styles.daysLabel}>Given Every*</Text>
+              <Text style={[styles.daysLabel, { color: theme.colors.text }]}>Given Every*</Text>
               <GInput 
                 containerStyle={styles.daysInputBox}
                 value={daysBetween} 
@@ -83,10 +85,10 @@ const AddVaccineNameScreen = ({ navigation }) => {
                 placeholder="0"
                 keyboardType="number-pad"
               />
-              <Text style={styles.daysSuffix}>Days</Text>
+              <Text style={[styles.daysSuffix, { color: theme.colors.text }]}>Days</Text>
             </View>
 
-            <Text style={styles.helperText}>
+            <Text style={[styles.helperText, { color: theme.colors.primary }]}>
               Given number of days help to find next due date for vaccination. Enter correct days for vaccine to get alert on due date. Enter zero for one time vaccination.
             </Text>
 
@@ -96,37 +98,37 @@ const AddVaccineNameScreen = ({ navigation }) => {
               onChangeText={setRemark} 
               placeholder="Optional"
               multiline
-              style={{ minHeight: 80, paddingTop: 12 }}
+              style={{ minHeight: 80, paddingTop: 12, color: theme.colors.text }}
             />
           </View>
 
           <View style={styles.footer}>
             <GButton 
-              title="SAVE" 
+              title="SAVE VACCINE" 
               onPress={handleSave} 
               loading={loading}
             />
           </View>
 
           {/* List View for Vaccine Names */}
-          <View style={styles.listSection}>
-            <Text style={styles.sectionTitle}>Existing Vaccines</Text>
+          <View style={[styles.listSection, { borderTopColor: theme.colors.border }]}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Existing Vaccines</Text>
             {vaccinesLoading ? (
-              <ActivityIndicator color={COLORS.primary} style={{ marginTop: 20 }} />
+              <ActivityIndicator color={theme.colors.primary} style={{ marginTop: 20 }} />
             ) : vaccines.length > 0 ? (
               vaccines.map((v) => (
-                <View key={v.id} style={styles.vaccineItem}>
-                  <View style={styles.vaccineIcon}>
-                    <ListPlus size={20} color={COLORS.primary} />
+                <View key={v.id} style={[styles.vaccineItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                  <View style={[styles.vaccineIcon, { backgroundColor: isDarkMode ? theme.colors.surface : '#EEF2FF' }]}>
+                    <ListPlus size={20} color={theme.colors.primary} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.vaccineLabel}>{v.name}</Text>
-                    <Text style={styles.vaccineDays}>Every {v.daysBetween} days</Text>
+                    <Text style={[styles.vaccineLabel, { color: theme.colors.text }]}>{v.name}</Text>
+                    <Text style={[styles.vaccineDays, { color: theme.colors.textLight }]}>Every {v.daysBetween} days</Text>
                   </View>
                 </View>
               ))
             ) : (
-              <Text style={styles.emptyText}>No vaccines defined yet</Text>
+              <Text style={[styles.emptyText, { color: theme.colors.textLight }]}>No vaccines defined yet</Text>
             )}
           </View>
         </ScrollView>
@@ -138,7 +140,6 @@ const AddVaccineNameScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   content: {
     padding: SPACING.lg,
@@ -152,26 +153,24 @@ const styles = StyleSheet.create({
     marginVertical: SPACING.md,
   },
   daysLabel: {
-    fontSize: 16,
-    color: '#374151',
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '700',
     marginRight: 10,
   },
   daysInputBox: {
-    width: 80,
+    width: 90,
     marginBottom: 0,
   },
   daysSuffix: {
-    fontSize: 16,
-    color: '#374151',
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '700',
     marginLeft: 10,
   },
   helperText: {
-    fontSize: 14,
-    color: '#3B82F6',
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
     marginBottom: SPACING.lg,
+    fontWeight: '600',
   },
   footer: {
     marginTop: SPACING.md,
@@ -179,50 +178,45 @@ const styles = StyleSheet.create({
   },
   listSection: {
     marginTop: 20,
-    paddingTop: 20,
+    paddingTop: 24,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 16,
+    fontSize: 20,
+    fontWeight: '900',
+    marginBottom: 20,
+    letterSpacing: -0.5,
   },
   vaccineItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1.5,
   },
   vaccineIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#EEF2FF',
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
   vaccineLabel: {
     fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
+    fontWeight: '700',
   },
   vaccineDays: {
     fontSize: 13,
-    color: COLORS.textLight,
     marginTop: 2,
+    fontWeight: '500',
   },
   emptyText: {
     textAlign: 'center',
-    color: COLORS.textLight,
-    marginTop: 20,
+    marginTop: 24,
     fontStyle: 'italic',
+    fontWeight: '500',
   },
 });
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Alert, ActivityIndicator } from 'react-native';
-import { COLORS } from '../theme';
+import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
@@ -9,6 +10,7 @@ import api from '../api';
 import styles from './FarmSettingsScreen.styles';
 
 const FarmSettingsScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -60,27 +62,27 @@ const FarmSettingsScreen = ({ navigation }) => {
 
   if (fetching) {
     return (
-      <View style={[styles.container, { justifyContent: 'center' }]}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={[styles.container, { justifyContent: 'center', backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title="Farm Settings" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         {!isOwner && (
-          <View style={styles.infoBox}>
-            <ShieldAlert size={20} color="#B45309" />
-            <Text style={styles.infoText}>
+          <View style={[styles.infoBox, { backgroundColor: isDarkMode ? '#451A03' : '#FFFBEB', borderColor: isDarkMode ? '#F59E0B66' : '#F3F4F6' }]}>
+            <ShieldAlert size={20} color={isDarkMode ? '#F59E0B' : '#B45309'} />
+            <Text style={[styles.infoText, { color: isDarkMode ? '#FCD34D' : '#92400E' }]}>
               Only farm owners can modify these settings. Your changes will not be saved if you are not an owner.
             </Text>
           </View>
         )}
 
-        <View style={styles.formCard}>
-          <Text style={styles.sectionTitle}>Details</Text>
+        <View style={[styles.formCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Details</Text>
           
           <GInput 
             label="Farm Name" 
@@ -104,7 +106,7 @@ const FarmSettingsScreen = ({ navigation }) => {
 
         {isOwner && (
           <GButton 
-            title="Save Changes" 
+            title="UPDATE FARM" 
             onPress={handleUpdate} 
             loading={loading}
             containerStyle={styles.submitBtn}

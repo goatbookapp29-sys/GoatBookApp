@@ -1,53 +1,55 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
+import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
 import { ClipboardList, Heart, Calculator, Printer } from 'lucide-react-native';
 
 const ReportsMenuScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const options = [
     { 
       id: 'overall', 
       title: 'Animal Overall Report', 
-      icon: <ClipboardList color="#1E40AF" size={40} />, 
+      icon: <ClipboardList color={theme.colors.primary} size={32} />, 
       onPress: () => navigation.navigate('OverallReport') 
     },
     { 
       id: 'condition', 
       title: 'Female Condition Report', 
-      icon: <Heart color="#1E40AF" size={40} />, 
-      onPress: null // Not in work yet
+      icon: <Heart color={theme.colors.primary} size={32} />, 
+      onPress: null 
     },
     { 
       id: 'vaccination', 
       title: 'Vaccination Report', 
-      icon: <Calculator color="#1E40AF" size={40} />, 
-      onPress: null // Not in work yet
+      icon: <Calculator color={theme.colors.primary} size={32} />, 
+      onPress: null 
     },
     { 
       id: 'sales', 
       title: 'Generate Sales Report', 
-      icon: <Printer color="#1E40AF" size={40} />, 
-      onPress: null // Not in work yet
+      icon: <Printer color={theme.colors.primary} size={32} />, 
+      onPress: null 
     },
   ];
 
   return (
-    <View style={styles.container}>
-      <GHeader title="Reports" onBack={() => navigation.goBack()} />
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <GHeader title="Reports Center" subTitle="Analysis" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.grid}>
           {options.map((item) => (
             <TouchableOpacity 
               key={item.id} 
-              style={[styles.card, !item.onPress && styles.disabledCard]} 
+              style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }, !item.onPress && styles.disabledCard]} 
               onPress={item.onPress || (() => {})}
               activeOpacity={0.7}
             >
-              <View style={styles.iconContainer}>
+              <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#F3F4F6' }]}>
                 {item.icon}
               </View>
-              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -59,10 +61,10 @@ const ReportsMenuScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   content: {
-    padding: SPACING.md,
+    padding: 16,
+    paddingTop: 24,
   },
   grid: {
     flexDirection: 'row',
@@ -70,32 +72,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   card: {
-    backgroundColor: COLORS.white,
     width: '48%',
     height: 160,
-    borderRadius: 16,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.md,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    ...SHADOW.sm,
+    ...lightTheme.shadow.sm,
   },
   disabledCard: {
     opacity: 0.5,
-    backgroundColor: '#F3F4F6',
   },
   iconContainer: {
-    marginBottom: SPACING.sm,
-    padding: 16,
-    borderRadius: 12,
+    marginBottom: 12,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cardTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text,
+    fontWeight: '800',
     textAlign: 'center',
     paddingHorizontal: 8,
+    letterSpacing: -0.2,
   },
 });
 

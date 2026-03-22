@@ -1,12 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { COLORS, SPACING, SHADOW } from '../theme';
+import { COLORS, SPACING, SHADOW, lightTheme } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import { Syringe, Calendar, User, Plus } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
 const VaccinationListScreen = ({ navigation, route }) => {
+  const { isDarkMode, theme } = useTheme();
   const mode = route.params?.mode; // 'SINGLE' or 'MASS' or undefined
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,51 +42,52 @@ const VaccinationListScreen = ({ navigation, route }) => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
-      style={styles.recordItem}
+      style={[styles.recordItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
       onPress={() => navigation.navigate('AddVaccination', { mode: 'single', record: item })}
     >
       <View style={styles.recordHeader}>
-        <View style={styles.iconBox}>
-          <Syringe size={20} color={COLORS.primary} />
+        <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1E293B' : '#EEF2FF' }]}>
+          <Syringe size={20} color={theme.colors.primary} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.vaccineName}>{item.vaccine?.name}</Text>
+          <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{item.vaccine?.name}</Text>
           <View style={styles.tagRow}>
-            <User size={14} color={COLORS.textLight} />
-            <Text style={styles.tagNumber}>Tag: {item.animal?.tagNumber}</Text>
+            <User size={14} color={theme.colors.textLight} />
+            <Text style={[styles.tagNumber, { color: theme.colors.textLight }]}>Tag: {item.animal?.tagNumber}</Text>
           </View>
         </View>
         <View style={styles.rightCol}>
-          <View style={styles.dateBox}>
-            <Calendar size={12} color={COLORS.textLight} />
-            <Text style={styles.dateText}>{item.date}</Text>
+          <View style={[styles.dateBox, { backgroundColor: isDarkMode ? '#334155' : '#F3F4F6' }]}>
+            <Calendar size={12} color={theme.colors.textLight} />
+            <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{item.date}</Text>
           </View>
-          <View style={[styles.modeBadge, item.creationMode === 'MASS' ? styles.massBadge : styles.singleBadge]}>
-            <Text style={styles.modeText}>{item.creationMode || 'SINGLE'}</Text>
+          <View style={[styles.modeBadge, item.creationMode === 'MASS' ? styles.massBadge : styles.singleBadge, 
+            { backgroundColor: isDarkMode ? '#1E293B' : (item.creationMode === 'MASS' ? '#EEF2FF' : '#F3F4F6') }]}>
+            <Text style={[styles.modeText, { color: isDarkMode ? theme.colors.primary : '#6B7280' }]}>{item.creationMode || 'SINGLE'}</Text>
           </View>
         </View>
       </View>
       
       {item.nextDueDate && (
-        <View style={styles.dueSection}>
-          <Text style={styles.dueLabel}>Next Due Date:</Text>
-          <Text style={styles.dueValue}>{item.nextDueDate}</Text>
+        <View style={[styles.dueSection, { backgroundColor: isDarkMode ? '#451A03' : '#FFFBEB' }]}>
+          <Text style={[styles.dueLabel, { color: isDarkMode ? '#FCD34D' : '#D97706' }]}>Next Due Date:</Text>
+          <Text style={[styles.dueValue, { color: isDarkMode ? '#FCD34D' : '#D97706' }]}>{item.nextDueDate}</Text>
         </View>
       )}
 
       {item.remark ? (
-        <Text style={styles.remarkText} numberOfLines={2}>Note: {item.remark}</Text>
+        <Text style={[styles.remarkText, { color: theme.colors.textLight, borderTopColor: theme.colors.border }]} numberOfLines={2}>Note: {item.remark}</Text>
       ) : null}
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title={getTitle()} onBack={() => navigation.goBack()} />
       
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -94,8 +97,8 @@ const VaccinationListScreen = ({ navigation, route }) => {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Syringe size={64} color="#E5E7EB" />
-              <Text style={styles.emptyText}>No vaccination records found</Text>
+              <Syringe size={64} color={theme.colors.border} />
+              <Text style={[styles.emptyText, { color: theme.colors.textLight }]}>No vaccination records found</Text>
             </View>
           }
         />
@@ -103,7 +106,7 @@ const VaccinationListScreen = ({ navigation, route }) => {
 
       {/* Floating Action Button to Add */}
       <TouchableOpacity 
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.colors.primary, ...theme.shadow.lg }]}
         onPress={() => {
           Alert.alert(
             'Add Vaccination',
@@ -116,7 +119,7 @@ const VaccinationListScreen = ({ navigation, route }) => {
           );
         }}
       >
-        <Plus size={30} color={COLORS.white} />
+        <Plus size={30} color={theme.colors.white} />
       </TouchableOpacity>
     </View>
   );
@@ -125,19 +128,16 @@ const VaccinationListScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   listContent: {
     padding: SPACING.lg,
   },
   recordItem: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: SPACING.md,
-    ...SHADOW.sm,
-    borderWidth: 1,
-    borderColor: '#F3F4F6',
+    ...lightTheme.shadow.sm,
+    borderWidth: 1.5,
   },
   recordHeader: {
     flexDirection: 'row',
@@ -145,18 +145,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   iconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: '#EEF2FF',
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   vaccineName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontSize: 17,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
   tagRow: {
     flexDirection: 'row',
@@ -165,22 +164,20 @@ const styles = StyleSheet.create({
   },
   tagNumber: {
     fontSize: 14,
-    color: COLORS.textLight,
+    fontWeight: '700',
     marginLeft: 4,
   },
   dateBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 4,
+    borderRadius: 8,
   },
   dateText: {
     fontSize: 11,
-    color: COLORS.textLight,
     marginLeft: 4,
-    fontWeight: '600',
+    fontWeight: '800',
   },
   rightCol: {
     alignItems: 'flex-end',
@@ -189,45 +186,35 @@ const styles = StyleSheet.create({
     marginTop: 6,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 4,
-  },
-  singleBadge: {
-    backgroundColor: '#F3F4F6',
-  },
-  massBadge: {
-    backgroundColor: '#EEF2FF',
+    borderRadius: 6,
   },
   modeText: {
     fontSize: 10,
-    fontWeight: '700',
-    color: '#6B7280',
+    fontWeight: '900',
+    textTransform: 'uppercase',
   },
   dueSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFBEB', // Light amber/yellow
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 4,
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 8,
   },
   dueLabel: {
     fontSize: 13,
-    color: '#D97706',
-    fontWeight: '600',
+    fontWeight: '800',
   },
   dueValue: {
     fontSize: 13,
-    color: '#D97706',
-    fontWeight: '700',
+    fontWeight: '900',
   },
   remarkText: {
     fontSize: 13,
-    color: COLORS.textLight,
     fontStyle: 'italic',
-    marginTop: 8,
+    marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    paddingTop: 8,
+    paddingTop: 10,
+    fontWeight: '500',
   },
   center: {
     flex: 1,
@@ -241,19 +228,17 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    color: COLORS.textLight,
+    fontWeight: '700',
   },
   fab: {
     position: 'absolute',
     bottom: 30,
     right: 30,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: COLORS.primary,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOW.md,
     elevation: 8,
   }
 });

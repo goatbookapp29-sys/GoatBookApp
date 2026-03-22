@@ -1,12 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { COLORS, SPACING, SHADOW } from '../theme';
+import { COLORS, SPACING, SHADOW, lightTheme } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import { ListPlus, Plus, Calendar, Settings } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
 const VaccineDefinitionsScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [vaccines, setVaccines] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,32 +31,32 @@ const VaccineDefinitionsScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.recordItem}>
+    <View style={[styles.recordItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
       <View style={styles.recordHeader}>
-        <View style={styles.iconBox}>
-          <ListPlus size={20} color={COLORS.primary} />
+        <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1E293B' : '#EEF2FF' }]}>
+          <ListPlus size={20} color={theme.colors.primary} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.vaccineName}>{item.name}</Text>
-          <Text style={styles.daysText}>Required every {item.daysBetween} days</Text>
+          <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{item.name}</Text>
+          <Text style={[styles.daysText, { color: theme.colors.textLight }]}>Required every {item.daysBetween} days</Text>
         </View>
         <TouchableOpacity style={styles.editBtn}>
-           <Settings size={18} color="#9CA3AF" />
+           <Settings size={18} color={theme.colors.textMuted} />
         </TouchableOpacity>
       </View>
       {item.remark ? (
-        <Text style={styles.remarkText}>{item.remark}</Text>
+        <Text style={[styles.remarkText, { color: theme.colors.textLight, borderTopColor: theme.colors.border }]}>{item.remark}</Text>
       ) : null}
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title="Vaccine Names" onBack={() => navigation.goBack()} />
       
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -64,8 +66,8 @@ const VaccineDefinitionsScreen = ({ navigation }) => {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <ListPlus size={64} color="#E5E7EB" />
-              <Text style={styles.emptyText}>No vaccines defined yet</Text>
+              <ListPlus size={64} color={theme.colors.border} />
+              <Text style={[styles.emptyText, { color: theme.colors.textLight }]}>No vaccines defined yet</Text>
             </View>
           }
         />
@@ -73,10 +75,10 @@ const VaccineDefinitionsScreen = ({ navigation }) => {
 
       {/* Floating Action Button to Add */}
       <TouchableOpacity 
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.colors.primary, ...theme.shadow.lg }]}
         onPress={() => navigation.navigate('AddVaccineName')}
       >
-        <Plus size={30} color={COLORS.white} />
+        <Plus size={30} color={theme.colors.white} />
       </TouchableOpacity>
     </View>
   );
@@ -85,18 +87,17 @@ const VaccineDefinitionsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   listContent: {
     padding: SPACING.lg,
     paddingBottom: 100,
   },
   recordItem: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: SPACING.md,
-    ...SHADOW.sm,
+    ...lightTheme.shadow.sm,
+    borderWidth: 1.5,
   },
   recordHeader: {
     flexDirection: 'row',
@@ -106,28 +107,26 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#EEF2FF',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   vaccineName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontSize: 17,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
   daysText: {
     fontSize: 13,
-    color: COLORS.textLight,
+    fontWeight: '600',
   },
   remarkText: {
-    marginTop: 8,
-    fontSize: 12,
-    color: COLORS.textLight,
+    marginTop: 10,
+    fontSize: 13,
     fontStyle: 'italic',
-    paddingTop: 8,
+    paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    fontWeight: '500',
   },
   editBtn: {
     padding: 8,
@@ -144,19 +143,17 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    color: COLORS.textLight,
+    fontWeight: '700',
   },
   fab: {
     position: 'absolute',
     bottom: 30,
     right: 30,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: COLORS.primary,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOW.md,
     elevation: 8,
   }
 });

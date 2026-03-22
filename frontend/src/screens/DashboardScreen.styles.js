@@ -1,4 +1,4 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 
 export default StyleSheet.create({
@@ -7,38 +7,38 @@ export default StyleSheet.create({
     backgroundColor: '#F3F4F6',
   },
   header: {
-    paddingTop: Platform.OS === 'android' ? 40 : 60,
+    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 24) : 48,
     paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingBottom: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: COLORS.primary,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
     ...SHADOW.lg,
   },
   userInfo: {
     flex: 1,
   },
   welcome: {
-    fontSize: 14,
+    fontSize: 12,
     color: 'rgba(255,255,255,0.8)',
-    fontWeight: '600',
+    fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    letterSpacing: 2,
   },
   farmRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: 4,
   },
   farmName: {
-    fontSize: 26,
-    fontWeight: '800',
+    fontSize: 24,
+    fontWeight: '900',
     color: COLORS.white,
-    marginLeft: 8,
-    letterSpacing: 0.5,
+    marginLeft: 6,
+    letterSpacing: -0.5,
   },
   logoutBtn: {
     width: 44,
@@ -51,7 +51,8 @@ export default StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     flex: 1,
-    marginTop: -20,
+    marginTop: 0, // Removed negative margin to prevent overlap
+    paddingTop: 20,
   },
   welcomeSection: {
     marginBottom: 24,

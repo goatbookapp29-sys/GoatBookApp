@@ -1,12 +1,14 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform } from 'react-native';
-import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
+import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
 import { Search, Plus, ChevronRight, MapPin, X } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
 const LocationListScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [locations, setLocations] = useState([]);
   const [filteredLocations, setFilteredLocations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -69,44 +71,45 @@ const LocationListScreen = ({ navigation }) => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
-      style={styles.locationCard}
+      style={[styles.locationCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
       onPress={() => navigation.navigate('LocationDetails', { locationId: item.id })}
       activeOpacity={0.7}
     >
-      <View style={styles.iconBox}>
-        <MapPin size={24} color={COLORS.primary} />
+      <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1E293B' : '#FFF1EA' }]}>
+        <MapPin size={24} color={theme.colors.primary} />
       </View>
       <View style={styles.locationInfo}>
-        <Text style={styles.locationName} numberOfLines={1}>{item.displayName || item.name}</Text>
-        <Text style={styles.locationMeta}>{item.code} • {item.type}</Text>
+        <Text style={[styles.locationName, { color: theme.colors.text }]} numberOfLines={1}>{item.displayName || item.name}</Text>
+        <Text style={[styles.locationMeta, { color: theme.colors.textLight }]}>{item.code} • {item.type}</Text>
       </View>
-      <ChevronRight size={20} color="#D1D5DB" />
+      <ChevronRight size={20} color={theme.colors.textMuted} />
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
-        title="Locations" 
+        title="Location List" 
         onBack={() => navigation.goBack()} 
-        rightIcon={isSearching ? <X color={COLORS.white} size={24} /> : <Search color={COLORS.white} size={24} />}
+        rightIcon={isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
         onRightPress={toggleSearch}
       />
 
       {isSearching && (
-        <Animated.View style={[styles.searchBarContainer, { transform: [{ translateY: searchBarTranslateY }] }]}>
-          <View style={styles.searchInner}>
-            <Search size={20} color={COLORS.textLight} style={styles.searchIcon} />
+        <Animated.View style={[styles.searchBarContainer, { backgroundColor: theme.colors.surface, transform: [{ translateY: searchBarTranslateY }] }]}>
+          <View style={[styles.searchInner, { backgroundColor: theme.colors.background }]}>
+            <Search size={20} color={theme.colors.textLight} style={styles.searchIcon} />
             <TextInput
-              style={styles.searchInput}
-              placeholder="Search code, name or path..."
+              style={[styles.searchInput, { color: theme.colors.text }]}
+              placeholder="Search code, name or type..."
+              placeholderTextColor={theme.colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
               autoFocus
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <X size={18} color={COLORS.textLight} />
+                <X size={18} color={theme.colors.textLight} />
               </TouchableOpacity>
             )}
           </View>
@@ -116,10 +119,10 @@ const LocationListScreen = ({ navigation }) => {
       {!isSearching && (
         <View style={styles.actionRow}>
           <TouchableOpacity 
-            style={styles.addButton}
+            style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
             onPress={() => navigation.navigate('AddLocation')}
           >
-            <Plus color={COLORS.white} size={20} style={styles.plusIcon} />
+            <Plus color={theme.colors.white} size={20} style={styles.plusIcon} />
             <Text style={styles.addButtonText}>Add Location</Text>
           </TouchableOpacity>
         </View>
@@ -127,7 +130,7 @@ const LocationListScreen = ({ navigation }) => {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -136,9 +139,9 @@ const LocationListScreen = ({ navigation }) => {
           keyExtractor={item => item.id}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-                <MapPin size={64} color="#E5E7EB" />
-                <Text style={styles.noRecords}>No Locations Found</Text>
-                <Text style={styles.emptyDesc}>Add stables, pens, or sections to organize your farm.</Text>
+                <MapPin size={64} color={theme.colors.border} />
+                <Text style={[styles.noRecords, { color: theme.colors.text }]}>No Locations Found</Text>
+                <Text style={[styles.emptyDesc, { color: theme.colors.textLight }]}>Add stables, pens, or sections to organize your farm.</Text>
             </View>
           }
           contentContainerStyle={[styles.listContent, isSearching && { paddingTop: 20 }]}
@@ -152,22 +155,19 @@ const LocationListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   searchBarContainer: {
-    backgroundColor: COLORS.white,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    ...SHADOW.sm,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    ...lightTheme.shadow.sm,
     zIndex: 5,
   },
   searchInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
-    height: 44,
+    height: 48,
   },
   searchIcon: {
     marginRight: 8,
@@ -175,50 +175,49 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: COLORS.text,
     paddingVertical: 8,
+    fontWeight: '500',
   },
   actionRow: {
-    padding: SPACING.lg,
-    paddingBottom: SPACING.sm,
+    padding: 16,
+    paddingBottom: 8,
     alignItems: 'flex-end',
   },
   addButton: {
-    backgroundColor: COLORS.primary,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    ...SHADOW.sm,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    ...lightTheme.shadow.sm,
   },
   plusIcon: {
-    marginRight: 6,
+    marginRight: 8,
   },
   addButtonText: {
-    color: COLORS.white,
-    fontWeight: 'bold',
+    color: 'white',
+    fontWeight: '800',
     fontSize: 14,
   },
   listContent: {
     flexGrow: 1,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: 16,
     paddingBottom: 40,
+    paddingTop: 16,
   },
   locationCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
-    ...SHADOW.sm,
+    borderWidth: 1,
+    ...lightTheme.shadow.sm,
   },
   iconBox: {
     width: 48,
     height: 48,
-    borderRadius: 12,
-    backgroundColor: '#FFF1EA',
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -227,14 +226,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   locationName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
   locationMeta: {
-    fontSize: 12,
-    color: COLORS.textLight,
+    fontSize: 13,
     marginTop: 2,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -242,15 +242,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   noRecords: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.textLight,
+    fontSize: 20,
+    fontWeight: '900',
     marginTop: 16,
   },
   emptyDesc: {
     textAlign: 'center',
-    color: '#9CA3AF',
     marginTop: 8,
+    lineHeight: 20,
+    fontWeight: '500',
   },
   center: {
     flex: 1,

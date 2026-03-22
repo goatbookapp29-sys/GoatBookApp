@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
@@ -8,6 +9,7 @@ import GSelect from '../components/GSelect';
 import api from '../api';
 
 const ProfileSettingsScreen = ({ navigation }) => {
+  const { theme } = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -79,14 +81,14 @@ const ProfileSettingsScreen = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title="Profile Settings" onBack={() => navigation.goBack()} />
       
       <KeyboardAvoidingView 
@@ -95,7 +97,7 @@ const ProfileSettingsScreen = ({ navigation }) => {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.formContainer}>
-            <Text style={styles.sectionTitle}>Basic Information</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Basic Information</Text>
             
             <GInput 
               label="Full Name" 
@@ -128,9 +130,10 @@ const ProfileSettingsScreen = ({ navigation }) => {
               label="Role" 
               value={formData.employeeType} 
               editable={false}
+              containerStyle={{ opacity: 0.7 }}
             />
 
-            <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>Address Details</Text>
+            <Text style={[styles.sectionTitle, { marginTop: SPACING.xl, color: theme.colors.text }]}>Address Details</Text>
             
             <GInput 
               label="Address" 
@@ -163,7 +166,7 @@ const ProfileSettingsScreen = ({ navigation }) => {
               </View>
               <View style={styles.halfBtn}>
                 <GButton 
-                  title="Save" 
+                  title="Save Changes" 
                   onPress={handleSave}
                   loading={saving}
                 />
@@ -179,7 +182,6 @@ const ProfileSettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
   },
   flex: {
     flex: 1,
@@ -195,15 +197,16 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     marginBottom: SPACING.xl,
+    paddingTop: 8,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#374151',
+    fontSize: 18,
+    fontWeight: '900',
     marginBottom: SPACING.lg,
+    letterSpacing: -0.5,
   },
   gap: {
-    height: 12,
+    height: 14,
   },
   buttonRow: {
     flexDirection: 'row',

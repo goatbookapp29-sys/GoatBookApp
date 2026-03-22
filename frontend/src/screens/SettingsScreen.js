@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import { User, Lock, Home } from 'lucide-react-native';
 import api from '../api';
 
 const SettingsScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,21 +30,21 @@ const SettingsScreen = ({ navigation }) => {
     { 
       id: 'profile', 
       title: 'Profile Settings', 
-      icon: <User color={COLORS.primary} size={40} />, 
+      icon: <User color={theme.colors.primary} size={32} />, 
       onPress: () => navigation.navigate('ProfileSettings'),
       visible: true
     },
     { 
       id: 'farm', 
       title: 'Farm Settings', 
-      icon: <Home color={COLORS.primary} size={40} />, 
+      icon: <Home color={theme.colors.primary} size={32} />, 
       onPress: () => navigation.navigate('FarmSettings'),
       visible: role === 'OWNER'
     },
     { 
       id: 'password', 
       title: 'Change Password', 
-      icon: <Lock color={COLORS.primary} size={40} />, 
+      icon: <Lock color={theme.colors.primary} size={32} />, 
       onPress: () => navigation.navigate('ChangePassword'),
       visible: true
     },
@@ -51,11 +53,11 @@ const SettingsScreen = ({ navigation }) => {
   const visibleOptions = settingsOptions.filter(option => option.visible);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title="Settings" onBack={() => navigation.goBack()} />
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
@@ -63,14 +65,14 @@ const SettingsScreen = ({ navigation }) => {
             {visibleOptions.map((item) => (
               <TouchableOpacity 
                 key={item.id} 
-                style={styles.card} 
+                style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} 
                 onPress={item.onPress}
                 activeOpacity={0.7}
               >
-                <View style={styles.iconContainer}>
+                <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#F3F4F6' }]}>
                   {item.icon}
                 </View>
-                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -83,7 +85,6 @@ const SettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB', // Light gray background for better card contrast
   },
   loaderContainer: {
     flex: 1,
@@ -99,28 +100,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   card: {
-    backgroundColor: COLORS.white,
-    width: '47%', // Slightly less than 50% to allow for spacing
-    height: 140,
-    borderRadius: 16,
+    width: '47%',
+    height: 150,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    ...SHADOW.sm,
+    borderWidth: 1.5,
   },
   iconContainer: {
-    marginBottom: SPACING.sm,
-    backgroundColor: '#F3F4F6', // Subtle background for icon
-    padding: 12,
-    borderRadius: 50,
+    marginBottom: SPACING.md,
+    padding: 16,
+    borderRadius: 16,
   },
   cardTitle: {
     fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontWeight: '800',
     textAlign: 'center',
+    letterSpacing: -0.2,
   },
 });
 

@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, Platform, Alert, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import GDatePicker from '../components/GDatePicker';
-import { Scan, Save, Info } from 'lucide-react-native';
+import { Scan, Info } from 'lucide-react-native';
 import api from '../api';
-import styles from './AddWeightScreen.styles';
 
 const AddWeightScreen = ({ route, navigation }) => {
+  const { theme } = useTheme();
   const initialTag = route.params?.tagNumber || '';
   const [tagNumber, setTagNumber] = useState(initialTag);
   const [weight, setWeight] = useState('');
@@ -90,7 +91,7 @@ const AddWeightScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title="Add Weight" 
         onBack={() => navigation.goBack()} 
@@ -106,28 +107,28 @@ const AddWeightScreen = ({ route, navigation }) => {
                 onChangeText={handleTagChange} 
                 placeholder="2912"
                 required
-                rightIcon={<Scan size={20} color={COLORS.primary} />}
+                rightIcon={<Scan size={20} color={theme.colors.primary} />}
               />
             </View>
           </View>
 
           {fetchingAnimal && (
-            <View style={styles.infoBox}>
-              <Text style={styles.infoText}>Fetching animal details...</Text>
+            <View style={[styles.infoBox, { backgroundColor: theme.colors.surface }]}>
+              <Text style={[styles.infoText, { color: theme.colors.textMuted }]}>Fetching animal details...</Text>
             </View>
           )}
 
           {animalInfo && (
-            <View style={styles.animalDetailCard}>
-              <View style={styles.detailRow}>
-                <Info size={16} color={COLORS.primary} />
-                <Text style={styles.detailLabel}>Breed: </Text>
-                <Text style={styles.detailValue}>{animalInfo.Breed?.name}</Text>
+            <View style={[styles.animalDetailCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+               <View style={styles.detailRow}>
+                <Info size={16} color={theme.colors.primary} />
+                <Text style={[styles.detailLabel, { color: theme.colors.textLight }]}>Breed: </Text>
+                <Text style={[styles.detailValue, { color: theme.colors.text }]}>{animalInfo.breed?.name || animalInfo.Breed?.name}</Text>
               </View>
               <View style={styles.detailRow}>
-                <Info size={16} color={COLORS.primary} />
-                <Text style={styles.detailLabel}>Gender: </Text>
-                <Text style={styles.detailValue}>{animalInfo.gender}</Text>
+                <Info size={16} color={theme.colors.primary} />
+                <Text style={[styles.detailLabel, { color: theme.colors.textLight }]}>Gender: </Text>
+                <Text style={[styles.detailValue, { color: theme.colors.text }]}>{animalInfo.gender}</Text>
               </View>
             </View>
           )}
@@ -164,11 +165,12 @@ const AddWeightScreen = ({ route, navigation }) => {
             placeholder="New!"
             multiline
             numberOfLines={3}
+            style={{ color: theme.colors.text }}
           />
         </View>
 
         <GButton 
-          title="Submit" 
+          title="SUBMIT RECORD" 
           onPress={handleSubmit} 
           loading={loading}
           containerStyle={styles.submitBtn}
@@ -178,6 +180,56 @@ const AddWeightScreen = ({ route, navigation }) => {
   );
 };
 
-
-
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: SPACING.lg,
+    paddingBottom: 40,
+  },
+  formCard: {
+    paddingBottom: SPACING.md,
+  },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  flex: {
+    flex: 1,
+  },
+  infoBox: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  infoText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  animalDetailCard: {
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    borderWidth: 1.5,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  detailLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginLeft: 10,
+  },
+  detailValue: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  submitBtn: {
+    marginTop: 10,
+  },
+});
 export default AddWeightScreen;

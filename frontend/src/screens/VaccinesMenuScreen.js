@@ -1,54 +1,55 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
-import { COLORS, SPACING, SHADOW } from '../theme';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
+import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
 import { ListPlus, Syringe, Users, ClipboardList } from 'lucide-react-native';
 
 const VaccinesMenuScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const options = [
     { 
       id: 'add_vaccine', 
       title: 'Add Vaccine Name', 
-      icon: <ListPlus color="#3B82F6" size={40} />, 
-      description: 'Define and manage vaccine types for your farm.',
+      icon: <ListPlus color={theme.colors.primary} size={32} />, 
       onPress: () => navigation.navigate('VaccineDefinitions') 
     },
     { 
       id: 'single_vaccination', 
       title: 'Single Vaccination', 
-      icon: <Syringe color="#3B82F6" size={40} />, 
+      icon: <Syringe color={theme.colors.primary} size={32} />, 
       onPress: () => navigation.navigate('AddVaccination', { mode: 'single' }) 
     },
     { 
       id: 'mass_vaccination', 
       title: 'Mass Vaccination', 
-      icon: <Users color="#3B82F6" size={40} />, 
+      icon: <Users color={theme.colors.primary} size={32} />, 
       onPress: () => navigation.navigate('AddVaccination', { mode: 'mass' }) 
     },
     { 
       id: 'history', 
       title: 'All Records', 
-      icon: <ClipboardList color="#10B981" size={40} />, 
+      icon: <ClipboardList color="#10B981" size={32} />, 
       onPress: () => navigation.navigate('VaccinationList') 
     },
   ];
 
   return (
-    <View style={styles.container}>
-      <GHeader title="Vaccines" onBack={() => navigation.goBack()} />
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <GHeader title="Vaccines Management" subTitle="Immunization" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.grid}>
           {options.map((item) => (
             <TouchableOpacity 
               key={item.id} 
-              style={styles.card} 
+              style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} 
               onPress={item.onPress}
               activeOpacity={0.7}
             >
-              <View style={styles.iconContainer}>
+              <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#F3F4F6' }]}>
                 {item.icon}
               </View>
-              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -60,10 +61,10 @@ const VaccinesMenuScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   content: {
-    padding: SPACING.md,
+    padding: 16,
+    paddingTop: 24,
   },
   grid: {
     flexDirection: 'row',
@@ -71,29 +72,29 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   card: {
-    backgroundColor: COLORS.white,
     width: '48%',
     height: 160,
-    borderRadius: 16,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.md,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    ...SHADOW.sm,
+    ...lightTheme.shadow.sm,
   },
   iconContainer: {
-    marginBottom: SPACING.sm,
-    backgroundColor: '#F3F4F6',
-    padding: 16,
-    borderRadius: 50,
+    marginBottom: 12,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cardTitle: {
     fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontWeight: '800',
     textAlign: 'center',
     paddingHorizontal: 8,
+    letterSpacing: -0.2,
   },
 });
 

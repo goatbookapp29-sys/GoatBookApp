@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
@@ -9,6 +10,7 @@ import api from '../api';
 import { KeyRound, Mail, User } from 'lucide-react-native';
 
 const AddEmployeeScreen = ({ navigation, route }) => {
+  const { theme } = useTheme();
   const isEditing = !!route.params?.employee;
   const existingEmployee = route.params?.employee;
 
@@ -63,7 +65,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title={isEditing ? "Edit employee" : "Add employee"} 
         onBack={() => navigation.goBack()} 
@@ -75,7 +77,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Identity Details</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Identity Details</Text>
             
             <GInput 
               label="Full Name" 
@@ -95,6 +97,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               autoCapitalize="none"
               editable={!isEditing} // Email cannot be edited as per requirement
               required 
+              style={isEditing && { backgroundColor: theme.colors.surface, color: theme.colors.textMuted }}
             />
 
             {!isEditing && (
@@ -113,7 +116,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Work Role</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Work Role</Text>
             <GSelect 
               label="Assigned Role" 
               value={role} 
@@ -128,14 +131,14 @@ const AddEmployeeScreen = ({ navigation, route }) => {
           </View>
 
           {isEditing && (
-            <View style={styles.resetSection}>
+            <View style={[styles.resetSection, { backgroundColor: theme.colors.surface }]}>
               {!showPasswordReset ? (
                 <TouchableOpacity 
                   style={styles.resetTrigger} 
                   onPress={() => setShowPasswordReset(true)}
                 >
-                  <KeyRound size={20} color={COLORS.primary} />
-                  <Text style={styles.resetTriggerText}>Reset Employee Password</Text>
+                  <KeyRound size={20} color={theme.colors.primary} />
+                  <Text style={[styles.resetTriggerText, { color: theme.colors.primary }]}>Reset Employee Password</Text>
                 </TouchableOpacity>
               ) : (
                 <View style={styles.resetBox}>
@@ -148,10 +151,10 @@ const AddEmployeeScreen = ({ navigation, route }) => {
                   />
                   <View style={styles.resetActions}>
                     <TouchableOpacity onPress={() => setShowPasswordReset(false)}>
-                      <Text style={styles.cancelText}>Cancel</Text>
+                      <Text style={[styles.cancelText, { color: theme.colors.textLight }]}>Cancel</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handleResetPassword}>
-                      <Text style={styles.confirmText}>Reset Now</Text>
+                      <Text style={[styles.confirmText, { color: theme.colors.error }]}>Reset Now</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -175,7 +178,6 @@ const AddEmployeeScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
   },
   flex: {
     flex: 1,
@@ -186,14 +188,14 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: SPACING.xl,
+    paddingTop: 8,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: COLORS.primary,
+    fontWeight: '900',
     marginBottom: SPACING.lg,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 2,
   },
   gap: {
     height: 16,
@@ -201,8 +203,7 @@ const styles = StyleSheet.create({
   resetSection: {
     marginTop: SPACING.md,
     padding: SPACING.md,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
+    borderRadius: 16,
   },
   resetTrigger: {
     flexDirection: 'row',
@@ -210,9 +211,8 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
   },
   resetTriggerText: {
-    marginLeft: 10,
-    color: COLORS.primary,
-    fontWeight: '600',
+    marginLeft: 12,
+    fontWeight: '800',
   },
   resetBox: {
     marginTop: SPACING.sm,
@@ -221,15 +221,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: SPACING.md,
-    gap: 20,
+    gap: 24,
   },
   cancelText: {
-    color: COLORS.textLight,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   confirmText: {
-    color: COLORS.error,
-    fontWeight: '700',
+    fontWeight: '900',
   },
   footer: {
     marginTop: 'auto',

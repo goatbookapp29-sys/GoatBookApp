@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Text, Animated, Platform, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING } from '../theme';
 
+import { useTheme } from '../theme/ThemeContext';
+
 const GInput = ({ 
   label, 
   value, 
@@ -10,10 +12,11 @@ const GInput = ({
   error, 
   keyboardType, 
   required,
-  placeholder, // Destructure placeholder to handle it manually
+  placeholder,
   containerStyle,
   ...props 
 }) => {
+  const { isDarkMode, theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
@@ -21,7 +24,7 @@ const GInput = ({
     Animated.timing(animatedValue, {
       toValue: (isFocused || value) ? 1 : 0,
       duration: 200,
-      useNativeDriver: false, // Label position and font size can't use native driver
+      useNativeDriver: false,
     }).start();
   }, [isFocused, value]);
 
@@ -30,7 +33,7 @@ const GInput = ({
     left: 12,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [14, -10], // Moves to top border
+      outputRange: [14, -10],
     }),
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
@@ -38,12 +41,12 @@ const GInput = ({
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [COLORS.textLight, isFocused ? COLORS.primary : COLORS.textLight],
+      outputRange: [theme.colors.textLight, isFocused ? theme.colors.primary : theme.colors.textLight],
     }),
-    backgroundColor: (isFocused || value) ? COLORS.white : 'transparent',
+    backgroundColor: (isFocused || value) ? theme.colors.surface : 'transparent',
     paddingHorizontal: (isFocused || value) ? 4 : 0,
     zIndex: 1,
-    fontWeight: (isFocused || value) ? '600' : '400',
+    fontWeight: (isFocused || value) ? '700' : '500',
   };
 
   const inputRef = useRef(null);
@@ -56,24 +59,23 @@ const GInput = ({
         onPress={() => inputRef.current?.focus()}
         style={[
           styles.inputWrapper, 
-          isFocused && styles.inputFocused,
-          error && styles.inputError,
+          { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+          isFocused && { borderColor: theme.colors.primary, borderWidth: 2 },
+          error && { borderColor: theme.colors.error },
           isMultiline && { height: 'auto', minHeight: 80, alignItems: 'flex-start', paddingTop: 16 }
         ]}
       >
-        <Animated.Text 
-          style={labelStyle} 
-          pointerEvents="none" 
-        >
+        <Animated.Text style={labelStyle} pointerEvents="none">
           {label}{required && '*'}
         </Animated.Text>
         <TextInput
           ref={inputRef}
-          style={[
+          style={StyleSheet.flatten([
             styles.input,
             isMultiline && { textAlignVertical: 'top', height: 'auto', minHeight: 60, marginTop: 4 },
-            props.style
-          ]}
+            props.style,
+            { color: theme.colors.text },
+          ])}
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setIsFocused(true)}
@@ -81,11 +83,13 @@ const GInput = ({
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
           placeholder={(isFocused && !value) ? placeholder : ""} 
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={theme.colors.textMuted}
+          cursorColor={theme.colors.primary}
+          selectionColor={theme.colors.primary + '40'}
           {...props}
         />
       </TouchableOpacity>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>}
     </View>
   );
 };
@@ -99,41 +103,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#E5E7EB', 
-    borderRadius: 12,
-    backgroundColor: COLORS.white,
+    borderRadius: 14,
     paddingHorizontal: 12,
     height: 56,
-  },
-  inputFocused: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-    ...Platform.select({
-      ios: {
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, shadowHeight: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      }
-    })
-  },
-  inputError: {
-    borderColor: COLORS.error,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: COLORS.text,
     height: '100%',
     textAlignVertical: 'center',
     paddingTop: Platform.OS === 'ios' ? 0 : 4,
+    fontWeight: '500',
   },
   errorText: {
     fontSize: 12,
-    color: COLORS.error,
     marginTop: 4,
     marginLeft: 4,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });
 

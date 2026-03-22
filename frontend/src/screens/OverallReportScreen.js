@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import { ChevronDown } from 'lucide-react-native';
 import api from '../api';
 import Svg, { Circle, G, Text as SvgText } from 'react-native-svg';
 
 const OverallReportScreen = ({ navigation }) => {
+  const { isDarkMode, theme } = useTheme();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,9 +35,6 @@ const OverallReportScreen = ({ navigation }) => {
     const center = 100;
     const circumference = 2 * Math.PI * radius;
 
-    // We'll just show 2 segments (Male vs Female) for simplicity in the donut, 
-    // or all of them. The image shows a few segments.
-    // Let's do a few.
     const data = [
       { label: 'Male', value: stats.male, color: '#F59E0B' },
       { label: 'Female', value: stats.female, color: '#10B981' },
@@ -70,8 +68,7 @@ const OverallReportScreen = ({ navigation }) => {
               />
             );
           })}
-          {/* Inner circle to make it a donut */}
-          <Circle cx={center} cy={center} r={45} fill="white" />
+          <Circle cx={center} cy={center} r={45} fill={theme.colors.surface} />
           
           <SvgText
             x={center}
@@ -79,7 +76,7 @@ const OverallReportScreen = ({ navigation }) => {
             textAnchor="middle"
             fontSize="16"
             fontWeight="bold"
-            fill={COLORS.text}
+            fill={theme.colors.text}
           >
             Total
           </SvgText>
@@ -89,7 +86,7 @@ const OverallReportScreen = ({ navigation }) => {
             textAnchor="middle"
             fontSize="24"
             fontWeight="bold"
-            fill={COLORS.text}
+            fill={theme.colors.text}
           >
             {total}
           </SvgText>
@@ -100,7 +97,7 @@ const OverallReportScreen = ({ navigation }) => {
 
   const StatRow = ({ label, value, color, onPress, half }) => (
     <TouchableOpacity 
-      style={[styles.statRow, { backgroundColor: color, width: half ? '48%' : '100%' }]}
+      style={[styles.statRow, { backgroundColor: color, width: half ? '48%' : '100%', ...theme.shadow.sm }]}
       onPress={onPress}
       activeOpacity={0.8}
     >
@@ -110,17 +107,17 @@ const OverallReportScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title="Animal Report" subTitle="Overall Records" onBack={() => navigation.goBack()} />
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
         <ScrollView style={styles.flex} contentContainerStyle={{ paddingBottom: 40 }}>
-          <View style={styles.chartCard}>
-            <Text style={styles.chartTitle}>Inventory Status</Text>
+          <View style={[styles.chartCard, { backgroundColor: theme.colors.surface, ...theme.shadow.md }]}>
+            <Text style={[styles.chartTitle, { color: theme.colors.text }]}>Inventory Status</Text>
             <View style={styles.chartContainer}>
               {renderDonut(stats.total)}
             </View>
@@ -137,7 +134,7 @@ const OverallReportScreen = ({ navigation }) => {
                ].map((item, idx) => (
                  <View key={idx} style={styles.legendItem}>
                     <View style={[styles.dot, { backgroundColor: item.color }]} />
-                    <Text style={styles.legendText}>{item.label}</Text>
+                    <Text style={[styles.legendText, { color: theme.colors.textLight }]}>{item.label}</Text>
                  </View>
                ))}
             </View>
@@ -210,7 +207,6 @@ const OverallReportScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
   },
   flex: {
     flex: 1,
@@ -221,19 +217,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chartCard: {
-    backgroundColor: COLORS.white,
     margin: 16,
     padding: 24,
-    borderRadius: 24,
+    borderRadius: 32,
     alignItems: 'center',
-    ...SHADOW.md,
   },
   chartTitle: {
     alignSelf: 'flex-start',
-    fontSize: 20,
-    fontWeight: '800',
-    color: COLORS.text,
+    fontSize: 22,
+    fontWeight: '900',
     marginBottom: 20,
+    letterSpacing: -0.5,
   },
   chartContainer: {
     height: 200,
@@ -260,8 +254,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 12,
-    color: COLORS.textLight,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   listSection: {
     paddingHorizontal: 16,
@@ -276,14 +269,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     marginBottom: 12,
-    borderRadius: 16,
-    width: '100%',
-    ...SHADOW.sm,
+    borderRadius: 20,
   },
   statLabel: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   statValue: {
     color: 'white',

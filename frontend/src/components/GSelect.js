@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Modal, FlatList, SafeAreaView, Platform } from 'react-native';
-import { COLORS, SPACING, SHADOW } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
+import { lightTheme } from '../theme';
 import { ChevronDown, X, AlertCircle } from 'lucide-react-native';
 
 const GSelect = ({ 
@@ -13,6 +14,7 @@ const GSelect = ({
   placeholder = '',
   containerStyle
 }) => {
+  const { isDarkMode, theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
@@ -37,12 +39,12 @@ const GSelect = ({
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [COLORS.textLight, error ? COLORS.error : COLORS.primary],
+      outputRange: [theme.colors.textLight, error ? theme.colors.error : theme.colors.primary],
     }),
-    backgroundColor: (value || modalVisible) ? COLORS.white : 'transparent',
+    backgroundColor: (value || modalVisible) ? theme.colors.surface : 'transparent',
     paddingHorizontal: (value || modalVisible) ? 4 : 0,
     zIndex: 1,
-    fontWeight: (value || modalVisible) ? '600' : '400',
+    fontWeight: (value || modalVisible) ? '700' : '500',
   };
 
   const selectedOption = options.find(opt => opt.value === value);
@@ -54,18 +56,18 @@ const GSelect = ({
         onPress={() => setModalVisible(true)}
         style={[
           styles.inputWrapper, 
-          error && styles.inputError,
-          modalVisible && styles.inputActive
+          { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+          error && { borderColor: theme.colors.error, borderWidth: 2 },
+          modalVisible && { borderColor: theme.colors.primary, borderWidth: 2 }
         ]}
       >
         <Animated.Text style={labelStyle} pointerEvents="none">
           {label}{required && '*'}
         </Animated.Text>
         
-        {/* Selection text only visible when label has moved up to border */}
         {value || modalVisible ? (
           <Text 
-            style={[styles.valueText, !value && { color: '#9CA3AF' }]} 
+            style={[styles.valueText, { color: theme.colors.text }, !value && { color: theme.colors.textMuted }]} 
             numberOfLines={1}
           >
             {selectedOption?.label || placeholder}
@@ -74,16 +76,16 @@ const GSelect = ({
 
         <View style={styles.iconContainer}>
           {error ? (
-            <AlertCircle size={20} color={COLORS.error} />
+            <AlertCircle size={20} color={theme.colors.error} />
           ) : (
-            <ChevronDown size={20} color={COLORS.textLight} />
+            <ChevronDown size={20} color={theme.colors.textLight} />
           )}
         </View>
       </TouchableOpacity>
 
       {error ? (
         <View style={styles.errorContainer}>
-           <Text style={styles.errorText}>{error}</Text>
+           <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
         </View>
       ) : null}
 
@@ -98,11 +100,11 @@ const GSelect = ({
           activeOpacity={1} 
           onPress={() => setModalVisible(false)}
         >
-          <SafeAreaView style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Choose {label}</Text>
+          <SafeAreaView style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Choose {label}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <X size={24} color={COLORS.text} />
+                <X size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
             
@@ -114,7 +116,8 @@ const GSelect = ({
                 <TouchableOpacity 
                   style={[
                     styles.optionItem,
-                    item.value === value && styles.selectedOptionItem
+                    { borderBottomColor: theme.colors.border },
+                    item.value === value && { backgroundColor: isDarkMode ? '#1E293B' : '#FFF1EA' }
                   ]}
                   onPress={() => {
                     onSelect(item.value);
@@ -123,7 +126,8 @@ const GSelect = ({
                 >
                   <Text style={[
                     styles.optionText,
-                    item.value === value && styles.selectedOptionText
+                    { color: theme.colors.text },
+                    item.value === value && { color: theme.colors.primary, fontWeight: '900' }
                   ]}>
                     {item.label}
                   </Text>
@@ -146,25 +150,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    backgroundColor: COLORS.white,
+    borderRadius: 14,
     paddingHorizontal: 12,
     height: 56,
   },
-  inputActive: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-  },
-  inputError: {
-    borderColor: COLORS.error,
-    borderWidth: 2,
-  },
   valueText: {
     fontSize: 16,
-    color: COLORS.text,
     flex: 1,
     marginRight: 8,
+    fontWeight: '500',
   },
   iconContainer: {
     width: 24,
@@ -173,39 +167,36 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end', // Aligns error text to the right corner
+    justifyContent: 'flex-end',
     marginTop: 4,
     paddingRight: 4,
   },
   errorText: {
     fontSize: 12,
-    color: COLORS.error,
     fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     maxHeight: '70%',
-    ...SHADOW.lg,
+    ...lightTheme.shadow.lg,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text,
+    fontSize: 20,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
   listContainer: {
     paddingBottom: 40,
@@ -213,18 +204,10 @@ const styles = StyleSheet.create({
   optionItem: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  selectedOptionItem: {
-    backgroundColor: '#FFF1EA',
   },
   optionText: {
     fontSize: 16,
-    color: COLORS.text,
-  },
-  selectedOptionText: {
-    color: COLORS.primary,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
 

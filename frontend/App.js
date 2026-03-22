@@ -32,12 +32,13 @@ import AddVaccinationScreen from './src/screens/AddVaccinationScreen';
 import VaccinationListScreen from './src/screens/VaccinationListScreen';
 import ReportsMenuScreen from './src/screens/ReportsMenuScreen';
 import OverallReportScreen from './src/screens/OverallReportScreen';
-import { COLORS } from './src/theme';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+function AppContent() {
   const [initialRoute, setInitialRoute] = useState(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     checkSession();
@@ -60,8 +61,8 @@ export default function App() {
 
   if (!initialRoute) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.white }}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.surface }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -73,7 +74,7 @@ export default function App() {
         initialRouteName={initialRoute}
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: COLORS.background },
+          contentStyle: { backgroundColor: theme.colors.background },
         }}
       >
         <Stack.Screen name="Login" component={LoginScreen} />
@@ -109,5 +110,13 @@ export default function App() {
         <Stack.Screen name="OverallReport" component={OverallReportScreen} />
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
