@@ -25,6 +25,9 @@ import BreedDetailsScreen from './src/screens/BreedDetailsScreen';
 import AddWeightScreen from './src/screens/AddWeightScreen';
 import WeightListScreen from './src/screens/WeightListScreen';
 import FarmSettingsScreen from './src/screens/FarmSettingsScreen';
+import VaccinesMenuScreen from './src/screens/VaccinesMenuScreen';
+import AddVaccineNameScreen from './src/screens/AddVaccineNameScreen';
+import AddVaccinationScreen from './src/screens/AddVaccinationScreen';
 import { COLORS } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -93,6 +96,9 @@ export default function App() {
         <Stack.Screen name="AddWeight" component={AddWeightScreen} />
         <Stack.Screen name="WeightList" component={WeightListScreen} />
         <Stack.Screen name="FarmSettings" component={FarmSettingsScreen} />
+        <Stack.Screen name="VaccinesMenu" component={VaccinesMenuScreen} />
+        <Stack.Screen name="AddVaccineName" component={AddVaccineNameScreen} />
+        <Stack.Screen name="AddVaccination" component={AddVaccinationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

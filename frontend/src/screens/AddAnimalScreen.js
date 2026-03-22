@@ -11,7 +11,7 @@ import GDatePicker from '../components/GDatePicker';
 import { Check } from 'lucide-react-native';
 import api from '../api';
 import { getFromCache } from '../utils/cache';
-import { HelpCircle, ChevronDown, ChevronUp, Plus, Scale } from 'lucide-react-native';
+import { HelpCircle, ChevronDown, ChevronUp, Plus, Scale, Syringe } from 'lucide-react-native';
 
 const CheckBox = ({ label, value, onToggle }) => (
   <TouchableOpacity style={styles.checkboxContainer} onPress={onToggle} activeOpacity={0.7}>
@@ -30,6 +30,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [tagNumber, setTagNumber] = useState(existingAnimal.tagNumber || '');
   const [weights, setWeights] = useState([]);
   const [weightsLoading, setWeightsLoading] = useState(false);
+  const [vaccinations, setVaccinations] = useState([]);
+  const [vaccinationsLoading, setVaccinationsLoading] = useState(false);
+  const [vaccinationExpanded, setVaccinationExpanded] = useState(false);
   const [breedId, setBreedId] = useState(existingAnimal.breedId || '');
   const [color, setColor] = useState(existingAnimal.color || '');
   const [gender, setGender] = useState(existingAnimal.gender || 'FEMALE');
@@ -69,9 +72,22 @@ const AddAnimalScreen = ({ navigation, route }) => {
       fetchLocations();
       if (isEditing) {
         fetchWeights();
+        fetchVaccinations();
       }
     }, [])
   );
+
+  const fetchVaccinations = async () => {
+    try {
+      setVaccinationsLoading(true);
+      const response = await api.get(`/vaccines/records?animalId=${existingAnimal.id}`);
+      setVaccinations(response.data);
+    } catch (error) {
+      console.error('Fetch vaccinations error:', error);
+    } finally {
+      setVaccinationsLoading(false);
+    }
+  };
 
   const fetchWeights = async () => {
     try {
@@ -507,6 +523,60 @@ const AddAnimalScreen = ({ navigation, route }) => {
                             <View style={styles.heightInfoBlock}>
                               <Text style={styles.weightLabel}>Height</Text>
                               <Text style={styles.weightValue}>{w.height}</Text>
+                            </View>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={styles.noRecordsText}>No Records Found</Text>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
+
+          {isEditing && (
+            <View style={styles.weightSection}>
+              <TouchableOpacity 
+                style={styles.weightHeader}
+                activeOpacity={0.7}
+                onPress={() => setVaccinationExpanded(!vaccinationExpanded)}
+              >
+                <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
+                  <Text style={styles.sectionTitle}>Vaccination Record</Text>
+                  <Syringe size={16} color="#9CA3AF" style={{ marginLeft: 6 }} />
+                </View>
+                {vaccinationExpanded ? <ChevronUp size={20} color="#9CA3AF" /> : <ChevronDown size={20} color="#9CA3AF" />}
+              </TouchableOpacity>
+              
+              {vaccinationExpanded && (
+                <View style={styles.weightContent}>
+                  <TouchableOpacity 
+                    style={styles.addNewBtn}
+                    onPress={() => navigation.navigate('AddVaccination', { mode: 'single', preSelectedAnimal: existingAnimal })}
+                  >
+                    <Plus size={16} color={COLORS.white} />
+                    <Text style={styles.addNewText}>Add New Record</Text>
+                  </TouchableOpacity>
+
+                  {vaccinationsLoading ? (
+                    <ActivityIndicator color={COLORS.primary} style={{ marginTop: 20 }} />
+                  ) : vaccinations.length > 0 ? (
+                    <View style={styles.weightList}>
+                      {vaccinations.map((v, idx) => (
+                        <View key={v.id} style={[styles.weightItem, idx === vaccinations.length - 1 && { borderBottomWidth: 0 }]}>
+                          <View style={styles.weightIconBox}>
+                            <Syringe size={16} color={COLORS.primary} />
+                          </View>
+                          <View style={styles.weightInfoBlock}>
+                            <Text style={styles.weightKg}>{v.vaccine?.name}</Text>
+                            <Text style={styles.weightDate}>{v.date}</Text>
+                          </View>
+                          {v.nextDueDate && (
+                            <View style={[styles.heightInfoBlock, { minWidth: 100 }]}>
+                              <Text style={[styles.weightLabel, { color: COLORS.primary }]}>Due Date</Text>
+                              <Text style={styles.weightValue}>{v.nextDueDate}</Text>
                             </View>
                           )}
                         </View>
