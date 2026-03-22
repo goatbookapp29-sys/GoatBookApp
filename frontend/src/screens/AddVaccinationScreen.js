@@ -21,8 +21,6 @@ const AddVaccinationScreen = ({ navigation, route }) => {
   const [remark, setRemark] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [selectedAnimals, setSelectedAnimals] = useState([]);
-  const [recentRecords, setRecentRecords] = useState([]);
-  const [recordsLoading, setRecordsLoading] = useState(false);
   
   // UI Data
   const [vaccines, setVaccines] = useState([]);
@@ -34,25 +32,12 @@ const AddVaccinationScreen = ({ navigation, route }) => {
     useCallback(() => {
       fetchVaccines();
       fetchAnimals();
-      fetchRecentRecords();
       
       if (route.params?.preSelectedAnimal) {
         setSelectedAnimals([route.params.preSelectedAnimal]);
       }
     }, [route.params])
   );
-
-  const fetchRecentRecords = async () => {
-    try {
-      setRecordsLoading(true);
-      const response = await api.get('/vaccines/records');
-      setRecentRecords(response.data.slice(0, 10)); // Show last 10
-    } catch (error) {
-      console.error('Fetch recent records error:', error);
-    } finally {
-      setRecordsLoading(false);
-    }
-  };
 
   // Auto-fill daysBetween from selected vaccine
   useEffect(() => {
@@ -97,9 +82,7 @@ const AddVaccinationScreen = ({ navigation, route }) => {
     if (!tagInput.trim()) return;
     
     setSearching(true);
-    const animal = allAnimals.find(a => 
-      a.tagNumber.toLowerCase() === tagInput.trim().toLowerCase()
-    );
+    const animal = allAnimals.find(a => a.tagNumber === tagInput.trim());
 
     if (animal) {
       if (!selectedAnimals.find(a => a.id === animal.id)) {
@@ -127,9 +110,7 @@ const AddVaccinationScreen = ({ navigation, route }) => {
 
     // AUTO-ADD: If user typed a tag but forgot to click 'ADD', try to find it now
     if (tagInput.trim() && currentSelected.length === 0) {
-      const animal = allAnimals.find(a => 
-        a.tagNumber.toLowerCase() === tagInput.trim().toLowerCase()
-      );
+      const animal = allAnimals.find(a => a.tagNumber === tagInput.trim());
       if (animal) {
         currentSelected = [animal];
         setSelectedAnimals(currentSelected); // Update state for UI
@@ -148,16 +129,18 @@ const AddVaccinationScreen = ({ navigation, route }) => {
         animalIds: currentSelected.map(a => a.id),
         date,
         validTill: validTill || null,
-        remark
+        remark,
+        creationMode: isMass ? 'MASS' : 'SINGLE'
       });
       setLoading(false);
-      Alert.alert('Success', `${isMass ? 'Mass' : 'Single'} vaccination recorded successfully`);
+      Alert.alert('Success', `${isMass ? 'Mass' : 'Single'} vaccination recorded successfully`, [
+        { text: 'OK', onPress: () => navigation.navigate('VaccinationList') }
+      ]);
       
       // Reset form fields
       setSelectedAnimals([]);
       setRemark('');
       setTagInput('');
-      fetchRecentRecords(); // Refresh the list below
     } catch (error) {
       setLoading(false);
       const msg = error.response?.data?.message || 'Failed to record vaccination';
@@ -268,37 +251,6 @@ const AddVaccinationScreen = ({ navigation, route }) => {
               loading={loading}
               containerStyle={styles.saveBtn}
             />
-          </View>
-
-          <View style={styles.recentSection}>
-            <Text style={styles.sectionTitle}>Recent Records</Text>
-            {recordsLoading ? (
-              <ActivityIndicator color={COLORS.primary} style={{ marginTop: 20 }} />
-            ) : recentRecords.length > 0 ? (
-              recentRecords.map((item) => (
-                <View key={item.id} style={styles.recentItem}>
-                  <View style={styles.itemHeader}>
-                    <Text style={styles.itemVaccine}>{item.vaccine?.name}</Text>
-                    <Text style={styles.itemDate}>{item.date}</Text>
-                  </View>
-                  <View style={styles.itemSubHeader}>
-                    <Text style={styles.itemTag}>Tag: {item.animal?.tagNumber}</Text>
-                    {item.nextDueDate && (
-                      <Text style={styles.itemDue}>Due: {item.nextDueDate}</Text>
-                    )}
-                  </View>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.emptyText}>No recent records found</Text>
-            )}
-            
-            <TouchableOpacity 
-              style={styles.viewAllBtn}
-              onPress={() => navigation.navigate('VaccinationList')}
-            >
-              <Text style={styles.viewAllBtnText}>View All Historical Records →</Text>
-            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

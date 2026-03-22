@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, TextInput, Text, Animated, Platform } from 'react-native';
+import { StyleSheet, View, TextInput, Text, Animated, Platform, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING } from '../theme';
 
 const GInput = ({ 
@@ -46,16 +46,21 @@ const GInput = ({
     fontWeight: (isFocused || value) ? '600' : '400',
   };
 
+  const inputRef = useRef(null);
   const isMultiline = props.multiline;
-  
+
   return (
     <View style={[styles.container, containerStyle]}>
-      <View style={[
-        styles.inputWrapper, 
-        isFocused && styles.inputFocused,
-        error && styles.inputError,
-        isMultiline && { height: 'auto', minHeight: 80, alignItems: 'flex-start', paddingTop: 12 }
-      ]}>
+      <TouchableOpacity 
+        activeOpacity={1}
+        onPress={() => inputRef.current?.focus()}
+        style={[
+          styles.inputWrapper, 
+          isFocused && styles.inputFocused,
+          error && styles.inputError,
+          isMultiline && { height: 'auto', minHeight: 80, alignItems: 'flex-start', paddingTop: 16 }
+        ]}
+      >
         <Animated.Text 
           style={labelStyle} 
           pointerEvents="none" 
@@ -63,9 +68,10 @@ const GInput = ({
           {label}{required && '*'}
         </Animated.Text>
         <TextInput
+          ref={inputRef}
           style={[
             styles.input,
-            isMultiline && { textAlignVertical: 'top', height: 'auto', minHeight: 60 },
+            isMultiline && { textAlignVertical: 'top', height: 'auto', minHeight: 60, marginTop: 4 },
             props.style
           ]}
           value={value}
@@ -78,7 +84,7 @@ const GInput = ({
           placeholderTextColor="#9CA3AF"
           {...props}
         />
-      </View>
+      </TouchableOpacity>
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );

@@ -40,6 +40,12 @@ const VaccinationRecord = sequelize.define('VaccinationRecord', {
     allowNull: false,
     field: 'farm_id'
   },
+  creationMode: {
+    type: DataTypes.ENUM('SINGLE', 'MASS'),
+    allowNull: false,
+    defaultValue: 'SINGLE',
+    field: 'creation_mode'
+  },
   createdByUserId: {
     type: DataTypes.UUID,
     allowNull: true,

@@ -79,7 +79,7 @@ exports.getVaccinationRecords = async (req, res) => {
 // @desc    Create vaccination records (Single or Mass)
 // @route   POST /api/vaccines/records
 exports.createVaccinationRecord = async (req, res) => {
-  const { vaccineId, animalIds, date, validTill, remark } = req.body;
+  const { vaccineId, animalIds, date, validTill, remark, creationMode } = req.body;
   
   try {
     if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
@@ -105,6 +105,7 @@ exports.createVaccinationRecord = async (req, res) => {
       validTill,
       nextDueDate,
       remark,
+      creationMode: creationMode || (animalIds.length > 1 ? 'MASS' : 'SINGLE'),
       farmId: req.farmId,
       createdByUserId: req.user.id
     }));

@@ -41,9 +41,14 @@ const VaccinationListScreen = ({ navigation }) => {
             <Text style={styles.tagNumber}>Tag: {item.animal?.tagNumber}</Text>
           </View>
         </View>
-        <View style={styles.dateBox}>
-          <Calendar size={12} color={COLORS.textLight} />
-          <Text style={styles.dateText}>{item.date}</Text>
+        <View style={styles.rightCol}>
+          <View style={styles.dateBox}>
+            <Calendar size={12} color={COLORS.textLight} />
+            <Text style={styles.dateText}>{item.date}</Text>
+          </View>
+          <View style={[styles.modeBadge, item.creationMode === 'MASS' ? styles.massBadge : styles.singleBadge]}>
+            <Text style={styles.modeText}>{item.creationMode || 'SINGLE'}</Text>
+          </View>
         </View>
       </View>
       
@@ -163,6 +168,26 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginLeft: 4,
     fontWeight: '600',
+  },
+  rightCol: {
+    alignItems: 'flex-end',
+  },
+  modeBadge: {
+    marginTop: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  singleBadge: {
+    backgroundColor: '#F3F4F6',
+  },
+  massBadge: {
+    backgroundColor: '#EEF2FF',
+  },
+  modeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#6B7280',
   },
   dueSection: {
     flexDirection: 'row',
