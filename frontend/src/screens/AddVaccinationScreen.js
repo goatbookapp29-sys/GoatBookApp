@@ -21,6 +21,8 @@ const AddVaccinationScreen = ({ navigation, route }) => {
   const [remark, setRemark] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [selectedAnimals, setSelectedAnimals] = useState([]);
+  const [recentRecords, setRecentRecords] = useState([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
   
   // UI Data
   const [vaccines, setVaccines] = useState([]);
@@ -32,12 +34,25 @@ const AddVaccinationScreen = ({ navigation, route }) => {
     useCallback(() => {
       fetchVaccines();
       fetchAnimals();
+      fetchRecentRecords();
       
       if (route.params?.preSelectedAnimal) {
         setSelectedAnimals([route.params.preSelectedAnimal]);
       }
     }, [route.params])
   );
+
+  const fetchRecentRecords = async () => {
+    try {
+      setRecordsLoading(true);
+      const response = await api.get('/vaccines/records');
+      setRecentRecords(response.data.slice(0, 10)); // Show last 10
+    } catch (error) {
+      console.error('Fetch recent records error:', error);
+    } finally {
+      setRecordsLoading(false);
+    }
+  };
 
   // Auto-fill daysBetween from selected vaccine
   useEffect(() => {
@@ -136,9 +151,13 @@ const AddVaccinationScreen = ({ navigation, route }) => {
         remark
       });
       setLoading(false);
-      Alert.alert('Success', `${isMass ? 'Mass' : 'Single'} vaccination recorded successfully`, [
-        { text: 'OK', onPress: () => navigation.navigate('VaccinationList') }
-      ]);
+      Alert.alert('Success', `${isMass ? 'Mass' : 'Single'} vaccination recorded successfully`);
+      
+      // Reset form fields
+      setSelectedAnimals([]);
+      setRemark('');
+      setTagInput('');
+      fetchRecentRecords(); // Refresh the list below
     } catch (error) {
       setLoading(false);
       const msg = error.response?.data?.message || 'Failed to record vaccination';
@@ -249,6 +268,37 @@ const AddVaccinationScreen = ({ navigation, route }) => {
               loading={loading}
               containerStyle={styles.saveBtn}
             />
+          </View>
+
+          <View style={styles.recentSection}>
+            <Text style={styles.sectionTitle}>Recent Records</Text>
+            {recordsLoading ? (
+              <ActivityIndicator color={COLORS.primary} style={{ marginTop: 20 }} />
+            ) : recentRecords.length > 0 ? (
+              recentRecords.map((item) => (
+                <View key={item.id} style={styles.recentItem}>
+                  <View style={styles.itemHeader}>
+                    <Text style={styles.itemVaccine}>{item.vaccine?.name}</Text>
+                    <Text style={styles.itemDate}>{item.date}</Text>
+                  </View>
+                  <View style={styles.itemSubHeader}>
+                    <Text style={styles.itemTag}>Tag: {item.animal?.tagNumber}</Text>
+                    {item.nextDueDate && (
+                      <Text style={styles.itemDue}>Due: {item.nextDueDate}</Text>
+                    )}
+                  </View>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.emptyText}>No recent records found</Text>
+            )}
+            
+            <TouchableOpacity 
+              style={styles.viewAllBtn}
+              onPress={() => navigation.navigate('VaccinationList')}
+            >
+              <Text style={styles.viewAllBtnText}>View All Historical Records →</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -367,6 +417,57 @@ const styles = StyleSheet.create({
   },
   saveBtn: {
     backgroundColor: '#1E40AF',
+  },
+  recentSection: {
+    marginTop: 30,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  recentItem: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  itemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  itemVaccine: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  itemDate: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  itemSubHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  itemTag: {
+    fontSize: 13,
+    color: COLORS.textLight,
+  },
+  itemDue: {
+    fontSize: 12,
+    color: '#D97706',
+    fontWeight: '600',
+  },
+  viewAllBtn: {
+    marginTop: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  viewAllBtnText: {
+    color: COLORS.primary,
+    fontSize: 14,
+    fontWeight: '600',
   }
 });
 
