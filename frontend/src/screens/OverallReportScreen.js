@@ -98,11 +98,15 @@ const OverallReportScreen = ({ navigation }) => {
     );
   };
 
-  const StatRow = ({ label, value, color }) => (
-    <View style={[styles.statRow, { backgroundColor: color }]}>
+  const StatRow = ({ label, value, color, onPress }) => (
+    <TouchableOpacity 
+      style={[styles.statRow, { backgroundColor: color }]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
       <Text style={styles.statLabel}>{label}</Text>
       <Text style={styles.statValue}>{value}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -146,14 +150,54 @@ const OverallReportScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.listSection}>
-            <StatRow label="Total Animal" value={stats.total} color="#1E40AF" />
-            <StatRow label="Male" value={stats.male} color="#F59E0B" />
-            <StatRow label="Female" value={stats.female} color="#10B981" />
-            <StatRow label="Breeder" value={stats.breeder} color="#06B6D4" />
-            <StatRow label="Pregnant" value={stats.pregnant} color="#EF4444" />
-            <StatRow label="Kids(0 - 3 months)" value={stats.kids0_3} color="#3B82F6" />
-            <StatRow label="Kids(3 - 6 months)" value={stats.kids3_6} color="#8B5CF6" />
-            <StatRow label="Kids(6 - 9 months)" value={stats.kids6_9} color="#FACC15" />
+            <StatRow 
+              label="Total Animal" 
+              value={stats.total} 
+              color="#1E40AF" 
+              onPress={() => navigation.navigate('AnimalList')}
+            />
+            <StatRow 
+              label="Male" 
+              value={stats.male} 
+              color="#F59E0B" 
+              onPress={() => navigation.navigate('AnimalList', { gender: 'MALE' })}
+            />
+            <StatRow 
+              label="Female" 
+              value={stats.female} 
+              color="#10B981" 
+              onPress={() => navigation.navigate('AnimalList', { gender: 'FEMALE' })}
+            />
+            <StatRow 
+              label="Breeder" 
+              value={stats.breeder} 
+              color="#06B6D4" 
+              onPress={() => navigation.navigate('AnimalList', { isBreeder: true })}
+            />
+            <StatRow 
+              label="Pregnant" 
+              value={stats.pregnant} 
+              color="#EF4444" 
+              onPress={() => navigation.navigate('AnimalList', { femaleCondition: 'PREGNANT' })}
+            />
+            <StatRow 
+              label="Kids(0 - 3 months)" 
+              value={stats.kids0_3} 
+              color="#3B82F6" 
+              onPress={() => navigation.navigate('AnimalList', { ageRange: '0-3' })}
+            />
+            <StatRow 
+              label="Kids(3 - 6 months)" 
+              value={stats.kids3_6} 
+              color="#8B5CF6" 
+              onPress={() => navigation.navigate('AnimalList', { ageRange: '3-6' })}
+            />
+            <StatRow 
+              label="Kids(6 - 9 months)" 
+              value={stats.kids6_9} 
+              color="#FACC15" 
+              onPress={() => navigation.navigate('AnimalList', { ageRange: '6-9' })}
+            />
           </View>
         </ScrollView>
       )}

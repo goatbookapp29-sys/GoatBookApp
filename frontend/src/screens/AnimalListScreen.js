@@ -29,12 +29,27 @@ const AnimalListScreen = ({ navigation, route }) => {
   useEffect(() => {
     let result = animals;
     
+    const { breedId, locationId, gender, isBreeder, femaleCondition, ageRange } = route.params || {};
+    const now = new Date();
+
     // Strict filters from navigation
-    if (route.params?.breedId) {
-      result = result.filter(a => a.breedId === route.params.breedId);
-    }
-    if (route.params?.locationId) {
-      result = result.filter(a => a.locationId === route.params.locationId);
+    if (breedId) result = result.filter(a => a.breedId === breedId);
+    if (locationId) result = result.filter(a => a.locationId === locationId);
+    if (gender) result = result.filter(a => a.gender === gender);
+    if (isBreeder !== undefined) result = result.filter(a => a.isBreeder === isBreeder);
+    if (femaleCondition) result = result.filter(a => a.femaleCondition === femaleCondition);
+
+    if (ageRange) {
+      result = result.filter(a => {
+        if (!a.birthDate) return false;
+        const bDate = new Date(a.birthDate);
+        const age = (now.getFullYear() - bDate.getFullYear()) * 12 + (now.getMonth() - bDate.getMonth());
+        
+        if (ageRange === '0-3') return age >= 0 && age < 3;
+        if (ageRange === '3-6') return age >= 3 && age < 6;
+        if (ageRange === '6-9') return age >= 6 && age < 9;
+        return true;
+      });
     }
 
     // Search query filter
