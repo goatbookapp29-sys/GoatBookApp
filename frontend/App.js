@@ -28,6 +28,7 @@ import FarmSettingsScreen from './src/screens/FarmSettingsScreen';
 import VaccinesMenuScreen from './src/screens/VaccinesMenuScreen';
 import AddVaccineNameScreen from './src/screens/AddVaccineNameScreen';
 import AddVaccinationScreen from './src/screens/AddVaccinationScreen';
+import VaccinationListScreen from './src/screens/VaccinationListScreen';
 import { COLORS } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -99,6 +100,7 @@ export default function App() {
         <Stack.Screen name="VaccinesMenu" component={VaccinesMenuScreen} />
         <Stack.Screen name="AddVaccineName" component={AddVaccineNameScreen} />
         <Stack.Screen name="AddVaccination" component={AddVaccinationScreen} />
+        <Stack.Screen name="VaccinationList" component={VaccinationListScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

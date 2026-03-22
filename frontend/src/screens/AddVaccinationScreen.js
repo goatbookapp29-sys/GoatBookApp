@@ -108,8 +108,21 @@ const AddVaccinationScreen = ({ navigation, route }) => {
   };
 
   const handleSave = async () => {
-    if (!vaccineId || selectedAnimals.length === 0 || !date) {
-      Alert.alert('Error', 'Please fill all required fields and select at least one animal');
+    let currentSelected = [...selectedAnimals];
+
+    // AUTO-ADD: If user typed a tag but forgot to click 'ADD', try to find it now
+    if (tagInput.trim() && currentSelected.length === 0) {
+      const animal = allAnimals.find(a => 
+        a.tagNumber.toLowerCase() === tagInput.trim().toLowerCase()
+      );
+      if (animal) {
+        currentSelected = [animal];
+        setSelectedAnimals(currentSelected); // Update state for UI
+      }
+    }
+
+    if (!vaccineId || currentSelected.length === 0 || !date) {
+      Alert.alert('Error', 'Please fill all required fields and select at least one animal (Hit ADD if entering Tag ID manually)');
       return;
     }
 
@@ -117,14 +130,14 @@ const AddVaccinationScreen = ({ navigation, route }) => {
     try {
       await api.post('/vaccines/records', {
         vaccineId,
-        animalIds: selectedAnimals.map(a => a.id),
+        animalIds: currentSelected.map(a => a.id),
         date,
         validTill: validTill || null,
         remark
       });
       setLoading(false);
       Alert.alert('Success', `${isMass ? 'Mass' : 'Single'} vaccination recorded successfully`, [
-        { text: 'OK', onPress: () => navigation.goBack() }
+        { text: 'OK', onPress: () => navigation.navigate('VaccinationList') }
       ]);
     } catch (error) {
       setLoading(false);

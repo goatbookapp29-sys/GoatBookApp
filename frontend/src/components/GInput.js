@@ -46,28 +46,34 @@ const GInput = ({
     fontWeight: (isFocused || value) ? '600' : '400',
   };
 
+  const isMultiline = props.multiline;
+  
   return (
     <View style={[styles.container, containerStyle]}>
       <View style={[
         styles.inputWrapper, 
         isFocused && styles.inputFocused,
-        error && styles.inputError
+        error && styles.inputError,
+        isMultiline && { height: 'auto', minHeight: 80, alignItems: 'flex-start', paddingTop: 12 }
       ]}>
         <Animated.Text 
           style={labelStyle} 
-          pointerEvents="none" // Ensure clicks pass through to the input
+          pointerEvents="none" 
         >
           {label}{required && '*'}
         </Animated.Text>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            isMultiline && { textAlignVertical: 'top', height: 'auto', minHeight: 60 }
+          ]}
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
-          placeholder={(isFocused && !value) ? placeholder : ""} // FIX: Only show placeholder when focused and empty
+          placeholder={(isFocused && !value) ? placeholder : ""} 
           placeholderTextColor="#9CA3AF"
           {...props}
         />
@@ -86,7 +92,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#E5E7EB', // Lighter gray for more premium feel
+    borderColor: '#E5E7EB', 
     borderRadius: 12,
     backgroundColor: COLORS.white,
     paddingHorizontal: 12,

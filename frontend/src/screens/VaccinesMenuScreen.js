@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import GHeader from '../components/GHeader';
-import { ListPlus, Syringe, Users } from 'lucide-react-native';
+import { ListPlus, Syringe, Users, ClipboardList } from 'lucide-react-native';
 
 const VaccinesMenuScreen = ({ navigation }) => {
   const options = [
@@ -26,6 +26,13 @@ const VaccinesMenuScreen = ({ navigation }) => {
       icon: <Users color="#3B82F6" size={40} />, 
       description: 'Record a vaccination for multiple animals at once.',
       onPress: () => navigation.navigate('AddVaccination', { mode: 'mass' }) 
+    },
+    { 
+      id: 'history', 
+      title: 'All Records', 
+      icon: <ClipboardList color="#10B981" size={40} />, 
+      description: 'View all vaccination history for your farm.',
+      onPress: () => navigation.navigate('VaccinationList') 
     },
   ];
 
