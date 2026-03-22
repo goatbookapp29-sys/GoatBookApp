@@ -3,76 +3,82 @@ import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Platform, Statu
 import { COLORS, SPACING } from '../theme';
 import { ArrowLeft } from 'lucide-react-native';
 
-const GHeader = ({ title, onBack, rightIcon, onRightPress }) => {
+const GHeader = ({ title, onBack, rightIcon, onRightPress, subTitle }) => {
   return (
     <View style={styles.outerContainer}>
-      <StatusBar barStyle="dark-content" backgroundColor="white" translucent={true} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} translucent={true} />
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.headerContent}>
-          <View style={styles.leftSection}>
-            <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
-              <ArrowLeft color={COLORS.white} size={28} />
-            </TouchableOpacity>
+          <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
+            <ArrowLeft color={COLORS.white} size={28} />
+          </TouchableOpacity>
+          
+          <View style={styles.titleContainer}>
             <Text style={styles.title} numberOfLines={1}>{title}</Text>
+            {subTitle && <Text style={styles.subTitle}>{subTitle}</Text>}
           </View>
           
-          {rightIcon && (
+          {rightIcon ? (
             <TouchableOpacity onPress={onRightPress} style={styles.rightButton}>
               {rightIcon}
             </TouchableOpacity>
+          ) : (
+            <View style={{ width: 36 }} />
           )}
         </View>
       </SafeAreaView>
-      <View style={styles.headerBottom} />
+      <View style={styles.curve} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   outerContainer: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.primary,
     zIndex: 10,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    ...SHADOW.md,
   },
   safeArea: {
-    backgroundColor: COLORS.white,
+    backgroundColor: 'transparent',
   },
   headerContent: {
-    backgroundColor: COLORS.primary,
-    height: 64,
+    height: 70,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    marginTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-  leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+    paddingHorizontal: 16,
+    marginTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 20) : 0,
   },
   backButton: {
-    marginRight: SPACING.md,
-    padding: 4,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  rightButton: {
-    padding: 4,
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
     color: COLORS.white,
-    letterSpacing: 0.5,
-    flex: 1,
+    letterSpacing: 0.3,
   },
-  headerBottom: {
-    height: 1,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-  }
+  subTitle: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
+    fontWeight: '500',
+    marginTop: -2,
+  },
+  rightButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default GHeader;

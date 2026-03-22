@@ -2,20 +2,21 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING } from '../theme';
 
-const GButton = ({ title, onPress, loading, style, textStyle, variant = 'primary' }) => {
+const GButton = ({ title, onPress, loading, containerStyle, titleStyle, variant = 'primary' }) => {
   const isOutline = variant === 'outline';
+  const isSecondary = variant === 'secondary';
 
   return (
     <TouchableOpacity 
       style={[
         styles.button, 
-        isOutline ? styles.buttonOutline : styles.buttonPrimary,
-        style,
+        isOutline ? styles.buttonOutline : (isSecondary ? styles.buttonSecondary : styles.buttonPrimary),
+        containerStyle,
         loading && styles.buttonDisabled
       ]} 
       onPress={onPress}
       disabled={loading}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
     >
       {loading ? (
         <ActivityIndicator color={isOutline ? COLORS.primary : COLORS.white} />
@@ -23,7 +24,7 @@ const GButton = ({ title, onPress, loading, style, textStyle, variant = 'primary
         <Text style={[
           styles.text, 
           isOutline ? styles.textOutline : styles.textPrimary,
-          textStyle
+          titleStyle
         ]}>
           {title}
         </Text>
@@ -34,19 +35,22 @@ const GButton = ({ title, onPress, loading, style, textStyle, variant = 'primary
 
 const styles = StyleSheet.create({
   button: {
-    height: 50,
-    borderRadius: 8,
+    height: 52,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    marginVertical: SPACING.sm,
+    marginVertical: 4,
   },
   buttonPrimary: {
     backgroundColor: COLORS.primary,
   },
+  buttonSecondary: {
+    backgroundColor: COLORS.secondary,
+  },
   buttonOutline: {
     backgroundColor: 'transparent',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: COLORS.primary,
   },
   buttonDisabled: {
@@ -54,7 +58,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   textPrimary: {
     color: COLORS.white,

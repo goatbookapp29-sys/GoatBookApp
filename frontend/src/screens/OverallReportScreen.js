@@ -98,9 +98,9 @@ const OverallReportScreen = ({ navigation }) => {
     );
   };
 
-  const StatRow = ({ label, value, color, onPress }) => (
+  const StatRow = ({ label, value, color, onPress, half }) => (
     <TouchableOpacity 
-      style={[styles.statRow, { backgroundColor: color }]}
+      style={[styles.statRow, { backgroundColor: color, width: half ? '48%' : '100%' }]}
       onPress={onPress}
       activeOpacity={0.8}
     >
@@ -111,22 +111,16 @@ const OverallReportScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerWrapper}>
-        <GHeader title="Overall Report" onBack={() => navigation.goBack()} />
-        <View style={styles.typeSelector}>
-          <Text style={styles.typeText}>Goat</Text>
-          <ChevronDown size={16} color="white" />
-        </View>
-      </View>
+      <GHeader title="Animal Report" subTitle="Overall Records" onBack={() => navigation.goBack()} />
 
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : (
-        <ScrollView style={styles.flex}>
-          <View style={styles.chartSection}>
-            <Text style={styles.chartTitle}>Current Status</Text>
+        <ScrollView style={styles.flex} contentContainerStyle={{ paddingBottom: 40 }}>
+          <View style={styles.chartCard}>
+            <Text style={styles.chartTitle}>Inventory Status</Text>
             <View style={styles.chartContainer}>
               {renderDonut(stats.total)}
             </View>
@@ -137,9 +131,9 @@ const OverallReportScreen = ({ navigation }) => {
                 { label: 'Female', color: '#10B981' },
                 { label: 'Breeder', color: '#06B6D4' },
                 { label: 'Pregnant', color: '#EF4444' },
-                { label: 'Kids(0-3m)', color: '#3B82F6' },
-                { label: 'Kids(3-6m)', color: '#8B5CF6' },
-                { label: 'Kids(6-9m)', color: '#FACC15' },
+                { label: 'Kids(0-3)', color: '#3B82F6' },
+                { label: 'Kids(3-6)', color: '#8B5CF6' },
+                { label: 'Kids(6-9)', color: '#FACC15' },
                ].map((item, idx) => (
                  <View key={idx} style={styles.legendItem}>
                     <View style={[styles.dot, { backgroundColor: item.color }]} />
@@ -153,47 +147,55 @@ const OverallReportScreen = ({ navigation }) => {
             <StatRow 
               label="Total Animal" 
               value={stats.total} 
-              color="#1E40AF" 
+              color="#4F46E5" 
               onPress={() => navigation.navigate('AnimalList')}
             />
+            <View style={styles.gridRow}>
+                <StatRow 
+                    label="Male" 
+                    value={stats.male} 
+                    color="#F59E0B" 
+                    half
+                    onPress={() => navigation.navigate('AnimalList', { gender: 'MALE' })}
+                />
+                <StatRow 
+                    label="Female" 
+                    value={stats.female} 
+                    color="#10B981" 
+                    half
+                    onPress={() => navigation.navigate('AnimalList', { gender: 'FEMALE' })}
+                />
+            </View>
+            <View style={styles.gridRow}>
+                <StatRow 
+                    label="Breeder" 
+                    value={stats.breeder} 
+                    color="#06B6D4" 
+                    half
+                    onPress={() => navigation.navigate('AnimalList', { isBreeder: true })}
+                />
+                <StatRow 
+                    label="Pregnant" 
+                    value={stats.pregnant} 
+                    color="#EF4444" 
+                    half
+                    onPress={() => navigation.navigate('AnimalList', { femaleCondition: 'PREGNANT' })}
+                />
+            </View>
             <StatRow 
-              label="Male" 
-              value={stats.male} 
-              color="#F59E0B" 
-              onPress={() => navigation.navigate('AnimalList', { gender: 'MALE' })}
-            />
-            <StatRow 
-              label="Female" 
-              value={stats.female} 
-              color="#10B981" 
-              onPress={() => navigation.navigate('AnimalList', { gender: 'FEMALE' })}
-            />
-            <StatRow 
-              label="Breeder" 
-              value={stats.breeder} 
-              color="#06B6D4" 
-              onPress={() => navigation.navigate('AnimalList', { isBreeder: true })}
-            />
-            <StatRow 
-              label="Pregnant" 
-              value={stats.pregnant} 
-              color="#EF4444" 
-              onPress={() => navigation.navigate('AnimalList', { femaleCondition: 'PREGNANT' })}
-            />
-            <StatRow 
-              label="Kids(0 - 3 months)" 
+              label="Kids (0 - 3 months)" 
               value={stats.kids0_3} 
               color="#3B82F6" 
               onPress={() => navigation.navigate('AnimalList', { ageRange: '0-3' })}
             />
             <StatRow 
-              label="Kids(3 - 6 months)" 
+              label="Kids (3 - 6 months)" 
               value={stats.kids3_6} 
               color="#8B5CF6" 
               onPress={() => navigation.navigate('AnimalList', { ageRange: '3-6' })}
             />
             <StatRow 
-              label="Kids(6 - 9 months)" 
+              label="Kids (6 - 9 months)" 
               value={stats.kids6_9} 
               color="#FACC15" 
               onPress={() => navigation.navigate('AnimalList', { ageRange: '6-9' })}
@@ -208,29 +210,7 @@ const OverallReportScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-  },
-  headerWrapper: {
-    zIndex: 10,
-    backgroundColor: COLORS.primary,
-  },
-  typeSelector: {
-    position: 'absolute',
-    right: 16,
-    top: 55,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'white',
-  },
-  typeText: {
-    color: 'white',
-    fontWeight: '600',
-    marginRight: 4,
+    backgroundColor: '#F3F4F6',
   },
   flex: {
     flex: 1,
@@ -240,19 +220,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  chartSection: {
-    padding: 20,
+  chartCard: {
+    backgroundColor: COLORS.white,
+    margin: 16,
+    padding: 24,
+    borderRadius: 24,
     alignItems: 'center',
+    ...SHADOW.md,
   },
   chartTitle: {
     alignSelf: 'flex-start',
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#374151',
+    fontSize: 20,
+    fontWeight: '800',
+    color: COLORS.text,
     marginBottom: 20,
   },
   chartContainer: {
-    height: 220,
+    height: 200,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -275,28 +259,36 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   legendText: {
-    fontSize: 11,
-    color: '#6B7280',
+    fontSize: 12,
+    color: COLORS.textLight,
+    fontWeight: '600',
   },
   listSection: {
-    padding: 12,
+    paddingHorizontal: 16,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   statRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 16,
-    marginBottom: 8,
-    borderRadius: 4,
+    alignItems: 'center',
+    padding: 20,
+    marginBottom: 12,
+    borderRadius: 16,
+    width: '100%',
+    ...SHADOW.sm,
   },
   statLabel: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   statValue: {
     color: 'white',
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '900',
   },
 });
 
