@@ -106,6 +106,26 @@ const Animal = sequelize.define('Animal', {
     allowNull: true,
     field: 'birth_type'
   },
+  status: {
+    type: DataTypes.ENUM('LIVE', 'SOLD', 'DEAD'),
+    allowNull: false,
+    defaultValue: 'LIVE'
+  },
+  isReadyForSale: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    field: 'is_ready_for_sale'
+  },
+  salePrice: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    field: 'sale_price'
+  },
+  currentWeight: {
+    type: DataTypes.DECIMAL(6, 2),
+    allowNull: true,
+    field: 'current_weight'
+  },
   remark: {
     type: DataTypes.TEXT,
     allowNull: true

@@ -29,7 +29,8 @@ exports.addAnimal = async (req, res) => {
     tagNumber, breedId, gender, color, birthDate, birthWeight, locationId,
     isBreeder, isQurbani, batchNo, acquisitionMethod,
     purchaseDate, purchasePrice, ageInMonths, femaleCondition,
-    birthType, motherTagId, fatherTagId, remark 
+    birthType, motherTagId, fatherTagId, remark,
+    status, isReadyForSale, currentWeight, salePrice 
   } = req.body;
   
   try {
@@ -96,6 +97,10 @@ exports.addAnimal = async (req, res) => {
       birthType,
       motherTagId: acquisitionMethod === 'BORN' ? motherTagId : null,
       fatherTagId: acquisitionMethod === 'BORN' ? fatherTagId : null,
+      status: status || 'LIVE',
+      isReadyForSale: isReadyForSale || false,
+      currentWeight: isReadyForSale ? currentWeight : null,
+      salePrice: isReadyForSale ? salePrice : null,
       remark
     });
 
@@ -134,7 +139,8 @@ exports.updateAnimal = async (req, res) => {
     tagNumber, breedId, gender, color, birthDate, birthWeight, locationId,
     isBreeder, isQurbani, batchNo, acquisitionMethod,
     purchaseDate, purchasePrice, ageInMonths, femaleCondition,
-    birthType, motherTagId, fatherTagId, remark 
+    birthType, motherTagId, fatherTagId, remark,
+    status, isReadyForSale, currentWeight, salePrice 
   } = req.body;
   try {
     const animal = await Animal.findOne({
@@ -200,6 +206,10 @@ exports.updateAnimal = async (req, res) => {
         birthType,
         motherTagId: (acquisitionMethod || animal.acquisitionMethod) === 'BORN' ? motherTagId : null,
         fatherTagId: (acquisitionMethod || animal.acquisitionMethod) === 'BORN' ? fatherTagId : null,
+        status: status || animal.status,
+        isReadyForSale: isReadyForSale !== undefined ? isReadyForSale : animal.isReadyForSale,
+        currentWeight: (isReadyForSale !== undefined ? isReadyForSale : animal.isReadyForSale) ? currentWeight : null,
+        salePrice: (isReadyForSale !== undefined ? isReadyForSale : animal.isReadyForSale) ? salePrice : null,
         remark,
         updatedByUserId: req.user.id
     });

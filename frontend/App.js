@@ -30,6 +30,8 @@ import AddVaccineNameScreen from './src/screens/AddVaccineNameScreen';
 import VaccineDefinitionsScreen from './src/screens/VaccineDefinitionsScreen';
 import AddVaccinationScreen from './src/screens/AddVaccinationScreen';
 import VaccinationListScreen from './src/screens/VaccinationListScreen';
+import ReportsMenuScreen from './src/screens/ReportsMenuScreen';
+import OverallReportScreen from './src/screens/OverallReportScreen';
 import { COLORS } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -103,6 +105,8 @@ export default function App() {
         <Stack.Screen name="AddVaccineName" component={AddVaccineNameScreen} />
         <Stack.Screen name="AddVaccination" component={AddVaccinationScreen} />
         <Stack.Screen name="VaccinationList" component={VaccinationListScreen} />
+        <Stack.Screen name="ReportsMenu" component={ReportsMenuScreen} />
+        <Stack.Screen name="OverallReport" component={OverallReportScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

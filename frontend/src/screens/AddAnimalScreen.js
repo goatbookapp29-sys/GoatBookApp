@@ -59,6 +59,10 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
   // Misc
   const [remark, setRemark] = useState(existingAnimal.remark || '');
+  const [animalStatus, setAnimalStatus] = useState(existingAnimal.status || 'LIVE');
+  const [isReadyForSale, setIsReadyForSale] = useState(existingAnimal.isReadyForSale || false);
+  const [currentWeight, setCurrentWeight] = useState(existingAnimal.currentWeight?.toString() || '');
+  const [salePrice, setSalePrice] = useState(existingAnimal.salePrice?.toString() || '');
 
   // UI state
   const [breeds, setBreeds] = useState([]);
@@ -218,7 +222,11 @@ const AddAnimalScreen = ({ navigation, route }) => {
         purchaseDate: acquisitionMethod === 'PURCHASED' ? purchaseDate : null,
         purchasePrice: acquisitionMethod === 'PURCHASED' ? purchasePrice : null,
         femaleCondition: (gender === 'FEMALE' && acquisitionMethod === 'PURCHASED') ? femaleCondition : null,
-        remark
+        remark,
+        status: animalStatus,
+        isReadyForSale,
+        currentWeight: isReadyForSale ? (parseFloat(currentWeight) || null) : null,
+        salePrice: isReadyForSale ? (parseFloat(salePrice) || null) : null,
       };
 
       if (isEditing) {
@@ -471,6 +479,59 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 />
               </View>
             )}
+
+            <View style={styles.sectionDivider} />
+
+            <View style={{ marginBottom: SPACING.md }}>
+              <GSelect 
+                label="Animal Status" 
+                value={animalStatus} 
+                onSelect={setAnimalStatus}
+                options={[
+                  { label: 'Live', value: 'LIVE' },
+                  { label: 'Sold', value: 'SOLD' },
+                  { label: 'Dead', value: 'DEAD' }
+                ]}
+              />
+            </View>
+
+            <View style={styles.readyForSaleRow}>
+              <Text style={styles.readyLabel}>Ready for Sale?</Text>
+              <TouchableOpacity 
+                style={styles.checkboxContainer}
+                onPress={() => setIsReadyForSale(!isReadyForSale)}
+              >
+                <View style={[styles.checkbox, isReadyForSale && styles.checkboxActive]}>
+                  {isReadyForSale && <Check size={14} color={COLORS.white} />}
+                </View>
+                <Text style={styles.checkboxLabel}>{isReadyForSale ? 'Yes' : 'No'}</Text>
+              </TouchableOpacity>
+            </View>
+
+            {isReadyForSale && (
+              <View style={[styles.row, { marginTop: SPACING.sm }]}>
+                <GInput 
+                  containerStyle={styles.halfWidth}
+                  label="Current Weight (KG)" 
+                  value={currentWeight} 
+                  onChangeText={setCurrentWeight} 
+                  keyboardType="decimal-pad"
+                  placeholder="e.g. 25.5"
+                  required
+                />
+                <GInput 
+                  containerStyle={styles.halfWidth}
+                  label="Sale Price" 
+                  value={salePrice} 
+                  onChangeText={setSalePrice} 
+                  keyboardType="number-pad"
+                  placeholder="e.g. 15000"
+                  required
+                />
+              </View>
+            )}
+
+            <View style={styles.sectionDivider} />
 
             <GInput 
               label="Remark" 
