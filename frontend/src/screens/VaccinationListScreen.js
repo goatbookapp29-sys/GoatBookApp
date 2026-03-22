@@ -6,20 +6,30 @@ import { Syringe, Calendar, User, Plus } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
-const VaccinationListScreen = ({ navigation }) => {
+const VaccinationListScreen = ({ navigation, route }) => {
+  const mode = route.params?.mode; // 'SINGLE' or 'MASS' or undefined
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const getTitle = () => {
+    if (mode === 'SINGLE') return 'Single Vaccinations';
+    if (mode === 'MASS') return 'Mass Vaccinations';
+    return 'All Vaccinations';
+  };
 
   useFocusEffect(
     useCallback(() => {
       fetchRecords();
-    }, [])
+    }, [mode])
   );
 
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/vaccines/records');
+      const url = mode 
+        ? `/vaccines/records?creationMode=${mode}` 
+        : '/vaccines/records';
+      const response = await api.get(url);
       setRecords(response.data);
       setLoading(false);
     } catch (error) {
@@ -70,7 +80,7 @@ const VaccinationListScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <GHeader title="All Vaccinations" onBack={() => navigation.goBack()} />
+      <GHeader title={getTitle()} onBack={() => navigation.goBack()} />
       
       {loading ? (
         <View style={styles.center}>

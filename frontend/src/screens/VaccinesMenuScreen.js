@@ -17,21 +17,18 @@ const VaccinesMenuScreen = ({ navigation }) => {
       id: 'single_vaccination', 
       title: 'Single Vaccination', 
       icon: <Syringe color="#3B82F6" size={40} />, 
-      description: 'View and record vaccinations for a specific animal.',
-      onPress: () => navigation.navigate('VaccinationList') 
+      onPress: () => navigation.navigate('VaccinationList', { mode: 'SINGLE' }) 
     },
     { 
       id: 'mass_vaccination', 
       title: 'Mass Vaccination', 
       icon: <Users color="#3B82F6" size={40} />, 
-      description: 'View and record vaccinations for multiple animals.',
-      onPress: () => navigation.navigate('VaccinationList') 
+      onPress: () => navigation.navigate('VaccinationList', { mode: 'MASS' }) 
     },
     { 
       id: 'history', 
       title: 'All Records', 
       icon: <ClipboardList color="#10B981" size={40} />, 
-      description: 'View all vaccination history for your farm.',
       onPress: () => navigation.navigate('VaccinationList') 
     },
   ];

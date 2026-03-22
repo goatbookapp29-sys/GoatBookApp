@@ -52,12 +52,13 @@ exports.createVaccine = async (req, res) => {
 // @desc    Get vaccination records (all for farm or specific animal)
 // @route   GET /api/vaccines/records
 exports.getVaccinationRecords = async (req, res) => {
-  const { animalId } = req.query;
+  const { animalId, creationMode } = req.query;
   try {
     if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
 
     const where = { farmId: req.farmId };
     if (animalId) where.animalId = animalId;
+    if (creationMode) where.creationMode = creationMode;
 
     const records = await VaccinationRecord.findAll({
       where,
