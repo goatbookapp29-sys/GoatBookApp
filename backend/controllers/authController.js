@@ -35,8 +35,8 @@ exports.register = async (req, res) => {
           name,
           email,
           password: hashedPassword,
-          createdAt: now,
-          updatedAt: now
+          created_at: now,
+          updated_at: now
         }
       });
 
@@ -187,9 +187,9 @@ exports.forgotPassword = async (req, res) => {
     await prisma.users.update({
       where: { id: user.id },
       data: {
-        resetPasswordToken: resetCode,
-        resetPasswordExpires: new Date(Date.now() + 3600000),
-        updatedAt: new Date()
+        reset_password_token: resetCode,
+        reset_password_expires: new Date(Date.now() + 3600000),
+        updated_at: new Date()
       }
     });
 
@@ -243,7 +243,7 @@ exports.resetPassword = async (req, res) => {
     const user = await prisma.users.findFirst({
       where: {
         email,
-        resetPasswordToken: code
+        reset_password_token: code
       }
     });
 
@@ -252,7 +252,7 @@ exports.resetPassword = async (req, res) => {
     }
 
     // Check if code is expired
-    if (user.resetPasswordExpires < new Date()) {
+    if (user.reset_password_expires < new Date()) {
       return res.status(400).json({ message: 'Reset code has expired' });
     }
 
@@ -262,9 +262,9 @@ exports.resetPassword = async (req, res) => {
       where: { id: user.id },
       data: {
         password: hashedPassword,
-        resetPasswordToken: null,
-        resetPasswordExpires: null,
-        updatedAt: new Date()
+        reset_password_token: null,
+        reset_password_expires: null,
+        updated_at: new Date()
       }
     });
 

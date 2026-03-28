@@ -38,7 +38,7 @@ exports.updateProfile = async (req, res) => {
       data: {
         name: name || user.name, email: email || user.email,
         phone: phone !== undefined ? phone : user.phone,
-        updated_by_user_id: req.user.id, updatedAt: new Date()
+        updated_by_user_id: req.user.id, updated_at: new Date()
       }
     });
     res.json({ id: updated.id, name: updated.name, email: updated.email, phone: updated.phone });
@@ -61,7 +61,7 @@ exports.createEmployee = async (req, res) => {
     const hashedPassword = await hashPassword(password);
     const now = new Date();
     await prisma.$transaction(async (tx) => {
-      const user = await tx.users.create({ data: { id: uuidv4(), name, email, password: hashedPassword, created_by_user_id: req.user.id, createdAt: now, updatedAt: now } });
+      const user = await tx.users.create({ data: { id: uuidv4(), name, email, password: hashedPassword, created_by_user_id: req.user.id, created_at: now, updated_at: now } });
       const employee = await tx.employees.create({ data: { id: uuidv4(), user_id: user.id, employee_type: role || 'EMPLOYEE', created_by_user_id: req.user.id, created_at: now, updated_at: now } });
       await tx.farm_employees.create({ data: { id: uuidv4(), farm_id: req.farmId, employee_id: employee.id, created_by_user_id: req.user.id, created_at: now, updated_at: now } });
     });
@@ -82,7 +82,7 @@ exports.updateEmployee = async (req, res) => {
     const ownedFarm = await prisma.farms.findFirst({ where: { owner_employee_id: employee.id } });
     if (ownedFarm && role && role !== 'OWNER') return res.status(403).json({ message: 'The primary owner role cannot be changed' });
     await prisma.employees.update({ where: { id: req.params.id }, data: { employee_type: role || employee.employee_type, updated_by_user_id: req.user.id, updated_at: new Date() } });
-    if (name) await prisma.users.update({ where: { id: employee.user_id }, data: { name, updated_by_user_id: req.user.id, updatedAt: new Date() } });
+    if (name) await prisma.users.update({ where: { id: employee.user_id }, data: { name, updated_by_user_id: req.user.id, updated_at: new Date() } });
     res.json({ message: 'Employee updated successfully' });
   } catch (err) {
     console.error('UPDATE EMPLOYEE ERROR:', err);
@@ -98,7 +98,7 @@ exports.resetEmployeePassword = async (req, res) => {
     const employee = await prisma.employees.findUnique({ where: { id: req.params.id } });
     if (!employee) return res.status(404).json({ message: 'Employee not found' });
     const hashed = await hashPassword(newPassword);
-    await prisma.users.update({ where: { id: employee.user_id }, data: { password: hashed, updated_by_user_id: req.user.id, updatedAt: new Date() } });
+    await prisma.users.update({ where: { id: employee.user_id }, data: { password: hashed, updated_by_user_id: req.user.id, updated_at: new Date() } });
     res.json({ message: 'Password reset successfully' });
   } catch (err) { res.status(500).json({ message: 'Server Error' }); }
 };
@@ -129,7 +129,7 @@ exports.changePassword = async (req, res) => {
     const isMatch = await comparePassword(currentPassword, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Incorrect current password' });
     const hashed = await hashPassword(newPassword);
-    await prisma.users.update({ where: { id: req.user.id }, data: { password: hashed, updated_by_user_id: req.user.id, updatedAt: new Date() } });
+    await prisma.users.update({ where: { id: req.user.id }, data: { password: hashed, updated_by_user_id: req.user.id, updated_at: new Date() } });
     res.json({ message: 'Password updated successfully' });
   } catch (err) {
     console.error('CHANGE PASSWORD ERROR:', err);

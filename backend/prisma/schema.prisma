@@ -35,8 +35,8 @@ model animals {
   remark                                  String?
   created_by_user_id                      String?                         @db.Uuid
   updated_by_user_id                      String?                         @db.Uuid
-  created_at                              DateTime                        @db.Timestamptz(6)
-  updated_at                              DateTime                        @db.Timestamptz(6)
+  created_at                              DateTime                        @default(now()) @db.Timestamptz(6)
+  updated_at                              DateTime                        @updatedAt @db.Timestamptz(6)
   breeds                                  breeds                          @relation(fields: [breed_id], references: [id], onDelete: Cascade)
   users_animals_created_by_user_idTousers users?                          @relation("animals_created_by_user_idTousers", fields: [created_by_user_id], references: [id])
   farms                                   farms                           @relation(fields: [farm_id], references: [id], onDelete: Cascade)
@@ -53,8 +53,8 @@ model breeds {
   farm_id                                String    @db.Uuid
   created_by_user_id                     String?   @db.Uuid
   updated_by_user_id                     String?   @db.Uuid
-  created_at                             DateTime  @db.Timestamptz(6)
-  updated_at                             DateTime  @db.Timestamptz(6)
+  created_at                             DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                             DateTime  @updatedAt @db.Timestamptz(6)
   animals                                animals[]
   users_breeds_created_by_user_idTousers users?    @relation("breeds_created_by_user_idTousers", fields: [created_by_user_id], references: [id])
   farms                                  farms     @relation(fields: [farm_id], references: [id], onDelete: Cascade)
@@ -67,8 +67,8 @@ model employees {
   employee_type      enum_employees_employee_type @default(EMPLOYEE)
   created_by_user_id String?                      @db.Uuid
   updated_by_user_id String?                      @db.Uuid
-  created_at         DateTime                     @db.Timestamptz(6)
-  updated_at         DateTime                     @db.Timestamptz(6)
+  created_at         DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime                     @updatedAt @db.Timestamptz(6)
   users              users                        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   farm_employees     farm_employees[]
   farms              farms[]
@@ -80,8 +80,8 @@ model farm_employees {
   employee_id        String    @db.Uuid
   created_by_user_id String?   @db.Uuid
   updated_by_user_id String?   @db.Uuid
-  created_at         DateTime  @db.Timestamptz(6)
-  updated_at         DateTime  @db.Timestamptz(6)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @updatedAt @db.Timestamptz(6)
   employees          employees @relation(fields: [employee_id], references: [id], onDelete: Cascade)
   farms              farms     @relation(fields: [farm_id], references: [id], onDelete: Cascade)
 
@@ -95,8 +95,8 @@ model farms {
   owner_employee_id   String                @db.Uuid
   created_by_user_id  String?               @db.Uuid
   updated_by_user_id  String?               @db.Uuid
-  created_at          DateTime              @db.Timestamptz(6)
-  updated_at          DateTime              @db.Timestamptz(6)
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime              @updatedAt @db.Timestamptz(6)
   animals             animals[]
   breeds              breeds[]
   farm_employees      farm_employees[]
@@ -116,8 +116,8 @@ model locations {
   farm_id                                   String      @db.Uuid
   created_by_user_id                        String?     @db.Uuid
   updated_by_user_id                        String?     @db.Uuid
-  created_at                                DateTime    @db.Timestamptz(6)
-  updated_at                                DateTime    @db.Timestamptz(6)
+  created_at                                DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at                                DateTime    @updatedAt @db.Timestamptz(6)
   animals                                   animals[]
   users_locations_created_by_user_idTousers users?      @relation("locations_created_by_user_idTousers", fields: [created_by_user_id], references: [id])
   farms                                     farms       @relation(fields: [farm_id], references: [id], onDelete: Cascade)
@@ -134,10 +134,10 @@ model users {
   password                                                          String                @db.VarChar(255)
   created_by_user_id                                                String?               @db.Uuid
   updated_by_user_id                                                String?               @db.Uuid
-  resetPasswordToken                                                String?               @db.VarChar(255)
-  resetPasswordExpires                                              DateTime?             @db.Timestamptz(6)
-  createdAt                                                         DateTime              @db.Timestamptz(6)
-  updatedAt                                                         DateTime              @db.Timestamptz(6)
+  reset_password_token                                              String?               @db.VarChar(255)
+  reset_password_expires                                            DateTime?             @db.Timestamptz(6)
+  created_at                                                        DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at                                                        DateTime              @updatedAt @db.Timestamptz(6)
   animals_animals_created_by_user_idTousers                         animals[]             @relation("animals_created_by_user_idTousers")
   animals_animals_updated_by_user_idTousers                         animals[]             @relation("animals_updated_by_user_idTousers")
   breeds_breeds_created_by_user_idTousers                           breeds[]              @relation("breeds_created_by_user_idTousers")
@@ -165,8 +165,8 @@ model vaccination_records {
   creation_mode                                       enum_vaccination_records_creation_mode @default(SINGLE)
   created_by_user_id                                  String?                                @db.Uuid
   updated_by_user_id                                  String?                                @db.Uuid
-  created_at                                          DateTime                               @db.Timestamptz(6)
-  updated_at                                          DateTime                               @db.Timestamptz(6)
+  created_at                                          DateTime                               @default(now()) @db.Timestamptz(6)
+  updated_at                                          DateTime                               @updatedAt @db.Timestamptz(6)
   animals                                             animals                                @relation(fields: [animal_id], references: [id], onDelete: Cascade)
   users_vaccination_records_created_by_user_idTousers users?                                 @relation("vaccination_records_created_by_user_idTousers", fields: [created_by_user_id], references: [id])
   farms                                               farms                                  @relation(fields: [farm_id], references: [id], onDelete: Cascade)
@@ -182,8 +182,8 @@ model vaccines {
   farm_id                                  String                @db.Uuid
   created_by_user_id                       String?               @db.Uuid
   updated_by_user_id                       String?               @db.Uuid
-  created_at                               DateTime              @db.Timestamptz(6)
-  updated_at                               DateTime              @db.Timestamptz(6)
+  created_at                               DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at                               DateTime              @updatedAt @db.Timestamptz(6)
   vaccination_records                      vaccination_records[]
   users_vaccines_created_by_user_idTousers users?                @relation("vaccines_created_by_user_idTousers", fields: [created_by_user_id], references: [id])
   farms                                    farms                 @relation(fields: [farm_id], references: [id], onDelete: Cascade)
@@ -201,8 +201,8 @@ model weights {
   remark                                  String?
   created_by_user_id                      String?  @db.Uuid
   updated_by_user_id                      String?  @db.Uuid
-  created_at                              DateTime @db.Timestamptz(6)
-  updated_at                              DateTime @db.Timestamptz(6)
+  created_at                                 DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                                 DateTime @updatedAt @db.Timestamptz(6)
   animals                                 animals  @relation(fields: [animal_id], references: [id], onDelete: Cascade)
   users_weights_created_by_user_idTousers users?   @relation("weights_created_by_user_idTousers", fields: [created_by_user_id], references: [id])
   farms                                   farms    @relation(fields: [farm_id], references: [id], onDelete: Cascade)
