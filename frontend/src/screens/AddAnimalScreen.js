@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { COLORS, SPACING } from '../theme';
+import { SPACING } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
-import styles from './AddAnimalScreen.styles';
+import { getStyles } from './AddAnimalScreen.styles';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
@@ -21,7 +21,7 @@ const CheckBox = ({ label, value, onToggle }) => {
   return (
     <TouchableOpacity style={styles.checkboxContainer} onPress={onToggle} activeOpacity={0.7}>
       <View style={[styles.checkbox, { borderColor: theme.colors.border }, value && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }]}>
-        {value && <Check size={14} color="white" />}
+        {value && <Check size={14} color="#FFF" />}
       </View>
       <Text style={[styles.checkboxLabel, { color: theme.colors.text }]}>{label}</Text>
     </TouchableOpacity>
@@ -30,6 +30,7 @@ const CheckBox = ({ label, value, onToggle }) => {
 
 const AddAnimalScreen = ({ navigation, route }) => {
   const { isDarkMode, theme } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const isEditing = !!route.params?.animal;
   const existingAnimal = route.params?.animal || {};
   const [weightExpanded, setWeightExpanded] = useState(false);
@@ -299,13 +300,13 @@ const AddAnimalScreen = ({ navigation, route }) => {
     styles.sectionTitle, 
     { 
       color: theme.colors.primary, 
-      fontFamily: theme.typography.semiBold,
+      fontFamily: 'Montserrat_600SemiBold',
       textTransform: 'uppercase',
       letterSpacing: 1,
       fontSize: 14,
       marginBottom: 16,
       marginTop: 24,
-      borderBottomWidth:1,
+      borderBottomWidth:1.5,
       borderBottomColor: theme.colors.border,
       paddingBottom: 8
     }
@@ -327,9 +328,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {isEditing && (
-            <View style={[styles.readyToSellCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
-                  <Text style={[styles.readyTitle, { color: '#DC2626' }]}>READY TO SELL</Text>
+                  <Text style={[styles.readyTitle, { color: theme.colors.error }]}>READY TO SELL</Text>
                   <HelpCircle size={18} color={theme.colors.textMuted} />
                </View>
                <View style={styles.readyOptions}>
@@ -576,8 +577,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 activeOpacity={0.7}
                 onPress={() => setWeightExpanded(!weightExpanded)}
               >
-                <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.primary, marginBottom: 0, fontSize: 15, fontFamily: theme.typography.semiBold }]}>WEIGHT HISTORY</Text>
+                <View style={styles.row}>
+                  <Text style={styles.sectionTitle}>WEIGHT HISTORY</Text>
                 </View>
                 {weightExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
               </TouchableOpacity>
@@ -585,10 +586,10 @@ const AddAnimalScreen = ({ navigation, route }) => {
               {weightExpanded && (
                 <View style={styles.weightContent}>
                   <TouchableOpacity 
-                    style={[styles.addNewBtn, { backgroundColor: theme.colors.primary }]}
+                    style={styles.addNewBtn}
                     onPress={() => navigation.navigate('AddWeight', { tagNumber: existingAnimal.tagNumber })}
                   >
-                    <Plus size={16} color="white" />
+                    <Plus size={16} color="#FFF" />
                     <Text style={styles.addNewText}>Add New Record</Text>
                   </TouchableOpacity>
 
@@ -631,18 +632,18 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   activeOpacity={0.7}
                   onPress={() => setVaccinationExpanded(!vaccinationExpanded)}
                 >
-                  <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.primary, marginBottom: 0, fontSize: 15, fontFamily: theme.typography.semiBold }]}>VACCINATION RECORD</Text>
-                  </View>
-                  {vaccinationExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
-                </TouchableOpacity>
+                <View style={styles.row}>
+                  <Text style={styles.sectionTitle}>VACCINATION RECORD</Text>
+                </View>
+                {vaccinationExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
+              </TouchableOpacity>
                 {vaccinationExpanded && (
                   <View style={styles.weightContent}>
                     <TouchableOpacity 
-                      style={[styles.addNewBtn, { backgroundColor: theme.colors.primary }]}
+                      style={styles.addNewBtn}
                       onPress={() => navigation.navigate('AddVaccination', { mode: 'single', preSelectedAnimal: existingAnimal })}
                     >
-                      <Plus size={16} color="white" />
+                      <Plus size={16} color="#FFF" />
                       <Text style={styles.addNewText}>Add New Record</Text>
                     </TouchableOpacity>
                     
@@ -656,12 +657,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
                             style={[styles.weightItem, { borderBottomColor: theme.colors.border }, idx === vaccinations.length - 1 && { borderBottomWidth: 0 }]}
                             onPress={() => navigation.navigate('AddVaccination', { mode: 'single', record: v })}
                           >
-                            <View style={[styles.weightIconBox, { backgroundColor: isDarkMode ? theme.colors.surface : '#F0F9FF' }]}>
+                            <View style={styles.weightIconBox}>
                               <Syringe size={16} color={theme.colors.primary} />
                             </View>
                             <View style={styles.weightInfoBlock}>
-                              <Text style={[styles.weightKg, { color: theme.colors.text, fontFamily: theme.typography.semiBold }]}>{v.vaccine?.name}</Text>
-                              <Text style={[styles.weightDate, { color: theme.colors.textLight, fontFamily: theme.typography.regular }]}>{v.date}</Text>
+                              <Text style={[styles.weightKg, { color: theme.colors.text }]}>{v.vaccine?.name}</Text>
+                              <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{v.date}</Text>
                             </View>
                             {v.nextDueDate && (
                               <View style={[styles.heightInfoBlock, { minWidth: 100 }]}>
@@ -695,8 +696,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 </TouchableOpacity>
                 {matingExpanded && (
                   <View style={styles.weightContent}>
-                    <TouchableOpacity style={[styles.addNewBtn, { backgroundColor: theme.colors.primary }]}>
-                      <Plus size={16} color="white" />
+                    <TouchableOpacity style={styles.addNewBtn}>
+                      <Plus size={16} color="#FFF" />
                       <Text style={styles.addNewText}>Add New Record</Text>
                     </TouchableOpacity>
                     <Text style={[styles.noRecordsText, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>No Records found</Text>
@@ -718,8 +719,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 </TouchableOpacity>
                 {breedingExpanded && (
                   <View style={styles.weightContent}>
-                     <TouchableOpacity style={[styles.addNewBtn, { backgroundColor: theme.colors.primary }]}>
-                      <Plus size={16} color="white" />
+                     <TouchableOpacity style={styles.addNewBtn}>
+                      <Plus size={16} color="#FFF" />
                       <Text style={styles.addNewText}>Add New Record</Text>
                     </TouchableOpacity>
                     <Text style={[styles.noRecordsText, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>No Records found</Text>
@@ -741,8 +742,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 </TouchableOpacity>
                 {milkExpanded && (
                   <View style={styles.weightContent}>
-                    <TouchableOpacity style={[styles.addNewBtn, { backgroundColor: theme.colors.primary }]}>
-                      <Plus size={16} color="white" />
+                    <TouchableOpacity style={styles.addNewBtn}>
+                      <Plus size={16} color="#FFF" />
                       <Text style={styles.addNewText}>Add New Record</Text>
                     </TouchableOpacity>
                     <Text style={[styles.noRecordsText, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>No Records found</Text>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
@@ -8,6 +8,7 @@ import api, { setAuthToken, setSelectedFarm } from '../api';
 
 const LoginScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -51,13 +52,13 @@ const LoginScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-      style={[styles.container, { backgroundColor: theme.colors.surface }]}
+      style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
         <View style={styles.formWrapper}>
             <View style={styles.titleContainer}>
-                <Text style={[styles.mainTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold }]}>Login</Text>
-                <Text style={[styles.subTitle, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>Login to Goatwala Farm APP!</Text>
+                <Text style={styles.mainTitle}>Login</Text>
+                <Text style={styles.subTitle}>Login to Goatwala Farm APP!</Text>
             </View>
 
             <View style={styles.form}>
@@ -93,9 +94,9 @@ const LoginScreen = ({ navigation }) => {
                 />
 
                 <View style={styles.footer}>
-                    <Text style={[styles.footerText, { color: theme.colors.textLight, fontFamily: theme.typography.medium }]}>Don’t have an account? </Text>
+                    <Text style={styles.footerText}>Don’t have an account? </Text>
                     <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                        <Text style={[styles.link, { color: theme.colors.primary, fontFamily: theme.typography.medium }]}>Register</Text>
+                        <Text style={styles.link}>Register</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -105,9 +106,10 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -121,12 +123,16 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   mainTitle: {
-    fontSize: 28,
-    letterSpacing: -0.5,
+    fontSize: 32,
+    fontFamily: 'Montserrat_700Bold',
+    color: theme.colors.primary,
+    letterSpacing: -1,
   },
   subTitle: {
     fontSize: 16,
     marginTop: 8,
+    fontFamily: 'Montserrat_500Medium',
+    color: theme.colors.textLight,
   },
   form: {
     flex: 1,
@@ -138,6 +144,8 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     fontSize: 14,
+    color: theme.colors.primary,
+    fontFamily: 'Montserrat_600SemiBold',
   },
   loginBtn: {
     marginTop: 10,
@@ -149,10 +157,14 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   footerText: {
-    fontSize: 16,
+    fontSize: 15,
+    fontFamily: 'Montserrat_500Medium',
+    color: theme.colors.textLight,
   },
   link: {
-    fontSize: 16,
+    fontSize: 15,
+    fontFamily: 'Montserrat_700Bold',
+    color: theme.colors.primary,
     textDecorationLine: 'underline',
   }
 });

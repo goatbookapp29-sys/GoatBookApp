@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
@@ -10,6 +10,7 @@ import { ArrowLeft } from 'lucide-react-native';
 
 const RegisterScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   // Form state to store user and farm details
   const [formData, setFormData] = useState({
     firstName: '',
@@ -79,23 +80,23 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, { backgroundColor: theme.colors.surface }]}
+      style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => navigation.goBack()}
         >
-          <ArrowLeft color={theme.colors.primary} size={32} />
+          <ArrowLeft color={theme.colors.primary} size={30} />
         </TouchableOpacity>
 
         <View style={styles.titleContainer}>
-            <Text style={[styles.mainTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold }]}>Register</Text>
-            <Text style={[styles.subTitle, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>Start your journey to smarter goat farming.</Text>
+            <Text style={styles.mainTitle}>Register</Text>
+            <Text style={styles.subTitle}>Start your journey to smarter goat farming.</Text>
         </View>
 
         <View style={styles.form}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold }]}>Personal Details</Text>
+            <Text style={styles.sectionTitle}>Personal Details</Text>
             <View style={styles.row}>
                 <View style={{ flex: 1, marginRight: 8 }}>
                     <GInput 
@@ -148,7 +149,7 @@ const RegisterScreen = ({ navigation }) => {
                 required 
             />
 
-            <Text style={[styles.sectionTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold, marginTop: 24 }]}>Farm Details</Text>
+            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Farm Details</Text>
             <GInput 
                 label="Farm Name" 
                 value={formData.farmName} 
@@ -170,9 +171,9 @@ const RegisterScreen = ({ navigation }) => {
             />
 
             <View style={styles.footer}>
-                <Text style={[styles.footerText, { color: theme.colors.textLight, fontFamily: theme.typography.medium }]}>Already have an account? </Text>
+                <Text style={styles.footerText}>Already have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                    <Text style={[styles.link, { color: theme.colors.primary, fontFamily: theme.typography.medium }]}>Login</Text>
+                    <Text style={styles.link}>Login</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -181,9 +182,10 @@ const RegisterScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -199,19 +201,30 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   mainTitle: {
-    fontSize: 28,
-    letterSpacing: -0.5,
+    fontSize: 32,
+    fontFamily: 'Montserrat_700Bold',
+    color: theme.colors.primary,
+    letterSpacing: -1,
   },
   subTitle: {
     fontSize: 16,
     marginTop: 8,
+    fontFamily: 'Montserrat_500Medium',
+    color: theme.colors.textLight,
   },
   form: {
     flex: 1,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
+    fontFamily: 'Montserrat_700Bold',
+    color: theme.colors.primary,
     marginBottom: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    borderBottomWidth: 1.5,
+    borderBottomColor: theme.colors.border,
+    paddingBottom: 8,
   },
   row: {
     flexDirection: 'row',
@@ -229,10 +242,14 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   footerText: {
-    fontSize: 16,
+    fontSize: 15,
+    fontFamily: 'Montserrat_500Medium',
+    color: theme.colors.textLight,
   },
   link: {
-    fontSize: 16,
+    fontSize: 15,
+    fontFamily: 'Montserrat_700Bold',
+    color: theme.colors.primary,
     textDecorationLine: 'underline',
   }
 });

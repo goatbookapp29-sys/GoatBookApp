@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
@@ -7,6 +7,8 @@ import { ClipboardList, Heart, Calculator, Printer } from 'lucide-react-native';
 
 const ReportsMenuScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
+  
   // Menu items for the reports center
   const options = [
     { 
@@ -43,11 +45,11 @@ const ReportsMenuScreen = ({ navigation }) => {
           {options.map((item) => (
             <TouchableOpacity 
               key={item.id} 
-              style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }, !item.onPress && styles.disabledCard]} 
+              style={[styles.card, !item.onPress && styles.disabledCard]} 
               onPress={item.onPress || (() => {})}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#FFFFFF' }]}>
+              <View style={styles.iconContainer}>
                 {item.icon}
               </View>
               <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
@@ -59,10 +61,9 @@ const ReportsMenuScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   content: {
     padding: 16,
@@ -76,18 +77,13 @@ const styles = StyleSheet.create({
   card: {
     width: '48%',
     height: 160,
-    borderRadius: 8,
-    backgroundColor: '#FFF',
+    borderRadius: 12,
+    backgroundColor: theme.colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1.5,
+    borderColor: theme.colors.border,
   },
   disabledCard: {
     opacity: 0.5,
@@ -99,6 +95,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: isDarkMode ? '#1E293B' : '#F9FAFB',
   },
   cardTitle: {
     fontSize: 14,

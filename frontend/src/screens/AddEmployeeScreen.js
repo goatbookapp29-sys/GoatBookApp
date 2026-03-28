@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
@@ -10,7 +10,8 @@ import api from '../api';
 import { KeyRound, Mail, User } from 'lucide-react-native';
 
 const AddEmployeeScreen = ({ navigation, route }) => {
-  const { theme } = useTheme();
+  const { isDarkMode, theme } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const isEditing = !!route.params?.employee;
   const existingEmployee = route.params?.employee;
 
@@ -175,7 +176,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -185,6 +186,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: SPACING.lg,
     flexGrow: 1,
+    paddingBottom: 40,
   },
   section: {
     marginBottom: SPACING.xl,
@@ -192,12 +194,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Montserrat_700Bold',
     marginBottom: SPACING.md,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomWidth: 1.5,
+    borderBottomColor: theme.colors.border,
     paddingBottom: 8,
   },
   gap: {
@@ -205,17 +207,20 @@ const styles = StyleSheet.create({
   },
   resetSection: {
     marginTop: SPACING.md,
-    padding: SPACING.md,
+    padding: SPACING.lg,
     borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
   },
   resetTrigger: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SPACING.sm,
+    padding: SPACING.xs,
   },
   resetTriggerText: {
     marginLeft: 12,
-    fontWeight: '600',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   resetBox: {
     marginTop: SPACING.sm,
@@ -227,14 +232,14 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   cancelText: {
-    fontWeight: '600',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   confirmText: {
-    fontWeight: '700',
+    fontFamily: 'Montserrat_700Bold',
   },
   footer: {
-    marginTop: 'auto',
     paddingVertical: SPACING.xl,
+    marginTop: 'auto',
   }
 });
 

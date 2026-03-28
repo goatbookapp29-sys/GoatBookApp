@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
@@ -16,6 +16,7 @@ const AnimalListScreen = ({ navigation, route }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const searchBarTranslateY = useRef(new Animated.Value(-100)).current;
 
   useFocusEffect(
@@ -120,7 +121,7 @@ const AnimalListScreen = ({ navigation, route }) => {
         <Text style={[styles.tagNumber, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
         <Text style={[styles.breedName, { color: theme.colors.textLight }]}>{item.Breed?.name} • {item.gender}</Text>
         {item.Location && (
-          <View style={[styles.locationTag, { backgroundColor: isDarkMode ? '#334155' : '#F3F4F6' }]}>
+          <View style={[styles.locationTag, { backgroundColor: isDarkMode ? '#222' : '#F3F4F6' }]}>
             <MapPin size={12} color={theme.colors.textLight} style={styles.locIcon} />
             <Text style={[styles.locationName, { color: theme.colors.textLight }]}>{item.Location.name}</Text>
           </View>
@@ -159,7 +160,7 @@ const AnimalListScreen = ({ navigation, route }) => {
 
       {isSearching && (
         <Animated.View style={[styles.searchBarContainer, { backgroundColor: theme.colors.surface, transform: [{ translateY: searchBarTranslateY }] }]}>
-          <View style={[styles.searchInner, { backgroundColor: theme.colors.background }]}>
+          <View style={[styles.searchInner, { backgroundColor: isDarkMode ? '#000' : '#F9FAFB' }]}>
             <Search size={20} color={theme.colors.textLight} style={styles.searchIcon} />
             <TextInput
               style={[styles.searchInput, { color: theme.colors.text }]}
@@ -208,15 +209,18 @@ const AnimalListScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   searchBarContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    ...lightTheme.shadow.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: isDarkMode ? 0.3 : 0.05,
+    shadowRadius: 2,
+    elevation: 2,
     zIndex: 5,
   },
   searchInner: {
@@ -249,7 +253,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 14,
-    ...lightTheme.shadow.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   plusIcon: {
     marginRight: 8,
@@ -273,23 +281,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     marginBottom: 12,
-    borderRadius: 8,
-    backgroundColor: '#FFF',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: isDarkMode ? 0.3 : 0.05,
     shadowRadius: 2,
     elevation: 2,
-  },
-  iconBox: {
-    width: 52,
-    height: 52,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
   },
   animalInfo: {
     flex: 1,
@@ -297,13 +295,11 @@ const styles = StyleSheet.create({
   tagNumber: {
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#1F2937',
   },
   breedName: {
     fontSize: 14,
     marginTop: 4,
     fontFamily: 'Montserrat_500Medium',
-    color: '#6B7280',
   },
   locationTag: {
     flexDirection: 'row',

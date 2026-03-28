@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import GInput from '../components/GInput';
@@ -7,7 +7,8 @@ import api from '../api';
 import { ArrowLeft } from 'lucide-react-native';
 
 const ForgotPasswordScreen = ({ navigation }) => {
-  const { theme } = useTheme();
+  const { isDarkMode, theme } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const [identifier, setIdentifier] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -33,20 +34,20 @@ const ForgotPasswordScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-      style={[styles.container, { backgroundColor: theme.colors.surface }]}
+      style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => navigation.goBack()}
         >
-          <ArrowLeft color={theme.colors.primary} size={32} />
+          <ArrowLeft color={theme.colors.primary} size={30} />
         </TouchableOpacity>
 
         <View style={styles.formWrapper}>
             <View style={styles.titleContainer}>
-                <Text style={[styles.mainTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold }]}>Forgot Password</Text>
-                <Text style={[styles.subTitle, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>Enter your email or phone to receive a reset code.</Text>
+                <Text style={styles.mainTitle}>Forgot Password</Text>
+                <Text style={styles.subTitle}>Enter your email or phone to receive a reset code.</Text>
             </View>
 
             <View style={styles.form}>
@@ -72,9 +73,10 @@ const ForgotPasswordScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -92,12 +94,16 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   mainTitle: {
-    fontSize: 28,
-    letterSpacing: -0.5,
+    fontSize: 32,
+    fontFamily: 'Montserrat_700Bold',
+    color: theme.colors.primary,
+    letterSpacing: -1,
   },
   subTitle: {
     fontSize: 16,
     marginTop: 8,
+    fontFamily: 'Montserrat_500Medium',
+    color: theme.colors.textLight,
   },
   form: {
     flex: 1,

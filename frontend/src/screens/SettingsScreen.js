@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
@@ -8,6 +8,7 @@ import api from '../api';
 
 const SettingsScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -67,14 +68,14 @@ const SettingsScreen = ({ navigation }) => {
             {visibleOptions.map((item) => (
               <TouchableOpacity 
                 key={item.id} 
-                style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} 
+                style={styles.card} 
                 onPress={item.onPress}
                 activeOpacity={0.7}
               >
-                <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#F9FAFB' }]}>
+                <View style={styles.iconContainer}>
                   {item.icon}
                 </View>
-                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
+                <Text style={styles.cardTitle}>{item.title}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -84,7 +85,7 @@ const SettingsScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -109,17 +110,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.md,
     borderWidth: 1.5,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
   },
   iconContainer: {
     marginBottom: SPACING.md,
     padding: 16,
     borderRadius: 16,
+    backgroundColor: isDarkMode ? '#1A1A1A' : '#F9FAFB',
   },
   cardTitle: {
     fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
     textAlign: 'center',
     letterSpacing: -0.2,
+    color: theme.colors.text,
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
@@ -10,6 +10,7 @@ import { COLORS, SPACING, SHADOW } from '../theme';
 
 const WeightListScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const [weights, setWeights] = useState([]);
   const [filteredWeights, setFilteredWeights] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,8 +88,7 @@ const WeightListScreen = ({ navigation }) => {
   };
 
   const renderWeightItem = ({ item }) => (
-    <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-
+    <View style={styles.card}>
       <View style={styles.mainInfo}>
         <Text style={[styles.tagText, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
         <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{item.date}</Text>
@@ -101,7 +101,7 @@ const WeightListScreen = ({ navigation }) => {
         style={styles.deleteBtn} 
         onPress={() => handleDelete(item.id)}
       >
-        <Trash2 size={20} color="#EF4444" />
+        <Trash2 size={20} color={theme.colors.error} />
       </TouchableOpacity>
     </View>
   );
@@ -111,7 +111,7 @@ const WeightListScreen = ({ navigation }) => {
       <GHeader title="Weight Records" subTitle="Performance Tracking" onBack={() => navigation.goBack()} />
       
       <View style={styles.content}>
-        <View style={[styles.searchContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+        <View style={styles.searchContainer}>
           <Search size={20} color={theme.colors.textLight} />
           <TextInput
             style={[styles.searchInput, { color: theme.colors.text }]}
@@ -150,16 +150,15 @@ const WeightListScreen = ({ navigation }) => {
         style={[styles.fab, { backgroundColor: theme.colors.primary, ...theme.shadow.lg }]} 
         onPress={() => navigation.navigate('AddWeight')}
       >
-        <Plus size={30} color="white" />
+        <Plus size={30} color="#FFF" />
       </TouchableOpacity>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
   },
   content: {
     padding: SPACING.md,
@@ -173,12 +172,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: SPACING.md,
     borderWidth: 1.5,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
   },
   searchInput: {
     flex: 1,
     marginLeft: 12,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   list: {
     paddingBottom: 80,
@@ -187,38 +188,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 8,
-    backgroundColor: '#FFF',
+    borderRadius: 12,
+    backgroundColor: theme.colors.surface,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  iconBox: {
-    width: 52,
-    height: 52,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
+    borderColor: theme.colors.border,
   },
   mainInfo: {
     flex: 1,
   },
   tagText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#1F2937',
+    fontFamily: 'Montserrat_700Bold',
   },
   dateText: {
     fontSize: 14,
     marginTop: 4,
-    fontWeight: '500',
-    color: '#6B7280',
+    fontFamily: 'Montserrat_500Medium',
   },
   statsBox: {
     alignItems: 'flex-end',
@@ -226,11 +212,11 @@ const styles = StyleSheet.create({
   },
   weightValue: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: 'Montserrat_700Bold',
   },
   heightValue: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: 'Montserrat_500Medium',
   },
   deleteBtn: {
     padding: 8,
@@ -247,7 +233,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 22,
-    fontWeight: '600',
+    fontFamily: 'Montserrat_600SemiBold',
     marginTop: 20,
     textAlign: 'center',
   },
@@ -256,7 +242,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 20,
-    fontWeight: '600',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   fab: {
     position: 'absolute',

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, SHADOW, lightTheme } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
@@ -9,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 const BreedDetailsScreen = ({ navigation, route }) => {
   const { isDarkMode, theme } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const { breedId } = route.params;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -53,8 +54,7 @@ const BreedDetailsScreen = ({ navigation, route }) => {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Basic Info */}
-        <View style={[styles.infoCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-
+        <View style={styles.infoCard}>
           <Text style={[styles.breedName, { color: theme.colors.text }]}>{breed.name}</Text>
           <Text style={[styles.animalType, { color: theme.colors.textLight }]}>{breed.animalType}</Text>
           
@@ -70,11 +70,11 @@ const BreedDetailsScreen = ({ navigation, route }) => {
         
         {/* Navigation Button */}
         <TouchableOpacity 
-          style={[styles.actionButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+          style={styles.actionButton}
           onPress={() => navigation.navigate('AnimalList', { breedId: breed.id, initialSearch: breed.name })}
           activeOpacity={0.8}
         >
-          <View style={[styles.actionIcon, { backgroundColor: isDarkMode ? '#1E293B' : '#EEF2FF' }]}>
+          <View style={styles.actionIcon}>
             <ClipboardList size={22} color={theme.colors.primary} />
           </View>
           <View style={styles.actionTextContent}>
@@ -92,7 +92,7 @@ const BreedDetailsScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -103,37 +103,22 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   infoCard: {
-    borderRadius: 8,
-    backgroundColor: '#FFF',
+    borderRadius: 12,
+    backgroundColor: theme.colors.surface,
     padding: 24,
     alignItems: 'center',
     marginBottom: 32,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  iconBox: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: theme.colors.border,
   },
   breedName: {
     fontSize: 22,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#1F2937',
   },
   animalType: {
     fontSize: 15,
     fontFamily: 'Montserrat_500Medium',
     marginTop: 4,
-    color: '#6B7280',
   },
   divider: {
     height: 1,
@@ -148,7 +133,6 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 22,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#1F2937',
   },
   statLabel: {
     fontSize: 14,
@@ -157,24 +141,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#6B7280',
     marginBottom: 16,
     marginLeft: 4,
     textTransform: 'uppercase',
   },
   actionButton: {
-    borderRadius: 8,
-    backgroundColor: '#FFF',
+    borderRadius: 12,
+    backgroundColor: theme.colors.surface,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1.5,
+    borderColor: theme.colors.border,
   },
   actionIcon: {
     width: 48,
@@ -183,6 +161,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
+    backgroundColor: isDarkMode ? '#1E293B' : '#EEF2FF',
   },
   actionTextContent: {
     flex: 1,
@@ -190,13 +169,11 @@ const styles = StyleSheet.create({
   actionTitle: {
     fontSize: 16,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#1F2937',
   },
   actionSubtitle: {
     fontSize: 14,
     marginTop: 4,
     fontFamily: 'Montserrat_400Regular',
-    color: '#6B7280',
   },
   footerInfo: {
     marginTop: 32,

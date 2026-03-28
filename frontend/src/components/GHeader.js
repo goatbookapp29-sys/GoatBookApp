@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../theme/ThemeContext';
-import { ArrowLeft, Menu } from 'lucide-react-native';
+import { ArrowLeft, Menu, Sun, Moon } from 'lucide-react-native';
 
 /**
  * Global Header Component
@@ -15,7 +15,7 @@ import { ArrowLeft, Menu } from 'lucide-react-native';
  * - subTitle: Small text below the title
  */
 const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) => {
-  const { theme } = useTheme();
+  const { theme, isDarkMode, toggleTheme } = useTheme();
 
   return (
     <View style={[styles.outerContainer, { backgroundColor: theme.colors.primary, ...theme.shadow.md }]}>
@@ -32,7 +32,9 @@ const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) =
               <TouchableOpacity onPress={onMenu} style={styles.backButton} activeOpacity={0.7}>
                 <Menu color={theme.colors.white} size={28} />
               </TouchableOpacity>
-            ) : null}
+            ) : (
+              <View style={{ width: 10 }} />
+            )}
           </View>
           
           <View style={styles.titleContainer}>
@@ -96,6 +98,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   rightButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+  },
+  themeToggle: {
     width: 44,
     height: 44,
     justifyContent: 'center',
