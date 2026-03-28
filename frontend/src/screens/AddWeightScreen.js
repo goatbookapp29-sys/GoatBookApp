@@ -113,13 +113,13 @@ const AddWeightScreen = ({ route, navigation }) => {
           </View>
 
           {fetchingAnimal && (
-            <View style={[styles.infoBox, { backgroundColor: theme.colors.surface }]}>
+            <View style={[styles.infoBox, { backgroundColor: theme.colors.background }]}>
               <Text style={[styles.infoText, { color: theme.colors.textMuted }]}>Fetching animal details...</Text>
             </View>
           )}
 
           {animalInfo && (
-            <View style={[styles.animalDetailCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <View style={[styles.animalDetailCard, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}>
                <View style={styles.detailRow}>
                 <Info size={16} color={theme.colors.primary} />
                 <Text style={[styles.detailLabel, { color: theme.colors.textLight }]}>Breed: </Text>
@@ -142,7 +142,7 @@ const AddWeightScreen = ({ route, navigation }) => {
           />
 
           <GInput 
-            label="Weight (KG)" 
+            label="Weight" 
             value={weight} 
             onChangeText={setWeight} 
             keyboardType="decimal-pad"
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '400',
   },
   animalDetailCard: {
     padding: 16,
@@ -221,12 +221,12 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '500',
     marginLeft: 10,
   },
   detailValue: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '600',
   },
   submitBtn: {
     marginTop: 10,

@@ -75,7 +75,7 @@ const OverallReportScreen = ({ navigation }) => {
             y={center - 10}
             textAnchor="middle"
             fontSize="16"
-            fontWeight="bold"
+            fontWeight="600"
             fill={theme.colors.text}
           >
             Total
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   chartTitle: {
     alignSelf: 'flex-start',
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '600',
     marginBottom: 20,
     letterSpacing: -0.5,
   },
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   listSection: {
     paddingHorizontal: 16,
@@ -274,12 +274,12 @@ const styles = StyleSheet.create({
   statLabel: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '600',
   },
   statValue: {
     color: 'white',
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '600',
   },
 });
 

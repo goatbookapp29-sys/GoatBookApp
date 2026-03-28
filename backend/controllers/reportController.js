@@ -1,15 +1,14 @@
-const { Animal, Breed, VaccinationRecord } = require('../models');
-const { Op, fn, col, literal } = require('sequelize');
+const prisma = require('../config/prisma');
 
 exports.getOverallReport = async (req, res) => {
   try {
     const farmId = req.farmId;
     if (!farmId) return res.status(400).json({ message: 'No farm selected' });
 
-    // Fetch all animals for the farm
-    const animals = await Animal.findAll({
-      where: { farmId, status: 'LIVE' },
-      attributes: ['gender', 'birthDate', 'isBreeder', 'femaleCondition']
+    // Fetch all live animals for the farm
+    const animals = await prisma.animals.findMany({
+      where: { farm_id: farmId, status: 'LIVE' },
+      select: { gender: true, birth_date: true, is_breeder: true, female_condition: true }
     });
 
     const now = new Date();
@@ -31,15 +30,15 @@ exports.getOverallReport = async (req, res) => {
       if (animal.gender === 'MALE') stats.male++;
       if (animal.gender === 'FEMALE') {
         stats.female++;
-        if (animal.femaleCondition === 'PREGNANT') stats.pregnant++;
+        if (animal.female_condition === 'PREGNANT') stats.pregnant++;
       }
       
       // Breeder
-      if (animal.isBreeder) stats.breeder++;
+      if (animal.is_breeder) stats.breeder++;
 
       // Age Breakdown
-      if (animal.birthDate) {
-        const birthDate = new Date(animal.birthDate);
+      if (animal.birth_date) {
+        const birthDate = new Date(animal.birth_date);
         const ageInMonths = (now.getFullYear() - birthDate.getFullYear()) * 12 + (now.getMonth() - birthDate.getMonth());
         
         if (ageInMonths >= 0 && ageInMonths < 3) stats.kids0_3++;

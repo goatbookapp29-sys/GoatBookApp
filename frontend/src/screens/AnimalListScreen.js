@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, Bug, X, MapPin } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, SearchX, X, MapPin } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
@@ -115,9 +115,7 @@ const AnimalListScreen = ({ navigation, route }) => {
       style={[styles.animalItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
       onPress={() => navigation.navigate('EditAnimal', { animal: item })}
     >
-      <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1E293B' : '#FFF1EA' }]}>
-        <Bug size={24} color={theme.colors.primary} />
-      </View>
+
       <View style={styles.animalInfo}>
         <Text style={[styles.tagNumber, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
         <Text style={[styles.breedName, { color: theme.colors.textLight }]}>{item.Breed?.name} • {item.gender}</Text>
@@ -137,7 +135,7 @@ const AnimalListScreen = ({ navigation, route }) => {
 
   const EmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Bug size={64} color={theme.colors.border} />
+      <SearchX size={64} color={theme.colors.border} />
       <Text style={[styles.noRecords, { color: theme.colors.text }]}>
         {searchQuery ? "No matching animals found" : "No Animals found"}
       </Text>
@@ -212,6 +210,7 @@ const AnimalListScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   searchBarContainer: {
     paddingHorizontal: 16,
@@ -233,12 +232,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     paddingVertical: 8,
-    fontWeight: '500',
+    fontFamily: 'Montserrat_500Medium',
   },
   actionRow: {
     padding: 16,
     paddingBottom: 8,
     alignItems: 'flex-end',
+    maxWidth: 768,
+    width: '100%',
+    alignSelf: 'center',
   },
   addButton: {
     flexDirection: 'row',
@@ -253,7 +255,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: 'white',
-    fontWeight: '800',
+    fontFamily: 'Montserrat_600SemiBold',
     fontSize: 14,
   },
   listContent: {
@@ -261,20 +263,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 40,
+    maxWidth: 768,
+    width: '100%',
+    alignSelf: 'center',
   },
   animalItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     marginBottom: 12,
-    borderRadius: 20,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
     borderWidth: 1,
-    ...lightTheme.shadow.sm,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   iconBox: {
     width: 52,
     height: 52,
-    borderRadius: 16,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -283,13 +294,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tagNumber: {
-    fontSize: 18,
-    fontWeight: '900',
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: '#1F2937',
   },
   breedName: {
     fontSize: 14,
-    marginTop: 2,
-    fontWeight: '600',
+    marginTop: 4,
+    fontFamily: 'Montserrat_500Medium',
+    color: '#6B7280',
   },
   locationTag: {
     flexDirection: 'row',
@@ -305,7 +318,7 @@ const styles = StyleSheet.create({
   },
   locationName: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   emptyContainer: {
     flex: 1,
@@ -315,8 +328,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   noRecords: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 18,
+    fontFamily: 'Montserrat_500Medium',
     marginTop: 24,
     marginBottom: 8,
   },
@@ -324,7 +337,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
-    fontWeight: '500',
+    fontFamily: 'Montserrat_400Regular',
   },
   center: {
     flex: 1,
@@ -339,7 +352,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontFamily: 'Montserrat_700Bold',
     color: 'white',
   },
   statusLIVE: { backgroundColor: '#10B981' },

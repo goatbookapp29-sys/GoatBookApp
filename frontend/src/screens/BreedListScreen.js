@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, X, Ghost } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, X, SearchX } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
@@ -87,9 +87,7 @@ const BreedListScreen = ({ navigation }) => {
       onPress={() => navigation.navigate('BreedDetails', { breedId: item.id })}
       activeOpacity={0.7}
     >
-      <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1E293B' : '#FFF1EA' }]}>
-        <Ghost size={24} color={theme.colors.primary} />
-      </View>
+
       <View style={styles.breedInfo}>
         <Text style={[styles.breedName, { color: theme.colors.text }]}>{item.name}</Text>
         <Text style={[styles.animalType, { color: theme.colors.textLight }]}>{item.animalType}</Text>
@@ -151,7 +149,7 @@ const BreedListScreen = ({ navigation }) => {
           keyExtractor={item => item.id}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-                <Ghost size={64} color={theme.colors.border} />
+                <SearchX size={64} color={theme.colors.border} />
                 <Text style={[styles.noRecords, { color: theme.colors.text }]}>No Breeds Found</Text>
                 <Text style={[styles.emptyDesc, { color: theme.colors.textLight }]}>Register different breeds to categorize your livestock.</Text>
             </View>
@@ -167,6 +165,7 @@ const BreedListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   searchBarContainer: {
     paddingHorizontal: 16,
@@ -188,12 +187,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     paddingVertical: 8,
-    fontWeight: '500',
+    fontFamily: 'Montserrat_500Medium',
   },
   actionRow: {
     padding: 16,
     paddingBottom: 8,
     alignItems: 'flex-end',
+    maxWidth: 768,
+    width: '100%',
+    alignSelf: 'center',
   },
   addButton: {
     flexDirection: 'row',
@@ -208,28 +210,37 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: 'white',
-    fontWeight: '800',
+    fontFamily: 'Montserrat_600SemiBold',
     fontSize: 14,
   },
   listContent: {
     flexGrow: 1,
     paddingHorizontal: 16,
-    paddingBottom: 40,
     paddingTop: 16,
+    paddingBottom: 40,
+    maxWidth: 768,
+    width: '100%',
+    alignSelf: 'center',
   },
   breedCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    ...lightTheme.shadow.sm,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   iconBox: {
     width: 48,
     height: 48,
-    borderRadius: 14,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -238,15 +249,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   breedName: {
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: -0.5,
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: '#1F2937',
   },
   animalType: {
-    fontSize: 13,
-    marginTop: 2,
-    fontWeight: '600',
-    textTransform: 'uppercase',
+    fontSize: 14,
+    marginTop: 4,
+    fontFamily: 'Montserrat_500Medium',
+    color: '#6B7280',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -254,15 +265,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   noRecords: {
-    fontSize: 20,
-    fontWeight: '900',
+    fontSize: 18,
+    fontFamily: 'Montserrat_500Medium',
     marginTop: 16,
   },
   emptyDesc: {
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 20,
-    fontWeight: '500',
+    fontFamily: 'Montserrat_400Regular',
   },
   center: {
     flex: 1,

@@ -211,6 +211,10 @@ const styles = StyleSheet.create({
   },
   halfBtn: {
     width: '48%',
+  },
+  formContainer: {
+    backgroundColor: 'white',
+    paddingTop: 8,
   }
 });
 

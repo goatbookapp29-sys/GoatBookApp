@@ -38,9 +38,6 @@ const GHeader = ({ title, onBack, rightIcon, onRightPress, subTitle }) => {
 const styles = StyleSheet.create({
   outerContainer: {
     zIndex: 10,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    paddingBottom: 4,
   },
   safeArea: {
     backgroundColor: 'transparent',
@@ -67,14 +64,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '900',
+    fontSize: 20,
+    fontFamily: 'Montserrat_600SemiBold',
     letterSpacing: -0.5,
     textAlign: 'center',
   },
   subTitle: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11,
+    fontFamily: 'Montserrat_500Medium',
     marginTop: -2,
     opacity: 0.9,
     textTransform: 'uppercase',

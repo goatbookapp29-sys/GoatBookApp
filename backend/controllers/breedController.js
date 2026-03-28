@@ -1,4 +1,5 @@
-const { Breed, Animal, Location } = require('../models');
+const prisma = require('../config/prisma');
+const { v4: uuidv4 } = require('uuid');
 
 // @desc    Get all breeds for the current farm
 exports.getBreeds = async (req, res) => {
@@ -7,11 +8,20 @@ exports.getBreeds = async (req, res) => {
       return res.status(400).json({ message: 'No farm selected' });
     }
 
-    const breeds = await Breed.findAll({
-      where: { farmId: req.farmId },
-      order: [['name', 'ASC']]
+    const breeds = await prisma.breeds.findMany({
+      where: { farm_id: req.farmId },
+      orderBy: { name: 'asc' }
     });
-    res.json(breeds);
+
+    // Map to camelCase for frontend
+    res.json(breeds.map(b => ({
+      id: b.id,
+      name: b.name,
+      animalType: b.animal_type,
+      farmId: b.farm_id,
+      createdAt: b.created_at,
+      updatedAt: b.updated_at
+    })));
   } catch (err) {
     console.error('FETCH BREEDS ERROR:', err);
     res.status(500).json({ message: 'Server Error', error: err.message });
@@ -26,13 +36,26 @@ exports.addBreed = async (req, res) => {
       return res.status(400).json({ message: 'No farm selected' });
     }
 
-    const breed = await Breed.create({
-      name,
-      animalType: animalType || 'Goat',
-      farmId: req.farmId,
-      createdByUserId: req.user.id
+    const now = new Date();
+    const breed = await prisma.breeds.create({
+      data: {
+        id: uuidv4(),
+        name,
+        animal_type: animalType || 'Goat',
+        farm_id: req.farmId,
+        created_by_user_id: req.user.id,
+        created_at: now,
+        updated_at: now
+      }
     });
-    res.status(201).json(breed);
+
+    res.status(201).json({
+      id: breed.id,
+      name: breed.name,
+      animalType: breed.animal_type,
+      farmId: breed.farm_id,
+      createdAt: breed.created_at
+    });
   } catch (err) {
     console.error('ADD BREED ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
@@ -43,16 +66,26 @@ exports.addBreed = async (req, res) => {
 exports.updateBreed = async (req, res) => {
   const { name, animalType } = req.body;
   try {
-    const breed = await Breed.findOne({
-      where: { id: req.params.id, farmId: req.farmId }
+    const breed = await prisma.breeds.findFirst({
+      where: { id: req.params.id, farm_id: req.farmId }
     });
 
     if (!breed) {
       return res.status(404).json({ message: 'Breed not found in this farm' });
     }
 
-    await breed.update({ name, animalType, updatedByUserId: req.user.id });
-    res.json(breed);
+    const updated = await prisma.breeds.update({
+      where: { id: req.params.id },
+      data: { name, animal_type: animalType, updated_by_user_id: req.user.id, updated_at: new Date() }
+    });
+
+    res.json({
+      id: updated.id,
+      name: updated.name,
+      animalType: updated.animal_type,
+      farmId: updated.farm_id,
+      updatedAt: updated.updated_at
+    });
   } catch (err) {
     console.error('UPDATE BREED ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
@@ -62,8 +95,8 @@ exports.updateBreed = async (req, res) => {
 // @desc    Delete a breed
 exports.deleteBreed = async (req, res) => {
   try {
-    const breed = await Breed.findOne({
-      where: { id: req.params.id, farmId: req.farmId }
+    const breed = await prisma.breeds.findFirst({
+      where: { id: req.params.id, farm_id: req.farmId }
     });
 
     if (!breed) {
@@ -71,12 +104,12 @@ exports.deleteBreed = async (req, res) => {
     }
 
     // Check if animals are using this breed
-    const animalCount = await Animal.count({ where: { breedId: breed.id } });
+    const animalCount = await prisma.animals.count({ where: { breed_id: breed.id } });
     if (animalCount > 0) {
       return res.status(400).json({ message: 'Cannot delete breed that is assigned to animals' });
     }
 
-    await breed.destroy();
+    await prisma.breeds.delete({ where: { id: req.params.id } });
     res.json({ message: 'Breed removed' });
   } catch (err) {
     console.error('DELETE BREED ERROR:', err);
@@ -90,19 +123,19 @@ exports.getBreedStats = async (req, res) => {
     const { id } = req.params;
     
     // Check if breed exists and belongs to farm
-    const breed = await Breed.findOne({ where: { id, farmId: req.farmId } });
+    const breed = await prisma.breeds.findFirst({ where: { id, farm_id: req.farmId } });
     if (!breed) return res.status(404).json({ message: 'Breed not found' });
 
     // Fetch animals of this breed with their location info
-    const animals = await Animal.findAll({
-      where: { breedId: id, farmId: req.farmId },
-      include: [{ model: Location, attributes: ['name', 'code', 'type'] }]
+    const animals = await prisma.animals.findMany({
+      where: { breed_id: id, farm_id: req.farmId },
+      include: { locations: { select: { name: true, code: true, type: true } } }
     });
 
     // Group animals by location
     const distribution = {};
     animals.forEach(animal => {
-      const locName = animal.Location?.name || 'Unassigned';
+      const locName = animal.locations?.name || 'Unassigned';
       if (!distribution[locName]) {
         distribution[locName] = {
           locationName: locName,
@@ -113,14 +146,14 @@ exports.getBreedStats = async (req, res) => {
       distribution[locName].count += 1;
       distribution[locName].animals.push({
           id: animal.id,
-          tagNumber: animal.tagNumber,
+          tagNumber: animal.tag_number,
           gender: animal.gender,
-          Location: animal.Location
+          Location: animal.locations
       });
     });
 
     res.json({
-      breed,
+      breed: { id: breed.id, name: breed.name, animalType: breed.animal_type },
       totalAnimals: animals.length,
       distribution: Object.values(distribution)
     });

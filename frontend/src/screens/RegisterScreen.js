@@ -6,13 +6,16 @@ import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import api, { setAuthToken, setSelectedFarm } from '../api';
 
+import { ArrowLeft } from 'lucide-react-native';
+
 const RegisterScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    phone: '',
     password: '',
+    confirmPassword: '',
     farmName: '',
     farmLocation: ''
   });
@@ -20,21 +23,42 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     // Basic validation
-    if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.farmName) {
-      alert('Please fill in all required fields (Name, Email, Phone, Password, and Farm Name)');
+    if (!formData.firstName || !formData.email || !formData.password || !formData.farmName) {
+      alert('Please fill in required fields');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/register', formData);
+      const payload = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        password: formData.password,
+        farmName: formData.farmName,
+        farmLocation: formData.farmLocation
+      };
+
+      const response = await api.post('/auth/register', payload);
       await setAuthToken(response.data.token);
       await setSelectedFarm(response.data.farm.id);
       setLoading(false);
       navigation.replace('Dashboard');
     } catch (error) {
       setLoading(false);
-      const message = error.response?.data?.message || 'Registration failed';
+      console.error('REGISTER ERROR FULL:', error);
+      console.error('REGISTER ERROR response:', error.response);
+      console.error('REGISTER ERROR message:', error.message);
+      let message = 'Registration failed';
+      if (error.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error.message) {
+        message = error.message;
+      }
       alert(message);
     }
   };
@@ -46,79 +70,92 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[styles.container, { backgroundColor: theme.colors.surface }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
-        <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
-            <Text style={[styles.title, { color: '#FFFFFF' }]}>Get Started</Text>
-            <Text style={[styles.subtitle, { color: 'rgba(255,255,255,0.8)' }]}>Register your farm to continue</Text>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <ArrowLeft color={theme.colors.primary} size={32} />
+        </TouchableOpacity>
+
+        <View style={styles.titleContainer}>
+            <Text style={[styles.mainTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold }]}>Register</Text>
+            <Text style={[styles.subTitle, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>Start your journey to smarter goat farming.</Text>
         </View>
 
-        <View style={styles.formContainer}>
-            <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Personal Details</Text>
+        <View style={styles.form}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold }]}>Personal Details</Text>
+            <View style={styles.row}>
+                <View style={{ flex: 1, marginRight: 8 }}>
                     <GInput 
-                        label="Full Name" 
-                        value={formData.name} 
-                        onChangeText={(v) => updateField('name', v)} 
-                        required 
-                    />
-                    <View style={styles.gap} />
-                    <GInput 
-                        label="Phone Number" 
-                        value={formData.phone} 
-                        onChangeText={(v) => updateField('phone', v)} 
-                        keyboardType="phone-pad"
-                        required 
-                    />
-                    <View style={styles.gap} />
-                    <GInput 
-                        label="Email Address" 
-                        value={formData.email} 
-                        onChangeText={(v) => updateField('email', v)} 
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        required
-                    />
-                    <View style={styles.gap} />
-                    <GInput 
-                        label="Password" 
-                        value={formData.password} 
-                        onChangeText={(v) => updateField('password', v)} 
-                        secureTextEntry 
+                        label="First Name" 
+                        value={formData.firstName} 
+                        onChangeText={(v) => updateField('firstName', v)} 
                         required 
                     />
                 </View>
-
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Farm Details</Text>
+                <View style={{ flex: 1, marginLeft: 8 }}>
                     <GInput 
-                        label="Farm Name" 
-                        value={formData.farmName} 
-                        onChangeText={(v) => updateField('farmName', v)} 
-                        required 
-                    />
-                    <View style={styles.gap} />
-                    <GInput 
-                        label="Farm Location" 
-                        value={formData.farmLocation} 
-                        onChangeText={(v) => updateField('farmLocation', v)} 
+                        label="Last Name" 
+                        value={formData.lastName} 
+                        onChangeText={(v) => updateField('lastName', v)} 
                     />
                 </View>
-
-                <GButton 
-                    title="Register Now" 
-                    onPress={handleRegister} 
-                    loading={loading}
-                    containerStyle={styles.btn}
-                />
             </View>
+            <View style={styles.gap} />
+            <GInput 
+                label="Email" 
+                value={formData.email} 
+                onChangeText={(v) => updateField('email', v)} 
+                placeholder="example@mail.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                required 
+            />
+            <View style={styles.gap} />
+            <GInput 
+                label="Password" 
+                value={formData.password} 
+                onChangeText={(v) => updateField('password', v)} 
+                secureTextEntry 
+                required 
+            />
+            <View style={styles.gap} />
+            <GInput 
+                label="Re-Type Password" 
+                value={formData.confirmPassword} 
+                onChangeText={(v) => updateField('confirmPassword', v)} 
+                secureTextEntry 
+                required 
+            />
+
+            <Text style={[styles.sectionTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold, marginTop: 24 }]}>Farm Details</Text>
+            <GInput 
+                label="Farm Name" 
+                value={formData.farmName} 
+                onChangeText={(v) => updateField('farmName', v)} 
+                required 
+            />
+            <View style={styles.gap} />
+            <GInput 
+                label="Farm Location" 
+                value={formData.farmLocation} 
+                onChangeText={(v) => updateField('farmLocation', v)} 
+            />
+
+            <GButton 
+                title="Register" 
+                onPress={handleRegister} 
+                loading={loading}
+                containerStyle={styles.nextBtn}
+            />
 
             <View style={styles.footer}>
-                <Text style={[styles.footerText, { color: theme.colors.textLight }]}>Already have an account? </Text>
+                <Text style={[styles.footerText, { color: theme.colors.textLight, fontFamily: theme.typography.medium }]}>Already have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                    <Text style={[styles.link, { color: theme.colors.primary }]}>Sign In</Text>
+                    <Text style={[styles.link, { color: theme.colors.primary, fontFamily: theme.typography.medium }]}>Login</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -133,60 +170,52 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-  },
-  header: {
-    paddingTop: 80,
-    paddingBottom: 70,
     paddingHorizontal: 24,
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
+    paddingBottom: 40,
   },
-  title: {
-    fontSize: 34,
-    fontWeight: '900',
-    letterSpacing: -1,
+  backButton: {
+    paddingTop: 40,
+    marginBottom: 20,
+    marginLeft: -8,
   },
-  subtitle: {
+  titleContainer: {
+    marginBottom: 40,
+  },
+  mainTitle: {
+    fontSize: 28,
+    letterSpacing: -0.5,
+  },
+  subTitle: {
     fontSize: 16,
-    marginTop: 6,
-    fontWeight: '600',
+    marginTop: 8,
   },
-  formContainer: {
-    paddingHorizontal: 20,
-    marginTop: -40,
-  },
-  card: {
-    borderRadius: 32,
-    padding: 24,
-    borderWidth: 1,
-  },
-  section: {
-    marginBottom: 28,
+  form: {
+    flex: 1,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    letterSpacing: 2.5,
+    fontSize: 16,
     marginBottom: 16,
   },
-  gap: {
-    height: 14,
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  btn: {
-    marginTop: 12,
+  gap: {
+    height: 16,
+  },
+  nextBtn: {
+    marginTop: 40,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 32,
-    marginBottom: 60,
+    marginTop: 30,
   },
   footerText: {
-    fontWeight: '700',
+    fontSize: 16,
   },
   link: {
-    fontWeight: '900',
+    fontSize: 16,
     textDecorationLine: 'underline',
   }
 });

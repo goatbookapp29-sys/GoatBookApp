@@ -46,7 +46,7 @@ const VaccinesMenuScreen = ({ navigation }) => {
               onPress={item.onPress}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#F3F4F6' }]}>
+              <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#FFFFFF' }]}>
                 {item.icon}
               </View>
               <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
@@ -61,6 +61,7 @@ const VaccinesMenuScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   content: {
     padding: 16,
@@ -74,24 +75,30 @@ const styles = StyleSheet.create({
   card: {
     width: '48%',
     height: 160,
-    borderRadius: 24,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    ...lightTheme.shadow.sm,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   iconContainer: {
     marginBottom: 12,
     width: 64,
     height: 64,
-    borderRadius: 20,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   cardTitle: {
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'Montserrat_600SemiBold',
     textAlign: 'center',
     paddingHorizontal: 8,
     letterSpacing: -0.2,

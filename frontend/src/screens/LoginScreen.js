@@ -20,7 +20,7 @@ const LoginScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/auth/login', { identifier: email, password });
       const { token, farms } = response.data;
       
       await setAuthToken(token);
@@ -46,25 +46,18 @@ const LoginScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[styles.container, { backgroundColor: theme.colors.surface }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
-        <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
-            <View style={[styles.logoCircle, { backgroundColor: '#FFFFFF' }]}>
-                <Text style={styles.logoText}>GB</Text>
+        <View style={styles.formWrapper}>
+            <View style={styles.titleContainer}>
+                <Text style={[styles.mainTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold }]}>Login</Text>
+                <Text style={[styles.subTitle, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>Login to Goatwala Farm APP!</Text>
             </View>
-            <Text style={[styles.appName, { color: '#FFFFFF' }]}>GoatBook</Text>
-            <Text style={[styles.appTagline, { color: 'rgba(255,255,255,0.8)' }]}>Modern Farm Management</Text>
-        </View>
 
-        <View style={styles.formContainer}>
-            <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-                <Text style={[styles.welcomeTitle, { color: theme.colors.text }]}>Welcome Back</Text>
-                <Text style={[styles.welcomeSub, { color: theme.colors.textLight }]}>Manage your farm with ease</Text>
-
-                <View style={styles.form}>
+            <View style={styles.form}>
                 <GInput 
-                    label="Email Address" 
+                    label="Email" 
                     value={email} 
                     onChangeText={setEmail} 
                     placeholder="example@mail.com"
@@ -72,7 +65,7 @@ const LoginScreen = ({ navigation }) => {
                     autoCapitalize="none"
                     required 
                 />
-                <View style={{ height: 16 }} />
+                <View style={{ height: 20 }} />
                 <GInput 
                     label="Password" 
                     value={password} 
@@ -81,23 +74,26 @@ const LoginScreen = ({ navigation }) => {
                     required 
                 />
                 
-                <TouchableOpacity style={styles.forgotPass}>
-                    <Text style={[styles.forgotText, { color: theme.colors.primary }]}>Forgot Password?</Text>
+                <TouchableOpacity 
+                    style={styles.forgotPass}
+                    onPress={() => navigation.navigate('ForgotPassword')}
+                >
+                    <Text style={[styles.forgotText, { color: theme.colors.primary, fontFamily: theme.typography.medium }]}>Forgot password?</Text>
                 </TouchableOpacity>
 
                 <GButton 
-                    title="Sign In" 
+                    title="Login" 
                     onPress={handleLogin} 
                     loading={loading}
+                    containerStyle={styles.loginBtn}
                 />
-                </View>
-            </View>
 
-            <View style={styles.footer}>
-                <Text style={[styles.footerText, { color: theme.colors.textLight }]}>New to GoatBook? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <Text style={[styles.link, { color: theme.colors.primary }]}>Create Account</Text>
-                </TouchableOpacity>
+                <View style={styles.footer}>
+                    <Text style={[styles.footerText, { color: theme.colors.textLight, fontFamily: theme.typography.medium }]}>Don’t have an account? </Text>
+                    <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                        <Text style={[styles.link, { color: theme.colors.primary, fontFamily: theme.typography.medium }]}>Register</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
       </ScrollView>
@@ -111,84 +107,48 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingHorizontal: 24,
   },
-  header: {
+  formWrapper: {
     paddingTop: 80,
-    paddingBottom: 70,
-    alignItems: 'center',
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
+    flex: 1,
   },
-  logoCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
+  titleContainer: {
+    marginBottom: 60,
   },
-  logoText: {
-    fontSize: 44,
-    fontWeight: '900',
-    color: '#312E81',
-  },
-  appName: {
-    fontSize: 34,
-    fontWeight: '900',
-    marginTop: 16,
+  mainTitle: {
+    fontSize: 28,
     letterSpacing: -0.5,
   },
-  appTagline: {
-    fontSize: 14,
-    marginTop: 4,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  formContainer: {
-    paddingHorizontal: 20,
-    marginTop: -40,
-  },
-  card: {
-    borderRadius: 32,
-    padding: 24,
-    borderWidth: 1,
-  },
-  welcomeTitle: {
-    fontSize: 26,
-    fontWeight: '900',
-    textAlign: 'center',
-    letterSpacing: -0.5,
-  },
-  welcomeSub: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 6,
-    marginBottom: 32,
-    fontWeight: '600',
+  subTitle: {
+    fontSize: 16,
+    marginTop: 8,
   },
   form: {
-    marginTop: 0,
+    flex: 1,
   },
   forgotPass: {
     alignSelf: 'flex-end',
-    marginVertical: 16,
-    marginBottom: 32,
+    marginTop: 12,
+    marginBottom: 30,
   },
   forgotText: {
-    fontWeight: '800',
     fontSize: 14,
+  },
+  loginBtn: {
+    marginTop: 10,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 32,
-    marginBottom: 40,
+    marginTop: 30,
+    paddingBottom: 40,
   },
   footerText: {
-    fontWeight: '700',
+    fontSize: 16,
   },
   link: {
-    fontWeight: '900',
+    fontSize: 16,
     textDecorationLine: 'underline',
   }
 });

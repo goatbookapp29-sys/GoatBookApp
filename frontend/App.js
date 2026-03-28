@@ -4,9 +4,20 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
+import * as Font from 'expo-font';
+import { 
+  Montserrat_400Regular, 
+  Montserrat_500Medium, 
+  Montserrat_600SemiBold, 
+  Montserrat_700Bold, 
+  Montserrat_800ExtraBold 
+} from '@expo-google-fonts/montserrat';
+import * as SplashScreen from 'expo-splash-screen';
 
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
+import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import ProfileSettingsScreen from './src/screens/ProfileSettingsScreen';
@@ -36,13 +47,42 @@ import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 
 const Stack = createNativeStackNavigator();
 
+SplashScreen.preventAutoHideAsync();
+
 function AppContent() {
   const [initialRoute, setInitialRoute] = useState(null);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const { theme } = useTheme();
 
   useEffect(() => {
-    checkSession();
+    loadResources();
   }, []);
+
+  const loadResources = async () => {
+    try {
+      await Font.loadAsync({
+        Montserrat_400Regular,
+        Montserrat_500Medium,
+        Montserrat_600SemiBold,
+        Montserrat_700Bold,
+        Montserrat_800ExtraBold,
+      });
+      setFontsLoaded(true);
+      await checkSession();
+    } catch (e) {
+      console.warn(e);
+    } finally {
+      if (fontsLoaded) {
+        await SplashScreen.hideAsync();
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (fontsLoaded && initialRoute) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, initialRoute]);
 
   const checkSession = async () => {
     try {
@@ -59,7 +99,7 @@ function AppContent() {
     }
   };
 
-  if (!initialRoute) {
+  if (!fontsLoaded || !initialRoute) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.surface }}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -79,6 +119,8 @@ function AppContent() {
       >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} />

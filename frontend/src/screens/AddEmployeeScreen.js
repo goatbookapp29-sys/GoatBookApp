@@ -192,10 +192,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '900',
-    marginBottom: SPACING.lg,
+    fontWeight: '600',
+    marginBottom: SPACING.md,
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+    paddingBottom: 8,
   },
   gap: {
     height: 16,
@@ -212,7 +215,7 @@ const styles = StyleSheet.create({
   },
   resetTriggerText: {
     marginLeft: 12,
-    fontWeight: '800',
+    fontWeight: '600',
   },
   resetBox: {
     marginTop: SPACING.sm,
@@ -224,10 +227,10 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   cancelText: {
-    fontWeight: '700',
+    fontWeight: '600',
   },
   confirmText: {
-    fontWeight: '900',
+    fontWeight: '700',
   },
   footer: {
     marginTop: 'auto',

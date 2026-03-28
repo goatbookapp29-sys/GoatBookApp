@@ -69,7 +69,7 @@ const SettingsScreen = ({ navigation }) => {
                 onPress={item.onPress}
                 activeOpacity={0.7}
               >
-                <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#F3F4F6' }]}>
+                <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#F9FAFB' }]}>
                   {item.icon}
                 </View>
                 <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'Montserrat_600SemiBold',
     textAlign: 'center',
     letterSpacing: -0.2,
   },

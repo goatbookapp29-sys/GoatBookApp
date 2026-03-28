@@ -11,6 +11,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.6.0",
+    "@prisma/client": "^7.6.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -18,10 +20,12 @@
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
     "pg-hstore": "^2.3.4",
+    "resend": "^6.9.4",
     "sequelize": "^6.37.8"
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
+    "prisma": "^7.6.0",
     "sequelize-cli": "^6.6.5",
     "uuid": "^13.0.0"
   }

@@ -35,9 +35,7 @@ const EmployeeListScreen = ({ navigation }) => {
       style={[styles.item, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
       onPress={() => navigation.navigate('EditEmployee', { employee: item })}
     >
-      <View style={[styles.avatar, { backgroundColor: isDarkMode ? '#1E293B' : '#FFF1EA' }]}>
-        <User size={24} color={theme.colors.primary} />
-      </View>
+
       <View style={styles.info}>
         <Text style={[styles.name, { color: theme.colors.text }]}>{item.name}</Text>
         <Text style={[styles.role, { color: theme.colors.textLight }]}>{item.role} • {item.email}</Text>
@@ -87,6 +85,7 @@ const EmployeeListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   actionRow: {
     padding: 16,
@@ -102,7 +101,7 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: 'white',
-    fontWeight: '800',
+    fontFamily: 'Montserrat_600SemiBold',
     marginLeft: 8,
     fontSize: 14,
   },
@@ -116,14 +115,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     marginBottom: 12,
-    borderRadius: 20,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
     borderWidth: 1,
-    ...lightTheme.shadow.sm,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   avatar: {
     width: 52,
     height: 52,
-    borderRadius: 16,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -132,15 +137,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: -0.5,
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: '#1F2937',
   },
   role: {
-    fontSize: 13,
-    marginTop: 2,
-    fontWeight: '600',
-    textTransform: 'uppercase',
+    fontSize: 14,
+    marginTop: 4,
+    fontFamily: 'Montserrat_500Medium',
+    color: '#6B7280',
   },
   center: {
     flex: 1,

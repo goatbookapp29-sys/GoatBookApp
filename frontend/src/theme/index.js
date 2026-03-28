@@ -3,7 +3,7 @@ export const lightTheme = {
     primary: '#FF6B00',
     primaryDark: '#E65100',
     secondary: '#4F46E5',
-    background: '#F3F4F6',
+    background: '#FFFFFF',
     surface: '#FFFFFF',
     text: '#111827',
     textLight: '#4B5563',
@@ -15,6 +15,13 @@ export const lightTheme = {
     info: '#2563EB',
     white: '#FFFFFF',
     black: '#000000',
+  },
+  typography: {
+    regular: 'Montserrat_400Regular',
+    medium: 'Montserrat_500Medium',
+    semiBold: 'Montserrat_600SemiBold',
+    bold: 'Montserrat_700Bold',
+    extraBold: 'Montserrat_800ExtraBold',
   },
   spacing: {
     xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 40,
@@ -44,6 +51,7 @@ export const darkTheme = {
     white: '#FFFFFF',
     black: '#000000',
   },
+  typography: lightTheme.typography,
   spacing: lightTheme.spacing,
   shadow: {
     sm: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 4, elevation: 3 },

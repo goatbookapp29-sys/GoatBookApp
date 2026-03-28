@@ -84,9 +84,7 @@ const WeightListScreen = ({ navigation }) => {
 
   const renderWeightItem = ({ item }) => (
     <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-      <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1E293B' : '#FFF1EA' }]}>
-        <Scale size={24} color={theme.colors.primary} />
-      </View>
+
       <View style={styles.mainInfo}>
         <Text style={[styles.tagText, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
         <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{item.date}</Text>
@@ -157,6 +155,7 @@ const WeightListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F9FAFB',
   },
   content: {
     padding: SPACING.md,
@@ -184,15 +183,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 20,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
     marginBottom: 12,
-    borderWidth: 1.5,
-    ...SHADOW.sm,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   iconBox: {
     width: 52,
     height: 52,
-    borderRadius: 16,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -201,27 +206,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tagText: {
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: -0.5,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
   },
   dateText: {
-    fontSize: 12,
-    fontWeight: '700',
-    marginTop: 2,
-    textTransform: 'uppercase',
+    fontSize: 14,
+    marginTop: 4,
+    fontWeight: '500',
+    color: '#6B7280',
   },
   statsBox: {
     alignItems: 'flex-end',
     marginRight: 12,
   },
   weightValue: {
-    fontSize: 20,
-    fontWeight: '900',
+    fontSize: 18,
+    fontWeight: '700',
   },
   heightValue: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '500',
   },
   deleteBtn: {
     padding: 8,

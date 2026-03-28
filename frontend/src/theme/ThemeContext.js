@@ -5,14 +5,11 @@ import { lightTheme, darkTheme } from './index';
 const ThemeThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const colorScheme = useColorScheme();
-  const [isDarkMode, setIsDarkMode] = useState(colorScheme === 'dark');
+  const isDarkMode = false;
 
-  const toggleTheme = () => {
-    setIsDarkMode(prev => !prev);
-  };
+  const toggleTheme = () => {};
 
-  const theme = isDarkMode ? darkTheme : lightTheme;
+  const theme = lightTheme;
 
   return (
     <ThemeThemeContext.Provider value={{ isDarkMode, toggleTheme, theme }}>

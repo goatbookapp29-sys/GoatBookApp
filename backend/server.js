@@ -3,10 +3,12 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-const initDB = require('./dbInit');
+const prisma = require('./config/prisma');
 
-// Initialize Database
-initDB();
+// Test DB Connection on startup
+prisma.$connect()
+  .then(() => console.log('Prisma: Connected to PostgreSQL successfully.'))
+  .catch(err => console.error('Prisma: Connection failed:', err.message));
 
 // Middleware
 app.use(cors());

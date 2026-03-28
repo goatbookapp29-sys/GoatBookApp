@@ -89,7 +89,7 @@ const AddBreedScreen = ({ navigation, route }) => {
             />
           </View>
 
-          <View style={[styles.noteContainer, { backgroundColor: isDarkMode ? theme.colors.surface : '#F8FAFC', borderColor: theme.colors.border }]}>
+          <View style={[styles.noteContainer, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}>
             <Text style={[styles.note, { color: theme.colors.textMuted }]}>
               <Text style={[styles.noteBold, { color: theme.colors.primary }]}>Note : </Text>
               Manage your livestock breeds. You can specify whether a breed belongs to Goats or Sheep. 
@@ -156,10 +156,10 @@ const styles = StyleSheet.create({
   note: {
     fontSize: 13,
     lineHeight: 20,
-    fontWeight: '500',
+    fontWeight: '400',
   },
   noteBold: {
-    fontWeight: '800',
+    fontWeight: '600',
   },
   footer: {
     marginTop: 'auto',
