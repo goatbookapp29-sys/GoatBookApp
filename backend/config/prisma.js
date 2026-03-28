@@ -1,5 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 
+process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
+
 let prisma;
 
 if (process.env.NODE_ENV === 'production') {
