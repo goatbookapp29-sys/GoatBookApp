@@ -7,30 +7,31 @@ import { ClipboardList, Heart, Calculator, Printer } from 'lucide-react-native';
 
 const ReportsMenuScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
+  // Menu items for the reports center
   const options = [
     { 
       id: 'overall', 
       title: 'Animal Overall Report', 
       icon: <ClipboardList color={theme.colors.primary} size={32} />, 
-      onPress: () => navigation.navigate('OverallReport') 
+      onPress: () => navigation.navigate('OverallReport') // Link to detailed stats
     },
     { 
       id: 'condition', 
       title: 'Female Condition Report', 
       icon: <Heart color={theme.colors.primary} size={32} />, 
-      onPress: null 
+      onPress: null // Coming Soon
     },
     { 
       id: 'vaccination', 
       title: 'Vaccination Report', 
       icon: <Calculator color={theme.colors.primary} size={32} />, 
-      onPress: null 
+      onPress: null // Coming Soon
     },
     { 
       id: 'sales', 
       title: 'Generate Sales Report', 
       icon: <Printer color={theme.colors.primary} size={32} />, 
-      onPress: null 
+      onPress: null // Coming Soon
     },
   ];
 

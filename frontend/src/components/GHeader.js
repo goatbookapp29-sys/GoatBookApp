@@ -4,6 +4,16 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../theme/ThemeContext';
 import { ArrowLeft, Menu } from 'lucide-react-native';
 
+/**
+ * Global Header Component
+ * Props:
+ * - title: Screen heading
+ * - onBack: Function to run when back button is pressed (shows ArrowLeft)
+ * - onMenu: Function to open Drawer (shows Menu icon, only if onBack is not provided)
+ * - rightIcon: Component to show on the right side
+ * - onRightPress: Action for the right icon
+ * - subTitle: Small text below the title
+ */
 const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) => {
   const { theme } = useTheme();
 
@@ -13,6 +23,7 @@ const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) =
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.headerContent}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {/* Logic: Prioritize Back button over Menu button to prevent overlap */}
             {onBack ? (
               <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
                 <ArrowLeft color={theme.colors.white} size={28} />
@@ -29,6 +40,7 @@ const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) =
             {subTitle && <Text style={[styles.subTitle, { color: 'rgba(255,255,255,0.8)' }]}>{subTitle}</Text>}
           </View>
           
+          {/* Right Action Button (Optional) */}
           {rightIcon ? (
             <TouchableOpacity onPress={onRightPress} style={styles.rightButton}>
               {rightIcon}

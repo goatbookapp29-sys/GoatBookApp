@@ -22,16 +22,18 @@ const WeightListScreen = ({ navigation }) => {
     }, [])
   );
 
+  // Fetch weight records from backend and update local state + cache
   const fetchWeights = async (isRefreshing = false) => {
     try {
       if (!isRefreshing) setLoading(true);
       const response = await api.get('/weights');
       const data = response.data;
       setWeights(data);
-      applyFilter(searchQuery, data);
-      await saveToCache('weights', data);
+      applyFilter(searchQuery, data); // Refresh current search view
+      await saveToCache('weights', data); // Backup for offline access
     } catch (error) {
       console.error('Fetch weights error:', error);
+      // Fallback to cache if server is unreachable
       const cached = await getFromCache('weights');
       if (cached) {
         setWeights(cached);
@@ -43,11 +45,13 @@ const WeightListScreen = ({ navigation }) => {
     }
   };
 
+  // Intermediate search handler
   const handleSearch = (query) => {
     setSearchQuery(query);
     applyFilter(query, weights);
   };
 
+  // Main logic to filter weights by tag number
   const applyFilter = (query, data) => {
     if (!query) {
       setFilteredWeights(data);

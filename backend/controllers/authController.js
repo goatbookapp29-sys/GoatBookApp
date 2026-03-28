@@ -6,17 +6,18 @@ const { v4: uuidv4 } = require('uuid');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// @desc    Owner Registration Flow (Email + Password)
+// @desc    Owner Registration Flow (Email + Phone + Password)
 // @route   POST api/auth/register
 exports.register = async (req, res) => {
   const { name, email, phone, password, farmName, farmLocation } = req.body;
 
+  // Basic validation to ensure required fields are present
   if (!email || !password || !name || !farmName) {
     return res.status(400).json({ message: 'Name, email/phone, password, and farm name are required' });
   }
 
   try {
-    // 1. Check if user already exists by email or phone
+    // 1. Check if user already exists by either email or phone for uniqueness
     const existingUser = await prisma.users.findFirst({
       where: {
         OR: [
@@ -34,12 +35,13 @@ exports.register = async (req, res) => {
       }
     }
 
+    // Encrypt password before saving
     const hashedPassword = await hashPassword(password);
     const now = new Date();
 
-    // Use a transaction for the entire registration flow
+    // Database transaction ensures either everything is saved or nothing is (atomicity)
     const result = await prisma.$transaction(async (tx) => {
-      // 2. Create User
+      // 2. Create User record
       const user = await tx.users.create({
         data: {
           id: uuidv4(),
@@ -52,7 +54,7 @@ exports.register = async (req, res) => {
         }
       });
 
-      // 3. Create Employee record with type OWNER
+      // 3. Every owner is also an employee record with type 'OWNER'
       const employee = await tx.employees.create({
         data: {
           id: uuidv4(),
@@ -64,7 +66,7 @@ exports.register = async (req, res) => {
         }
       });
 
-      // 4. Create Farm
+      // 4. Initialize the farm for the new owner
       const farm = await tx.farms.create({
         data: {
           id: uuidv4(),
@@ -77,7 +79,7 @@ exports.register = async (req, res) => {
         }
       });
 
-      // 5. Link Owner to Farm
+      // 5. Explicitly link the owner (employee) to the newly created farm
       await tx.farm_employees.create({
         data: {
           id: uuidv4(),
@@ -92,6 +94,7 @@ exports.register = async (req, res) => {
       return { user, farm };
     });
 
+    // Generate session token (valid for 1 year)
     const token = jwt.sign(
       { id: result.user.id },
       process.env.JWT_SECRET || 'secret',
@@ -117,16 +120,17 @@ exports.register = async (req, res) => {
   }
 };
 
-// @desc    Email-only Login Flow
+// @desc    Login Flow (Supports Email or Phone)
 // @route   POST api/auth/login
 exports.login = async (req, res) => {
   const { identifier, password } = req.body;
 
   if (!identifier || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+    return res.status(400).json({ message: 'Email/Phone and password are required' });
   }
 
   try {
+    // Find user where identifier matches EITHER email OR phone
     const user = await prisma.users.findFirst({
       where: {
         OR: [
@@ -147,19 +151,21 @@ exports.login = async (req, res) => {
       }
     });
 
+    // Validate existence and password match
     if (!user || !(await comparePassword(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const employeeProfile = user.employees?.[0];
 
+    // Create session token
     const token = jwt.sign(
       { id: user.id },
       process.env.JWT_SECRET || 'secret',
       { expiresIn: '365d' }
     );
 
-    // Extract farms from the employee -> farm_employees -> farms chain
+    // Extract all farms linked to this user's employee profile
     const farms = employeeProfile?.farm_employees?.map(fe => fe.farms) || [];
 
     res.json({
@@ -178,7 +184,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// @desc    Forgot Password - Send 6-digit code
+// @desc    Forgot Password - Generates and sends a 6-digit verification code
 // @route   POST api/auth/forgot-password
 exports.forgotPassword = async (req, res) => {
   const { identifier } = req.body;
@@ -188,6 +194,7 @@ exports.forgotPassword = async (req, res) => {
   }
 
   try {
+    // Lookup user by either email or phone
     const user = await prisma.users.findFirst({
       where: {
         OR: [
@@ -197,17 +204,16 @@ exports.forgotPassword = async (req, res) => {
       }
     });
 
+    // Security: Don't reveal if user exists; just return a generic message
     if (!user) {
       console.log(`FORGOT PASSWORD: User not found for identifier ${identifier}`);
       return res.status(200).json({ message: 'If an account exists, a reset code has been sent.' });
     }
 
-    console.log(`FORGOT PASSWORD: User found for email ${email}, generating code...`);
-
-    // Generate 6-digit reset code
+    // Generate random 6-digit code for reset
     const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Set token and expiry (1 hour)
+    // Store reset code and set 1-hour expiration
     await prisma.users.update({
       where: { id: user.id },
       data: {
@@ -217,12 +223,14 @@ exports.forgotPassword = async (req, res) => {
       }
     });
 
+    // If user has no email (registered only with phone), we log it locally for now
+    // Note: SMS integration like Twilio should be added here for production phone support
     if (!user.email) {
       console.log(`FORGOT PASSWORD: User ${user.id} has no email. Reset code is: ${resetCode}`);
-      return res.status(200).json({ message: 'Reset code generated. (Backend log check required for phone-only users for now)' });
+      return res.status(200).json({ message: 'Reset code generated. (Check logs for phone users)' });
     }
 
-    // Send Email via Resend
+    // Send the numeric code via Resend email service
     const { data, error } = await resend.emails.send({
       from: 'GoatBook <onboarding@resend.dev>',
       to: user.email,
@@ -246,10 +254,8 @@ exports.forgotPassword = async (req, res) => {
 
     if (error) {
       console.error('RESEND ERROR:', error);
-      return res.status(500).json({ message: 'Failed to send email via Resend', error });
+      return res.status(500).json({ message: 'Failed to send email' });
     }
-
-    console.log('RESEND SUCCESS:', data);
 
     res.status(200).json({ message: 'Reset code sent to your email' });
 
@@ -259,16 +265,17 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-// @desc    Reset Password
+// @desc    Reset Password with code verification
 // @route   POST api/auth/reset-password
 exports.resetPassword = async (req, res) => {
   const { identifier, code, newPassword } = req.body;
 
   if (!identifier || !code || !newPassword) {
-    return res.status(400).json({ message: 'Identifier, code, and new password are required' });
+    return res.status(400).json({ message: 'Code and new password are required' });
   }
 
   try {
+    // Validate identity and the temporary reset code
     const user = await prisma.users.findFirst({
       where: {
         OR: [
@@ -280,15 +287,15 @@ exports.resetPassword = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ message: 'Invalid code or email' });
+      return res.status(400).json({ message: 'Invalid code or identifier' });
     }
 
-    // Check if code is expired
+    // Ensure the code is still within its validation window (1 hour)
     if (user.reset_password_expires < new Date()) {
       return res.status(400).json({ message: 'Reset code has expired' });
     }
 
-    // Update password
+    // Hash the new password and clear the reset tokens
     const hashedPassword = await hashPassword(newPassword);
     await prisma.users.update({
       where: { id: user.id },

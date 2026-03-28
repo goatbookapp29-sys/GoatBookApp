@@ -10,6 +10,7 @@ import { ArrowLeft } from 'lucide-react-native';
 
 const RegisterScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
+  // Form state to store user and farm details
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -22,13 +23,15 @@ const RegisterScreen = ({ navigation }) => {
   });
   const [loading, setLoading] = useState(false);
 
+  // Function to handle user registration
   const handleRegister = async () => {
-    // Basic validation
+    // 1. Basic validation: ensure all mandatory fields have values
     if (!formData.firstName || !formData.email || !formData.password || !formData.farmName) {
       alert('Please fill in required fields');
       return;
     }
 
+    // 2. Security Check: ensure password and confirmation match
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match');
       return;
@@ -36,6 +39,7 @@ const RegisterScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
+      // 3. Prepare payload for the backend API
       const payload = {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
@@ -45,21 +49,24 @@ const RegisterScreen = ({ navigation }) => {
         farmLocation: formData.farmLocation
       };
 
+      // 4. Send POST request to registration endpoint
       const response = await api.post('/auth/register', payload);
+      
+      // 5. Success locally: store the session token and the default farm ID
       await setAuthToken(response.data.token);
       await setSelectedFarm(response.data.farm.id);
+      
       setLoading(false);
+      // 6. Navigate to the main application area (MainDrawer)
       navigation.replace('MainDrawer');
     } catch (error) {
       setLoading(false);
-      console.error('REGISTER ERROR FULL:', error);
-      console.error('REGISTER ERROR response:', error.response);
-      console.error('REGISTER ERROR message:', error.message);
+      console.error('REGISTER ERROR:', error);
+      
+      // 7. Error handling: show backend message or fallback
       let message = 'Registration failed';
       if (error.response?.data?.message) {
         message = error.response.data.message;
-      } else if (error.message) {
-        message = error.message;
       }
       alert(message);
     }

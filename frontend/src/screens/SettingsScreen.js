@@ -11,6 +11,7 @@ const SettingsScreen = ({ navigation }) => {
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Component mount: fetch user profile to determine their role (OWNER vs EMPLOYEE)
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -18,6 +19,7 @@ const SettingsScreen = ({ navigation }) => {
   const fetchProfile = async () => {
     try {
       const response = await api.get('/users/profile');
+      // Set the user's role to control visibility of specific settings (e.g., Farm Settings)
       setRole(response.data?.employeeProfile?.employeeType);
     } catch (error) {
       console.error('Error fetching profile in settings:', error);
