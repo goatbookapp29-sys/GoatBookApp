@@ -307,3 +307,87 @@ exports.deleteAnimal = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+// @desc    Check if a tag exists in the farm
+// @route   GET /api/animals/check-tag/:tagNumber
+exports.checkTagExists = async (req, res) => {
+  try {
+    const animal = await prisma.animals.findFirst({
+      where: { 
+        tag_number: req.params.tagNumber, 
+        farm_id: req.farmId 
+      },
+      select: {
+        id: true,
+        tag_number: true,
+        gender: true,
+        breeds: { select: { name: true } }
+      }
+    });
+
+    if (!animal) {
+      return res.status(404).json({ message: 'Tag ID not found in your farm' });
+    }
+
+    res.json(animal);
+  } catch (err) {
+    console.error('CHECK TAG ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Replace an existing Tag ID with a new one
+// @route   POST /api/animals/replace-tag
+exports.replaceTag = async (req, res) => {
+  const { oldTagNumber, newTagNumber } = req.body;
+
+  if (!oldTagNumber || !newTagNumber) {
+    return res.status(400).json({ message: 'Both old and new tags are required' });
+  }
+
+  try {
+    // 1. Verify old tag exists
+    const animal = await prisma.animals.findFirst({
+      where: { tag_number: oldTagNumber, farm_id: req.farmId }
+    });
+    if (!animal) return res.status(404).json({ message: 'Existing Tag ID not found' });
+
+    // 2. Verify new tag is unique
+    const existingNewTag = await prisma.animals.findFirst({
+      where: { tag_number: newTagNumber, farm_id: req.farmId }
+    });
+    if (existingNewTag) return res.status(400).json({ message: 'New Tag ID already exists in your farm' });
+
+    // 3. Perform transactional update
+    await prisma.$transaction([
+      // Update the animal itself
+      prisma.animals.update({
+        where: { id: animal.id },
+        data: { tag_number: newTagNumber, updated_at: new Date() }
+      }),
+      // Update parentage in other records
+      prisma.animals.updateMany({
+        where: { mother_tag_id: oldTagNumber, farm_id: req.farmId },
+        data: { mother_tag_id: newTagNumber }
+      }),
+      prisma.animals.updateMany({
+        where: { father_tag_id: oldTagNumber, farm_id: req.farmId },
+        data: { father_tag_id: newTagNumber }
+      }),
+      // Update weight records
+      prisma.weights.updateMany({
+        where: { tag_number: oldTagNumber, farm_id: req.farmId },
+        data: { tag_number: newTagNumber }
+      }),
+      // Update transaction records
+      prisma.animal_transactions.updateMany({
+        where: { tag_number: oldTagNumber, animal_id: animal.id },
+        data: { tag_number: newTagNumber }
+      })
+    ]);
+
+    res.json({ message: `Successfully replaced tag ${oldTagNumber} with ${newTagNumber}` });
+  } catch (err) {
+    console.error('REPLACE TAG ERROR:', err);
+    res.status(500).json({ message: 'Server Error', error: err.message });
+  }
+};
