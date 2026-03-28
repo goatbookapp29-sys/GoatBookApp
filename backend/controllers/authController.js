@@ -9,18 +9,29 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // @desc    Owner Registration Flow (Email + Password)
 // @route   POST api/auth/register
 exports.register = async (req, res) => {
-  const { name, email, password, farmName, farmLocation } = req.body;
+  const { name, email, phone, password, farmName, farmLocation } = req.body;
 
   if (!email || !password || !name || !farmName) {
-    return res.status(400).json({ message: 'Name, email, password, and farm name are required' });
+    return res.status(400).json({ message: 'Name, email/phone, password, and farm name are required' });
   }
 
   try {
-    // 1. Check if user already exists by email
-    const userExists = await prisma.users.findUnique({ where: { email } });
-
-    if (userExists) {
-      return res.status(400).json({ message: 'User with this email already exists' });
+    // 1. Check if user already exists by email or phone
+    const existingUser = await prisma.users.findFirst({
+      where: {
+        OR: [
+          { email },
+          { phone: phone || '' }
+        ]
+      }
+    });
+    
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return res.status(400).json({ message: 'User with this email already exists' });
+      } else {
+        return res.status(400).json({ message: 'User with this phone number already exists' });
+      }
     }
 
     const hashedPassword = await hashPassword(password);
@@ -34,6 +45,7 @@ exports.register = async (req, res) => {
           id: uuidv4(),
           name,
           email,
+          phone,
           password: hashedPassword,
           created_at: now,
           updated_at: now
@@ -115,8 +127,13 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const user = await prisma.users.findUnique({
-      where: { email: identifier },
+    const user = await prisma.users.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { phone: identifier }
+        ]
+      },
       include: {
         employees: {
           include: {
@@ -164,18 +181,25 @@ exports.login = async (req, res) => {
 // @desc    Forgot Password - Send 6-digit code
 // @route   POST api/auth/forgot-password
 exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
+  const { identifier } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ message: 'Email is required' });
+  if (!identifier) {
+    return res.status(400).json({ message: 'Email or Phone is required' });
   }
 
   try {
-    const user = await prisma.users.findUnique({ where: { email } });
+    const user = await prisma.users.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { phone: identifier }
+        ]
+      }
+    });
 
     if (!user) {
-      console.log(`FORGOT PASSWORD: User not found for email ${email}`);
-      return res.status(200).json({ message: 'If an account exists with this email, a reset code has been sent.' });
+      console.log(`FORGOT PASSWORD: User not found for identifier ${identifier}`);
+      return res.status(200).json({ message: 'If an account exists, a reset code has been sent.' });
     }
 
     console.log(`FORGOT PASSWORD: User found for email ${email}, generating code...`);
@@ -193,10 +217,15 @@ exports.forgotPassword = async (req, res) => {
       }
     });
 
+    if (!user.email) {
+      console.log(`FORGOT PASSWORD: User ${user.id} has no email. Reset code is: ${resetCode}`);
+      return res.status(200).json({ message: 'Reset code generated. (Backend log check required for phone-only users for now)' });
+    }
+
     // Send Email via Resend
     const { data, error } = await resend.emails.send({
       from: 'GoatBook <onboarding@resend.dev>',
-      to: email,
+      to: user.email,
       subject: 'Password Reset Code - GoatBook',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -233,16 +262,19 @@ exports.forgotPassword = async (req, res) => {
 // @desc    Reset Password
 // @route   POST api/auth/reset-password
 exports.resetPassword = async (req, res) => {
-  const { email, code, newPassword } = req.body;
+  const { identifier, code, newPassword } = req.body;
 
-  if (!email || !code || !newPassword) {
-    return res.status(400).json({ message: 'Email, code, and new password are required' });
+  if (!identifier || !code || !newPassword) {
+    return res.status(400).json({ message: 'Identifier, code, and new password are required' });
   }
 
   try {
     const user = await prisma.users.findFirst({
       where: {
-        email,
+        OR: [
+          { email: identifier },
+          { phone: identifier }
+        ],
         reset_password_token: code
       }
     });

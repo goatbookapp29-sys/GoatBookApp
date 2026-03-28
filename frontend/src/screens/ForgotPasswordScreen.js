@@ -8,20 +8,20 @@ import { ArrowLeft } from 'lucide-react-native';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const { theme } = useTheme();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSendCode = async () => {
-    if (!email) {
-      alert('Please enter your email address');
+    if (!identifier) {
+      alert('Please enter your email or phone number');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/forgot-password', { email });
+      const response = await api.post('/auth/forgot-password', { identifier });
       alert(response.data.message);
-      navigation.navigate('ResetPassword', { email });
+      navigation.navigate('ResetPassword', { identifier });
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to send reset code';
       alert(message);
@@ -46,16 +46,15 @@ const ForgotPasswordScreen = ({ navigation }) => {
         <View style={styles.formWrapper}>
             <View style={styles.titleContainer}>
                 <Text style={[styles.mainTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold }]}>Forgot Password</Text>
-                <Text style={[styles.subTitle, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>Enter your email to receive a reset code.</Text>
+                <Text style={[styles.subTitle, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>Enter your email or phone to receive a reset code.</Text>
             </View>
 
             <View style={styles.form}>
                 <GInput 
-                    label="Email" 
-                    value={email} 
-                    onChangeText={setEmail} 
-                    placeholder="example@mail.com"
-                    keyboardType="email-address"
+                    label="Email or Phone" 
+                    value={identifier} 
+                    onChangeText={setIdentifier} 
+                    placeholder="email or phone number"
                     autoCapitalize="none"
                     required 
                 />

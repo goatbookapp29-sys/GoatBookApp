@@ -12,15 +12,18 @@ const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) =
       <StatusBar style="light" backgroundColor={theme.colors.primary} translucent={true} />
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.headerContent}>
-          {onMenu ? (
-            <TouchableOpacity onPress={onMenu} style={styles.backButton} activeOpacity={0.7}>
-              <Menu color={theme.colors.white} size={28} />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
-              <ArrowLeft color={theme.colors.white} size={28} />
-            </TouchableOpacity>
-          )}
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {onMenu && (
+              <TouchableOpacity onPress={onMenu} style={styles.backButton} activeOpacity={0.7}>
+                <Menu color={theme.colors.white} size={28} />
+              </TouchableOpacity>
+            )}
+            {onBack && (
+              <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
+                <ArrowLeft color={theme.colors.white} size={28} />
+              </TouchableOpacity>
+            )}
+          </View>
           
           <View style={styles.titleContainer}>
             <Text style={[styles.title, { color: theme.colors.white }]} numberOfLines={1}>{title}</Text>

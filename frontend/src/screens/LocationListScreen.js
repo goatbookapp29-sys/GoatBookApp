@@ -89,6 +89,7 @@ const LocationListScreen = ({ navigation }) => {
       <GHeader 
         title="Location List" 
         onMenu={() => navigation.openDrawer()} 
+        onBack={() => navigation.goBack()}
         rightIcon={isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
         onRightPress={toggleSearch}
       />

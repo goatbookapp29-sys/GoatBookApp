@@ -14,6 +14,7 @@ const RegisterScreen = ({ navigation }) => {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
     farmName: '',
@@ -38,6 +39,7 @@ const RegisterScreen = ({ navigation }) => {
       const payload = {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
+        phone: formData.phone,
         password: formData.password,
         farmName: formData.farmName,
         farmLocation: formData.farmLocation
@@ -113,6 +115,14 @@ const RegisterScreen = ({ navigation }) => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 required 
+            />
+            <View style={styles.gap} />
+            <GInput 
+                label="Phone Number" 
+                value={formData.phone} 
+                onChangeText={(v) => updateField('phone', v)} 
+                placeholder="9876543210"
+                keyboardType="phone-pad"
             />
             <View style={styles.gap} />
             <GInput 

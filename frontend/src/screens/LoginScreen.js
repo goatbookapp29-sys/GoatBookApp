@@ -62,11 +62,10 @@ const LoginScreen = ({ navigation }) => {
 
             <View style={styles.form}>
                 <GInput 
-                    label="Email" 
+                    label="Email or Phone" 
                     value={email} 
                     onChangeText={setEmail} 
-                    placeholder="example@mail.com"
-                    keyboardType="email-address"
+                    placeholder="email or phone number"
                     autoCapitalize="none"
                     required 
                 />

@@ -8,16 +8,16 @@ import { ArrowLeft } from 'lucide-react-native';
 
 const ResetPasswordScreen = ({ navigation, route }) => {
   const { theme } = useTheme();
-  const { email: initialEmail } = route.params || {};
+  const { identifier: initialIdentifier } = route.params || {};
   
-  const [email, setEmail] = useState(initialEmail || '');
+  const [identifier, setIdentifier] = useState(initialIdentifier || '');
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleResetPassword = async () => {
-    if (!email || !code || !newPassword || !confirmPassword) {
+    if (!identifier || !code || !newPassword || !confirmPassword) {
       alert('Please fill in all fields');
       return;
     }
@@ -30,7 +30,7 @@ const ResetPasswordScreen = ({ navigation, route }) => {
     setLoading(true);
     try {
       const response = await api.post('/auth/reset-password', { 
-        email, 
+        identifier, 
         code, 
         newPassword 
       });
@@ -60,19 +60,18 @@ const ResetPasswordScreen = ({ navigation, route }) => {
         <View style={styles.formWrapper}>
             <View style={styles.titleContainer}>
                 <Text style={[styles.mainTitle, { color: theme.colors.primary, fontFamily: theme.typography.semiBold }]}>Reset Password</Text>
-                <Text style={[styles.subTitle, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>Enter the code sent to your email and your new password.</Text>
+                <Text style={[styles.subTitle, { color: theme.colors.textMuted, fontFamily: theme.typography.regular }]}>Enter the code sent to your email/phone and your new password.</Text>
             </View>
 
             <View style={styles.form}>
                 <GInput 
-                    label="Email" 
-                    value={email} 
-                    onChangeText={setEmail} 
-                    placeholder="example@mail.com"
-                    keyboardType="email-address"
+                    label="Email or Phone" 
+                    value={identifier} 
+                    onChangeText={setIdentifier} 
+                    placeholder="email or phone number"
                     autoCapitalize="none"
                     required 
-                    editable={!initialEmail}
+                    editable={!initialIdentifier}
                 />
                 <View style={styles.gap} />
                 <GInput 
