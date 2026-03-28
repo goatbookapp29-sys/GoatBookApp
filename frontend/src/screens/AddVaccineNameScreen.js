@@ -156,7 +156,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   daysLabel: {
     fontSize: 14,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     marginRight: 10,
   },
   daysInputBox: {
@@ -165,7 +165,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   daysSuffix: {
     fontSize: 14,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     marginLeft: 10,
   },
   helperText: {
@@ -186,7 +186,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     marginBottom: 20,
     letterSpacing: -0.5,
   },
@@ -211,7 +211,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   vaccineLabel: {
     fontSize: 16,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   vaccineDays: {
     fontSize: 13,

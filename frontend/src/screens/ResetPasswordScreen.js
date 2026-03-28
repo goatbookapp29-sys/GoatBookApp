@@ -136,7 +136,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   mainTitle: {
     fontSize: 32,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     color: theme.colors.primary,
     letterSpacing: -1,
   },

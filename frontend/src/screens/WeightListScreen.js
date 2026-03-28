@@ -199,7 +199,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   tagText: {
     fontSize: 16,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   dateText: {
     fontSize: 14,
@@ -212,7 +212,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   weightValue: {
     fontSize: 18,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   heightValue: {
     fontSize: 12,

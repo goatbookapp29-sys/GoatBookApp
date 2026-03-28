@@ -364,7 +364,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   badgeText: {
     fontSize: 16,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     color: theme.colors.primary,
   },
   statSuffix: {
@@ -374,7 +374,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     marginVertical: SPACING.lg,
     letterSpacing: -0.5,
   },
@@ -396,7 +396,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   addTagBtnText: {
     color: '#FFFFFF',
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     fontSize: 14,
   },
   selectedContainer: {
@@ -419,7 +419,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   chipText: {
     marginHorizontal: 8,
     fontSize: 14,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     color: isDarkMode ? theme.colors.white : theme.colors.primary,
   },
   emptyText: {
@@ -448,7 +448,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   editInfoLabel: {
     fontSize: 12,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 1,

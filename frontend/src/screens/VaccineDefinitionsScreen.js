@@ -146,7 +146,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   fab: {
     position: 'absolute',

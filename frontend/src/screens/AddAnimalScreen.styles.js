@@ -104,7 +104,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   addNewText: {
     color: '#FFF',
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     fontSize: 13,
     marginLeft: 6,
   },
@@ -157,7 +157,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   weightValue: {
     fontSize: 12,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     color: theme.colors.text,
   },
   sectionDivider: {
@@ -193,7 +193,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   statusText: {
     color: theme.colors.text,
     fontSize: 12,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     textTransform: 'uppercase',
   },
   readyToSellCard: {
@@ -212,7 +212,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   readyTitle: {
     fontSize: 14,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     letterSpacing: 1,
   },
   readyOptions: {

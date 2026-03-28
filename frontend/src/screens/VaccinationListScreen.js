@@ -164,7 +164,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   tagNumber: {
     fontSize: 14,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     marginLeft: 4,
   },
   dateBox: {
@@ -177,7 +177,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   dateText: {
     fontSize: 11,
     marginLeft: 4,
-    fontFamily: 'Montserrat_800ExtraBold',
+    fontFamily: 'Montserrat_700Bold',
   },
   rightCol: {
     alignItems: 'flex-end',
@@ -202,7 +202,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   dueLabel: {
     fontSize: 13,
-    fontFamily: 'Montserrat_800ExtraBold',
+    fontFamily: 'Montserrat_700Bold',
   },
   dueValue: {
     fontSize: 13,
@@ -228,7 +228,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   fab: {
     position: 'absolute',

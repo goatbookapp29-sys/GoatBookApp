@@ -349,7 +349,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     color: 'white',
   },
   statusLIVE: { backgroundColor: '#10B981' },

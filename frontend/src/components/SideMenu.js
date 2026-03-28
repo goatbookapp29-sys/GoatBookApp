@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   userName: {
     color: '#FFFFFF',
     fontSize: 20,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   farmName: {
     color: 'rgba(255, 255, 255, 0.8)',

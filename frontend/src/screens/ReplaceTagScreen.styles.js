@@ -93,7 +93,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   animalTag: {
     fontSize: 17,
-    fontFamily: theme.typography.bold || 'Montserrat_700Bold',
+    fontFamily: theme.typography.semiBold || 'Montserrat_600SemiBold',
     color: theme.colors.text,
   },
   animalSubInfo: {

@@ -229,7 +229,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   chartTitle: {
     alignSelf: 'flex-start',
     fontSize: 20,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     marginBottom: 20,
     letterSpacing: -0.5,
   },
@@ -283,7 +283,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   statValue: {
     color: 'white',
     fontSize: 24,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
 });
 

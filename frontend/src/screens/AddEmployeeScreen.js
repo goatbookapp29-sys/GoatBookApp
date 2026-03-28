@@ -194,7 +194,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     marginBottom: SPACING.md,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -235,7 +235,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
   },
   confirmText: {
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   footer: {
     paddingVertical: SPACING.xl,

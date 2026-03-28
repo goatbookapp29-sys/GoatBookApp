@@ -202,7 +202,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   mainTitle: {
     fontSize: 32,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     color: theme.colors.primary,
     letterSpacing: -1,
   },
@@ -217,7 +217,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     color: theme.colors.primary,
     marginBottom: 16,
     textTransform: 'uppercase',
@@ -248,7 +248,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   link: {
     fontSize: 15,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
     color: theme.colors.primary,
     textDecorationLine: 'underline',
   }
