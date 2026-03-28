@@ -83,23 +83,21 @@ const WeightListScreen = ({ navigation }) => {
   };
 
   const renderWeightItem = ({ item }) => (
-    <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-      <View style={[styles.iconBox, { backgroundColor: theme.colors.primary + '15' }]}>
-        <Scale size={24} color={theme.colors.primary} />
-      </View>
+    <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+
       <View style={styles.mainInfo}>
-        <Text style={[styles.tagText, { color: theme.colors.text, fontFamily: 'Montserrat_700Bold' }]}>Tag: {item.tagNumber}</Text>
-        <Text style={[styles.dateText, { color: theme.colors.textLight, fontFamily: 'Montserrat_500Medium' }]}>{item.date}</Text>
+        <Text style={[styles.tagText, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
+        <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{item.date}</Text>
       </View>
       <View style={styles.statsBox}>
-        <Text style={[styles.weightValue, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>{item.weight} KG</Text>
-        {item.height && <Text style={[styles.heightValue, { color: theme.colors.textMuted, fontFamily: 'Montserrat_500Medium' }]}>H: {item.height}</Text>}
+        <Text style={[styles.weightValue, { color: theme.colors.primary }]}>{item.weight} KG</Text>
+        {item.height && <Text style={[styles.heightValue, { color: theme.colors.textLight }]}>H: {item.height}</Text>}
       </View>
       <TouchableOpacity 
         style={styles.deleteBtn} 
         onPress={() => handleDelete(item.id)}
       >
-        <Trash2 size={18} color={theme.colors.error || '#EF4444'} />
+        <Trash2 size={20} color="#EF4444" />
       </TouchableOpacity>
     </View>
   );
@@ -109,10 +107,10 @@ const WeightListScreen = ({ navigation }) => {
       <GHeader title="Weight Records" subTitle="Performance Tracking" onBack={() => navigation.goBack()} />
       
       <View style={styles.content}>
-        <View style={[styles.searchWrapper, { backgroundColor: theme.colors.surface }]}>
-          <Search size={20} color={theme.colors.textMuted} />
+        <View style={[styles.searchContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+          <Search size={20} color={theme.colors.textLight} />
           <TextInput
-            style={[styles.searchInput, { color: theme.colors.text, fontFamily: 'Montserrat_500Medium' }]}
+            style={[styles.searchInput, { color: theme.colors.text }]}
             placeholder="Search Tag Number..."
             placeholderTextColor={theme.colors.textMuted}
             value={searchQuery}
@@ -134,20 +132,10 @@ const WeightListScreen = ({ navigation }) => {
               <RefreshControl refreshing={refreshing} onRefresh={() => fetchWeights(true)} />
             }
             ListEmptyComponent={
-              <View style={styles.emptyWrapper}>
-                <View style={[styles.emptyIconBox, { backgroundColor: theme.colors.primary + '10' }]}>
-                  <Scale size={80} color={theme.colors.primary + '40'} />
-                </View>
-                <Text style={[styles.emptyTitle, { color: theme.colors.text, fontFamily: 'Montserrat_700Bold' }]}>No weight records found</Text>
-                <Text style={[styles.emptySubtitle, { color: theme.colors.textMuted, fontFamily: 'Montserrat_500Medium' }]}>
-                  Keep track of your animals' growth performance here.
-                </Text>
-                <TouchableOpacity 
-                  style={[styles.emptyActionBtn, { backgroundColor: theme.colors.primary }]}
-                  onPress={() => navigation.navigate('AddWeight')}
-                >
-                  <Text style={[styles.emptyActionText, { color: 'white', fontFamily: 'Montserrat_600SemiBold' }]}>Record First Weight</Text>
-                </TouchableOpacity>
+              <View style={styles.emptyContainer}>
+                <Scale size={64} color={theme.colors.border} />
+                <Text style={[styles.emptyText, { color: theme.colors.text }]}>No weight records found</Text>
+                <Text style={[styles.emptySub, { color: theme.colors.textLight }]}>Start tracking growth by adding weight measurements.</Text>
               </View>
             }
           />
@@ -167,40 +155,49 @@ const WeightListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F9FAFB',
   },
   content: {
     padding: SPACING.md,
     flex: 1,
   },
-  searchWrapper: {
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     height: 54,
     borderRadius: 16,
     marginBottom: SPACING.md,
-    ...SHADOW.sm,
+    borderWidth: 1.5,
   },
   searchInput: {
     flex: 1,
     marginLeft: 12,
     fontSize: 16,
+    fontWeight: '600',
   },
   list: {
-    paddingBottom: 100,
+    paddingBottom: 80,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 20,
-    marginBottom: 16,
-    ...SHADOW.md,
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   iconBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -209,77 +206,61 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tagText: {
-    fontSize: 18,
-    letterSpacing: -0.5,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
   },
   dateText: {
-    fontSize: 13,
-    marginTop: 2,
+    fontSize: 14,
+    marginTop: 4,
+    fontWeight: '500',
+    color: '#6B7280',
   },
   statsBox: {
     alignItems: 'flex-end',
-    marginRight: 8,
+    marginRight: 12,
   },
   weightValue: {
-    fontSize: 20,
-    letterSpacing: -0.5,
+    fontSize: 18,
+    fontWeight: '700',
   },
   heightValue: {
     fontSize: 12,
-    marginTop: 2,
+    fontWeight: '500',
   },
   deleteBtn: {
     padding: 8,
-    marginLeft: 4,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  emptyWrapper: {
-    flex: 1,
+  emptyContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 80,
+    marginTop: 100,
     paddingHorizontal: 40,
   },
-  emptyIconBox: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  emptyTitle: {
+  emptyText: {
     fontSize: 22,
+    fontWeight: '900',
+    marginTop: 20,
     textAlign: 'center',
-    marginBottom: 12,
   },
-  emptySubtitle: {
-    fontSize: 15,
+  emptySub: {
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 32,
-  },
-  emptyActionBtn: {
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
-    ...SHADOW.md,
-  },
-  emptyActionText: {
-    fontSize: 16,
+    marginTop: 8,
+    lineHeight: 20,
+    fontWeight: '600',
   },
   fab: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 24,
     right: 24,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
