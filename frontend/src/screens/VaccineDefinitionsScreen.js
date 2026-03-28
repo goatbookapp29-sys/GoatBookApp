@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   vaccineName: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '600',
     letterSpacing: -0.5,
   },
   daysText: {

@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '600',
     marginTop: 20,
     textAlign: 'center',
   },

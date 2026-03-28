@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   },
   editTagText: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '600',
     marginLeft: 10,
   },
 });

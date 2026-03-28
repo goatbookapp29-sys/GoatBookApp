@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   vaccineName: {
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '600',
     letterSpacing: -0.5,
   },
   tagRow: {
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   modeText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '600',
     textTransform: 'uppercase',
   },
   dueSection: {
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   dueValue: {
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '600',
   },
   remarkText: {
     fontSize: 13,

@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '600',
     marginBottom: SPACING.lg,
     letterSpacing: -0.5,
   },
