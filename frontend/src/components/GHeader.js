@@ -13,16 +13,15 @@ const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) =
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.headerContent}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {onMenu && (
-              <TouchableOpacity onPress={onMenu} style={styles.backButton} activeOpacity={0.7}>
-                <Menu color={theme.colors.white} size={28} />
-              </TouchableOpacity>
-            )}
-            {onBack && (
+            {onBack ? (
               <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
                 <ArrowLeft color={theme.colors.white} size={28} />
               </TouchableOpacity>
-            )}
+            ) : onMenu ? (
+              <TouchableOpacity onPress={onMenu} style={styles.backButton} activeOpacity={0.7}>
+                <Menu color={theme.colors.white} size={28} />
+              </TouchableOpacity>
+            ) : null}
           </View>
           
           <View style={styles.titleContainer}>
