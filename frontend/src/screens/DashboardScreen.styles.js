@@ -1,10 +1,10 @@
 import { StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
-import { COLORS } from '../theme';
+import { SPACING } from '../theme';
 
-export default StyleSheet.create({
+export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.background,
   },
   header: {
     paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 24) : 48,
@@ -12,7 +12,7 @@ export default StyleSheet.create({
     paddingBottom: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.primary, // Orange
+    backgroundColor: theme.colors.primary,
   },
   menuButton: {
     marginRight: 16,
@@ -21,6 +21,11 @@ export default StyleSheet.create({
     fontSize: 20,
     color: '#FFF',
     fontFamily: 'Montserrat_600SemiBold',
+    flex: 1,
+  },
+  themeToggle: {
+    padding: 8,
+    marginLeft: 10,
   },
   content: {
     paddingHorizontal: 16,
@@ -35,18 +40,18 @@ export default StyleSheet.create({
     marginBottom: 16,
   },
   tile: {
-    backgroundColor: '#FFF',
-    width: '31%', // Fits 3 columns comfortably
-    aspectRatio: 1, // Makes the card perfectly square
-    borderRadius: 8,
+    backgroundColor: theme.colors.surface,
+    width: '31%',
+    aspectRatio: 1,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E5E7EB', // Fine light border
-    // Subtle modern shadow
+    borderColor: theme.colors.border,
+    // Subtle shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: isDarkMode ? 0.3 : 0.05,
     shadowRadius: 2,
     elevation: 2,
   },
@@ -55,7 +60,7 @@ export default StyleSheet.create({
   },
   tileTitle: {
     fontSize: 13,
-    color: '#111827',
+    color: theme.colors.text,
     fontFamily: 'Montserrat_500Medium',
     textAlign: 'center',
   },

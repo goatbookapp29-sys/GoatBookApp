@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, FlatList } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../theme/ThemeContext';
@@ -6,15 +6,17 @@ import { useFocusEffect } from '@react-navigation/native';
 import { 
   Menu, GitBranch, PawPrint, User, Home, Syringe, Scale, 
   Heart, Activity, ClipboardList, Globe, Settings, Briefcase,
-  Search, Bell
+  Moon, Sun
 } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import api, { setAuthToken, setSelectedFarm } from '../api';
-import styles from './DashboardScreen.styles';
+import api from '../api';
+import { getStyles } from './DashboardScreen.styles';
 
 const DashboardScreen = ({ navigation }) => {
-  const { theme } = useTheme();
+  const { theme, isDarkMode, toggleTheme } = useTheme();
   const [farmName, setFarmName] = useState('Goatwala Farm');
+  
+  // Memoize styles to avoid re-calculation on every render
+  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
 
   useFocusEffect(
     useCallback(() => {
@@ -55,18 +57,12 @@ const DashboardScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
-  const handleLogout = async () => {
-    await setAuthToken(null);
-    await setSelectedFarm(null);
-    navigation.replace('Login');
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" backgroundColor={theme.colors.primary} />
       
       {/* Header - Simple & Flat */}
-      <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
+      <View style={styles.header}>
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
           <TouchableOpacity 
             style={styles.menuButton}
@@ -75,6 +71,18 @@ const DashboardScreen = ({ navigation }) => {
             <Menu color="#FFF" size={26} strokeWidth={2.5} />
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>{farmName}</Text>
+          
+          {/* Theme Toggle Button */}
+          <TouchableOpacity 
+            style={styles.themeToggle}
+            onPress={toggleTheme}
+          >
+            {isDarkMode ? (
+              <Sun color="#FFF" size={24} strokeWidth={2} />
+            ) : (
+              <Moon color="#FFF" size={24} strokeWidth={2} />
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 

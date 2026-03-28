@@ -37,13 +37,13 @@ export const darkTheme = {
   colors: {
     primary: '#F95004',
     primaryDark: '#D64403',
-    secondary: '#818CF8', // Lighter indigo for Dark Mode
-    background: '#0F172A', // Slate 900
-    surface: '#1E293B',    // Slate 800
-    text: '#F8FAFC',       // Slate 50
-    textLight: '#CBD5E1',  // Slate 300 (was 400)
-    textMuted: '#94A3B8',  // Slate 400 (was 500)
-    border: '#334155',     // Slate 700
+    secondary: '#818CF8',
+    background: '#000000', // Pure black
+    surface: '#121212',    // Very dark gray
+    text: '#FFFFFF',       // White
+    textLight: '#A0A0A0',  // Light gray
+    textMuted: '#666666',  // Muted gray
+    border: '#222222',     // Dark border
     error: '#EF4444',
     success: '#10B981',
     warning: '#F59E0B',
