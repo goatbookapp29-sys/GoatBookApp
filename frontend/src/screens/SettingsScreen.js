@@ -54,7 +54,7 @@ const SettingsScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Settings" onMenu={() => navigation.openDrawer()} />
+      <GHeader title="Settings" onBack={() => navigation.goBack()} />
       {loading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />

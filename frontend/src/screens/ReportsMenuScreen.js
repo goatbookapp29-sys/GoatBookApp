@@ -36,7 +36,7 @@ const ReportsMenuScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Reports Center" subTitle="Analysis" onMenu={() => navigation.openDrawer()} />
+      <GHeader title="Reports Center" subTitle="Analysis" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.grid}>
           {options.map((item) => (

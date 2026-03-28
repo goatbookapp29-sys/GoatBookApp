@@ -39,7 +39,6 @@ const VaccinesMenuScreen = ({ navigation }) => {
       <GHeader 
         title="Vaccines Management" 
         subTitle="Immunization" 
-        onMenu={() => navigation.openDrawer()} 
         onBack={() => navigation.goBack()}
       />
       <ScrollView contentContainerStyle={styles.content}>
