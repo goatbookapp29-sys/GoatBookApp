@@ -129,8 +129,16 @@ exports.getBreedStats = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Check if breed exists and belongs to farm
-    const breed = await prisma.breeds.findFirst({ where: { id, farm_id: req.farmId } });
+    // Check if breed exists and belongs to farm (or is a default global breed)
+    const breed = await prisma.breeds.findFirst({ 
+      where: { 
+        id,
+        OR: [
+          { farm_id: req.farmId },
+          { is_default: true }
+        ]
+      } 
+    });
     if (!breed) return res.status(404).json({ message: 'Breed not found' });
 
     // Fetch animals of this breed with their location info

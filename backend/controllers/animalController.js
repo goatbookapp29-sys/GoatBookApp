@@ -82,10 +82,18 @@ exports.addAnimal = async (req, res) => {
       return res.status(400).json({ message: 'No farm selected' });
     }
 
-    // Verify breed belongs to this farm
-    const breed = await prisma.breeds.findFirst({ where: { id: breedId, farm_id: req.farmId } });
+    // Verify breed belongs to this farm (or is a global default breed)
+    const breed = await prisma.breeds.findFirst({ 
+      where: { 
+        id: breedId,
+        OR: [
+          { farm_id: req.farmId },
+          { is_default: true }
+        ]
+      } 
+    });
     if (!breed) {
-      return res.status(400).json({ message: 'Invalid breed selected for this farm' });
+      return res.status(400).json({ message: 'Invalid breed selected' });
     }
 
     // TAG VALIDATIONS
@@ -292,6 +300,22 @@ exports.updateAnimal = async (req, res) => {
         const location = await prisma.locations.findFirst({ where: { id: locationId, farm_id: req.farmId } });
         if (!location) {
             return res.status(400).json({ message: 'Invalid location selected for this farm' });
+        }
+    }
+
+    // Verify breed if changing
+    if (breedId) {
+        const breedCheck = await prisma.breeds.findFirst({ 
+          where: { 
+            id: breedId,
+            OR: [
+              { farm_id: req.farmId },
+              { is_default: true }
+            ]
+          } 
+        });
+        if (!breedCheck) {
+            return res.status(400).json({ message: 'Invalid breed selected' });
         }
     }
 
