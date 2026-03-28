@@ -1,18 +1,20 @@
 const prisma = require('../config/prisma');
 
-// @desc    Get current farm details
+// @desc    Get profile details for the active farm
 // @route   GET /api/farms/current
 exports.getFarmDetails = async (req, res) => {
   try {
+    // req.farmId is populated by the auth middleware based on the 'x-farm-id' header
     if (!req.farmId) {
       return res.status(400).json({ message: 'No farm selected' });
     }
 
     const farm = await prisma.farms.findUnique({ where: { id: req.farmId } });
     if (!farm) {
-      return res.status(404).json({ message: 'Farm not found' });
+      return res.status(404).json({ message: 'Farm database record not found' });
     }
 
+    // Return sanitized farm details
     res.json({
       id: farm.id,
       name: farm.name,
@@ -27,7 +29,7 @@ exports.getFarmDetails = async (req, res) => {
   }
 };
 
-// @desc    Update farm details
+// @desc    Edit main farm settings (Name, Location)
 // @route   PUT /api/farms/current
 exports.updateFarmDetails = async (req, res) => {
   const { name, location } = req.body;
@@ -36,16 +38,18 @@ exports.updateFarmDetails = async (req, res) => {
       return res.status(400).json({ message: 'No farm selected' });
     }
 
-    // Authorization: Only OWNER can update farm details
+    // RBAC Security: Only users with 'OWNER' role across the farm record are permitted to edit it
+    // req.employee is populated by the auth middleware
     if (req.employee.employee_type !== 'OWNER') {
-      return res.status(403).json({ message: 'Only farm owners can update farm details' });
+      return res.status(403).json({ message: 'Access Denied: Only farm owners can modify global settings' });
     }
 
     const farm = await prisma.farms.findUnique({ where: { id: req.farmId } });
     if (!farm) {
-      return res.status(404).json({ message: 'Farm not found' });
+      return res.status(404).json({ message: 'Farm record not found' });
     }
 
+    // Apply partial updates while preserving existing values if not provided
     const updated = await prisma.farms.update({
       where: { id: req.farmId },
       data: {

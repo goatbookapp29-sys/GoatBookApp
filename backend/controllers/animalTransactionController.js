@@ -1,15 +1,18 @@
 const prisma = require('../config/prisma');
 const { v4: uuidv4 } = require('uuid');
 
-// @desc    Get transactions for an animal
+// @desc    Get financial history/transactions for a specific animal
+// @route   GET /api/animal-transactions/:animalId
 exports.getTransactions = async (req, res) => {
   try {
     const { animalId } = req.params;
+    // Fetch all transaction records linked to this animal, ordered by date
     const transactions = await prisma.animal_transactions.findMany({
       where: { animal_id: animalId },
       orderBy: { created_at: 'desc' }
     });
 
+    // Transform database records (snake_case) to API standard (camelCase)
     res.json(transactions.map(t => ({
       id: t.id,
       animalId: t.animal_id,
@@ -40,7 +43,8 @@ exports.getTransactions = async (req, res) => {
   }
 };
 
-// @desc    Create a new transaction record
+// @desc    Record a new buy/sell transaction for an animal
+// @route   POST /api/animal-transactions
 exports.createTransaction = async (req, res) => {
   const { 
     animalId, tagNumber, teethStage, purchaseWeight, purchaseRate, purchaseDate, 
@@ -49,14 +53,16 @@ exports.createTransaction = async (req, res) => {
   } = req.body;
 
   try {
+    // 1. Verify the animal exists before creating a transaction
     const animal = await prisma.animals.findUnique({ where: { id: animalId } });
     if (!animal) return res.status(404).json({ message: 'Animal not found' });
 
+    // 2. Create the transaction record (linking to animal_id)
     const transaction = await prisma.animal_transactions.create({
       data: {
         id: uuidv4(),
         animal_id: animalId,
-        tag_number: tagNumber || animal.tag_number,
+        tag_number: tagNumber || animal.tag_number, // Default to animal's current tag if not provided
         teeth_stage: teethStage,
         purchase_weight: purchaseWeight,
         purchase_rate: purchaseRate,

@@ -1,13 +1,17 @@
 const prisma = require('../config/prisma');
 const { v4: uuidv4 } = require('uuid');
 
-// @desc    Get all breeds for the current farm
+// @desc    Get all breeds available for the current farm (includes global defaults)
+// @route   GET /api/breeds
 exports.getBreeds = async (req, res) => {
   try {
     if (!req.farmId) {
       return res.status(400).json({ message: 'No farm selected' });
     }
 
+    // Fetch breeds that:
+    // a) belong explicitly to this farm
+    // b) are marked as default/global (available to all users)
     const breeds = await prisma.breeds.findMany({
       where: {
         OR: [
@@ -18,7 +22,7 @@ exports.getBreeds = async (req, res) => {
       orderBy: { name: 'asc' }
     });
 
-    // Map to camelCase for frontend
+    // Transform database records to API standard (camelCase)
     res.json(breeds.map(b => ({
       id: b.id,
       name: b.name,
@@ -35,7 +39,8 @@ exports.getBreeds = async (req, res) => {
   }
 };
 
-// @desc    Add a new breed to a farm
+// @desc    Register a new custom breed for a specific farm
+// @route   POST /api/breeds
 exports.addBreed = async (req, res) => {
   const { name, animalType } = req.body;
   try {
@@ -44,11 +49,12 @@ exports.addBreed = async (req, res) => {
     }
 
     const now = new Date();
+    // Create new breed record private to the current farm
     const breed = await prisma.breeds.create({
       data: {
         id: uuidv4(),
         name,
-        animal_type: animalType || 'Goat',
+        animal_type: animalType || 'Goat', // Default to Goat if not specified
         farm_id: req.farmId,
         created_by_user_id: req.user.id,
         created_at: now,
@@ -69,10 +75,12 @@ exports.addBreed = async (req, res) => {
   }
 };
 
-// @desc    Update a breed
+// @desc    Update custom breed details
+// @route   PUT /api/breeds/:id
 exports.updateBreed = async (req, res) => {
   const { name, animalType } = req.body;
   try {
+    // 1. Ensure the breed exists and belongs to the current farm (cannot edit defaults)
     const breed = await prisma.breeds.findFirst({
       where: { id: req.params.id, farm_id: req.farmId }
     });
@@ -99,7 +107,8 @@ exports.updateBreed = async (req, res) => {
   }
 };
 
-// @desc    Delete a breed
+// @desc    Safely remove a custom breed from a farm
+// @route   DELETE /api/breeds/:id
 exports.deleteBreed = async (req, res) => {
   try {
     const breed = await prisma.breeds.findFirst({
@@ -110,21 +119,22 @@ exports.deleteBreed = async (req, res) => {
       return res.status(404).json({ message: 'Breed not found in this farm' });
     }
 
-    // Check if animals are using this breed
+    // Integrity Check: Do not delete if any animals are currently assigned to this breed
     const animalCount = await prisma.animals.count({ where: { breed_id: breed.id } });
     if (animalCount > 0) {
       return res.status(400).json({ message: 'Cannot delete breed that is assigned to animals' });
     }
 
     await prisma.breeds.delete({ where: { id: req.params.id } });
-    res.json({ message: 'Breed removed' });
+    res.json({ message: 'Breed removed successfully' });
   } catch (err) {
     console.error('DELETE BREED ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
-// @desc    Get animals of a specific breed with stats
+// @desc    Get detailed statistics for a specific breed within the farm
+// @route   GET /api/breeds/:id/stats
 exports.getBreedStats = async (req, res) => {
   try {
     const { id } = req.params;
@@ -141,13 +151,13 @@ exports.getBreedStats = async (req, res) => {
     });
     if (!breed) return res.status(404).json({ message: 'Breed not found' });
 
-    // Fetch animals of this breed with their location info
+    // Fetch all animals belonging to this breed in the current farm context
     const animals = await prisma.animals.findMany({
       where: { breed_id: id, farm_id: req.farmId },
       include: { locations: { select: { name: true, code: true, type: true } } }
     });
 
-    // Group animals by location
+    // Grouping Logic: Distribute counts and lists based on physical location (e.g., Shed A, Shed B)
     const distribution = {};
     animals.forEach(animal => {
       const locName = animal.locations?.name || 'Unassigned';

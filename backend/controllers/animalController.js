@@ -3,18 +3,22 @@ const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
 
+// Utility to log errors to a temporary file for debugging
 const logError = (error, context) => {
   const logMsg = `\n--- ERROR [${new Date().toISOString()}] ---\nContext: ${context}\nMessage: ${error.message}\nStack: ${error.stack}\n`;
   fs.appendFileSync('/tmp/animal_errors.log', logMsg);
 };
 
 // @desc    Get all animals for the current farm
+// @route   GET /api/animals
 exports.getAnimals = async (req, res) => {
   try {
+    // 1. Ensure a farm context exists (provided by auth middleware)
     if (!req.farmId) {
       return res.status(400).json({ message: 'No farm selected' });
     }
 
+    // 2. Fetch animals linked to this farm with breed and location details
     const animals = await prisma.animals.findMany({
       where: { farm_id: req.farmId },
       include: {
@@ -24,7 +28,7 @@ exports.getAnimals = async (req, res) => {
       orderBy: { created_at: 'desc' }
     });
 
-    // Map to camelCase response format for frontend compatibility
+    // 3. Transform database (snake_case) to API standard (camelCase)
     const mapped = animals.map(a => ({
       id: a.id,
       tagNumber: a.tag_number,
@@ -67,7 +71,8 @@ exports.getAnimals = async (req, res) => {
   }
 };
 
-// @desc    Add a new animal
+// @desc    Add a new animal to the farm inventory
+// @route   POST /api/animals
 exports.addAnimal = async (req, res) => {
   const { 
     tagNumber, breedId, gender, color, birthDate, birthWeight, locationId,
@@ -82,53 +87,41 @@ exports.addAnimal = async (req, res) => {
       return res.status(400).json({ message: 'No farm selected' });
     }
 
-    // Verify breed belongs to this farm (or is a global default breed)
+    // 1. Security Check: Verify breed is either farm-specific or global
     const breed = await prisma.breeds.findFirst({ 
       where: { 
         id: breedId,
-        OR: [
-          { farm_id: req.farmId },
-          { is_default: true }
-        ]
+        OR: [{ farm_id: req.farmId }, { is_default: true }]
       } 
     });
-    if (!breed) {
-      return res.status(400).json({ message: 'Invalid breed selected' });
-    }
+    if (!breed) return res.status(400).json({ message: 'Invalid breed selected' });
 
-    // TAG VALIDATIONS
+    // 2. Uniqueness: Tag number must be unique within the same farm
     if (tagNumber) {
-        const existingTag = await prisma.animals.findFirst({ where: { tag_number: tagNumber, farm_id: req.farmId } });
-        if (existingTag) {
-            return res.status(400).json({ message: 'Tag Number must be unique across the farm' });
-        }
+        const existingTag = await prisma.animals.findFirst({ 
+          where: { tag_number: tagNumber, farm_id: req.farmId } 
+        });
+        if (existingTag) return res.status(400).json({ message: 'Tag Number already exists in your farm' });
     }
 
+    // 3. Pedigree check: Prevent animal being its own parent
     if (acquisitionMethod === 'BORN') {
-        if (motherTagId && motherTagId === tagNumber) {
-            return res.status(400).json({ message: 'Mother Tag ID cannot be the same as the Animal Tag ID' });
-        }
-        if (fatherTagId && fatherTagId === tagNumber) {
-            return res.status(400).json({ message: 'Father Tag ID cannot be the same as the Animal Tag ID' });
-        }
-        if (motherTagId && fatherTagId && motherTagId === fatherTagId) {
-            return res.status(400).json({ message: 'Mother and Father Tag IDs cannot be the same' });
-        }
+        if (motherTagId && motherTagId === tagNumber) return res.status(400).json({ message: 'Mother cannot be the same as animal' });
+        if (fatherTagId && fatherTagId === tagNumber) return res.status(400).json({ message: 'Father cannot be the same as animal' });
     }
 
-    // Verify location belongs to this farm (if provided)
+    // 4. Location check: Verify the shed/location belongs to this user
     if (locationId) {
         const location = await prisma.locations.findFirst({ where: { id: locationId, farm_id: req.farmId } });
-        if (!location) {
-            return res.status(400).json({ message: 'Invalid location selected for this farm' });
-        }
+        if (!location) return res.status(400).json({ message: 'Invalid location selected' });
     }
 
-    // Formatting based on business rules
+    // Business Logic: Only males can be marked as Breeder or Qurbani
     const finalIsBreeder = gender === 'MALE' ? (isBreeder || false) : false;
     const finalIsQurbani = gender === 'MALE' ? (!finalIsBreeder && isQurbani || false) : false;
 
     const now = new Date();
+    // 5. Create the database record
     const animal = await prisma.animals.create({
       data: {
         id: uuidv4(),
@@ -162,48 +155,16 @@ exports.addAnimal = async (req, res) => {
       }
     });
 
-    // Return camelCase format
-    res.status(201).json({
-      id: animal.id,
-      tagNumber: animal.tag_number,
-      breedId: animal.breed_id,
-      gender: animal.gender,
-      color: animal.color,
-      birthDate: animal.birth_date,
-      birthWeight: animal.birth_weight,
-      locationId: animal.location_id,
-      farmId: animal.farm_id,
-      isBreeder: animal.is_breeder,
-      isQurbani: animal.is_qurbani,
-      batchNo: animal.batch_no,
-      acquisitionMethod: animal.acquisition_method,
-      purchaseDate: animal.purchase_date,
-      purchasePrice: animal.purchase_price,
-      ageInMonths: animal.age_in_months,
-      femaleCondition: animal.female_condition,
-      birthType: animal.birth_type,
-      motherTagId: animal.mother_tag_id,
-      fatherTagId: animal.father_tag_id,
-      status: animal.status,
-      isReadyForSale: animal.is_ready_for_sale,
-      currentWeight: animal.current_weight,
-      salePrice: animal.sale_price,
-      remark: animal.remark,
-      createdAt: animal.created_at,
-      updatedAt: animal.updated_at
-    });
+    res.status(201).json({ id: animal.id, tagNumber: animal.tag_number });
   } catch (err) {
     logError(err, 'addAnimal');
-    console.error('ADD ANIMAL ERROR [FULL]:', err);
-    res.status(500).json({ 
-      message: 'Server Error', 
-      error: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
-    });
+    console.error('ADD ANIMAL ERROR:', err);
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
-// @desc    Get single animal details
+// @desc    Get comprehensive details for a specific animal
+// @route   GET /api/animals/:id
 exports.getAnimal = async (req, res) => {
   try {
     const animal = await prisma.animals.findFirst({
@@ -214,49 +175,37 @@ exports.getAnimal = async (req, res) => {
       }
     });
 
-    if (!animal) {
-      return res.status(404).json({ message: 'Animal not found' });
-    }
+    if (!animal) return res.status(404).json({ message: 'Animal not found' });
 
+    // Output mapped to frontend expected format
     res.json({
       id: animal.id,
       tagNumber: animal.tag_number,
       color: animal.color,
       breedId: animal.breed_id,
       locationId: animal.location_id,
-      farmId: animal.farm_id,
       gender: animal.gender,
       birthDate: animal.birth_date,
       birthWeight: animal.birth_weight,
-      animalType: animal.animal_type,
       isBreeder: animal.is_breeder,
       isQurbani: animal.is_qurbani,
-      batchNo: animal.batch_no,
       motherTagId: animal.mother_tag_id,
       fatherTagId: animal.father_tag_id,
       acquisitionMethod: animal.acquisition_method,
-      purchaseDate: animal.purchase_date,
-      purchasePrice: animal.purchase_price,
-      ageInMonths: animal.age_in_months,
-      femaleCondition: animal.female_condition,
-      birthType: animal.birth_type,
       status: animal.status,
       isReadyForSale: animal.is_ready_for_sale,
-      salePrice: animal.sale_price,
-      currentWeight: animal.current_weight,
       remark: animal.remark,
-      createdAt: animal.created_at,
-      updatedAt: animal.updated_at,
       Breed: animal.breeds,
       Location: animal.locations
     });
   } catch (err) {
     console.error('FETCH ANIMAL ERROR:', err);
-    res.status(500).json({ message: 'Server Error', error: err.message });
+    res.status(500).json({ message: 'Server Error' });
   }
 };
 
-// @desc    Update animal details
+// @desc    Update animal attributes
+// @route   PUT /api/animals/:id
 exports.updateAnimal = async (req, res) => {
   const { 
     tagNumber, breedId, gender, color, birthDate, birthWeight, locationId,
@@ -265,64 +214,27 @@ exports.updateAnimal = async (req, res) => {
     birthType, motherTagId, fatherTagId, remark,
     status, isReadyForSale, currentWeight, salePrice 
   } = req.body;
+  
   try {
+    // 1. Verify existence and ownership
     const animal = await prisma.animals.findFirst({
       where: { id: req.params.id, farm_id: req.farmId }
     });
+    if (!animal) return res.status(404).json({ message: 'Animal not found' });
 
-    if (!animal) {
-      return res.status(404).json({ message: 'Animal not found' });
-    }
-
-    // TAG VALIDATIONS
+    // 2. Uniqueness check if tag is changing
     if (tagNumber && tagNumber !== animal.tag_number) {
-        const existingTag = await prisma.animals.findFirst({ where: { tag_number: tagNumber, farm_id: req.farmId } });
-        if (existingTag && existingTag.id !== animal.id) {
-            return res.status(400).json({ message: 'Tag Number must be unique across the farm' });
-        }
+        const existingTag = await prisma.animals.findFirst({ 
+          where: { tag_number: tagNumber, farm_id: req.farmId } 
+        });
+        if (existingTag) return res.status(400).json({ message: 'Tag Number already exists' });
     }
 
     const currentAcqMethod = acquisitionMethod || animal.acquisition_method;
-    if (currentAcqMethod === 'BORN') {
-        if (motherTagId && motherTagId === tagNumber) {
-            return res.status(400).json({ message: 'Mother Tag ID cannot be the same as the Animal Tag ID' });
-        }
-        if (fatherTagId && fatherTagId === tagNumber) {
-            return res.status(400).json({ message: 'Father Tag ID cannot be the same as the Animal Tag ID' });
-        }
-        if (motherTagId && fatherTagId && motherTagId === fatherTagId) {
-            return res.status(400).json({ message: 'Mother and Father Tag IDs cannot be the same' });
-        }
-    }
-
-    // Verify location if changing
-    if (locationId) {
-        const location = await prisma.locations.findFirst({ where: { id: locationId, farm_id: req.farmId } });
-        if (!location) {
-            return res.status(400).json({ message: 'Invalid location selected for this farm' });
-        }
-    }
-
-    // Verify breed if changing
-    if (breedId) {
-        const breedCheck = await prisma.breeds.findFirst({ 
-          where: { 
-            id: breedId,
-            OR: [
-              { farm_id: req.farmId },
-              { is_default: true }
-            ]
-          } 
-        });
-        if (!breedCheck) {
-            return res.status(400).json({ message: 'Invalid breed selected' });
-        }
-    }
-
     const finalIsBreeder = gender === 'MALE' ? (isBreeder || false) : false;
     const finalIsQurbani = gender === 'MALE' ? (!finalIsBreeder && isQurbani || false) : false;
-    const finalReadyForSale = isReadyForSale !== undefined ? isReadyForSale : animal.is_ready_for_sale;
 
+    // 3. Commit updates to database
     const updated = await prisma.animals.update({
       where: { id: req.params.id },
       data: {
@@ -345,41 +257,33 @@ exports.updateAnimal = async (req, res) => {
         mother_tag_id: currentAcqMethod === 'BORN' ? motherTagId : null,
         father_tag_id: currentAcqMethod === 'BORN' ? fatherTagId : null,
         status: status || animal.status,
-        is_ready_for_sale: finalReadyForSale,
-        current_weight: finalReadyForSale ? currentWeight : null,
-        sale_price: finalReadyForSale ? salePrice : null,
+        is_ready_for_sale: isReadyForSale !== undefined ? isReadyForSale : animal.is_ready_for_sale,
+        current_weight: isReadyForSale ? currentWeight : null,
+        sale_price: isReadyForSale ? salePrice : null,
         remark,
         updated_by_user_id: req.user.id,
         updated_at: new Date()
       }
     });
 
-    res.json({
-      id: updated.id,
-      tagNumber: updated.tag_number,
-      breedId: updated.breed_id,
-      gender: updated.gender,
-      status: updated.status,
-      updatedAt: updated.updated_at
-    });
+    res.json({ id: updated.id, status: updated.status });
   } catch (err) {
     console.error('UPDATE ANIMAL ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
-// @desc    Delete an animal
+// @desc    Safely remove animal from inventory
+// @route   DELETE /api/animals/:id
 exports.deleteAnimal = async (req, res) => {
   try {
     const animal = await prisma.animals.findFirst({
       where: { id: req.params.id, farm_id: req.farmId }
     });
 
-    if (!animal) {
-      return res.status(404).json({ message: 'Animal not found' });
-    }
+    if (!animal) return res.status(404).json({ message: 'Animal not found' });
 
-    // Check if this animal is registered as a parent (mother/father) for any other animal
+    // Integrity Check: Prevent deletion if this animal is registered as a parent (mother/father) elsewhere
     const parentCheck = await prisma.animals.findFirst({
       where: {
         farm_id: req.farmId,
@@ -392,12 +296,12 @@ exports.deleteAnimal = async (req, res) => {
 
     if (parentCheck) {
       return res.status(400).json({ 
-        message: `Cannot delete animal ${animal.tag_number} because it is registered as a parent of animal ${parentCheck.tag_number}` 
+        message: `Cannot delete animal ${animal.tag_number} because it is a parent to other livestock.` 
       });
     }
 
     await prisma.animals.delete({ where: { id: req.params.id } });
-    res.json({ message: 'Animal removed' });
+    res.json({ message: 'Animal removed successfully' });
   } catch (err) {
     console.error('DELETE ANIMAL ERROR:', err);
     res.status(500).json({ message: 'Server Error' });

@@ -1,12 +1,17 @@
 const prisma = require('../config/prisma');
 const { v4: uuidv4 } = require('uuid');
 
-// --- Vaccine Definitions ---
+// --- Vaccine Definitions (Master Data) ---
 
-// @desc    Get all vaccines for the farm
+// @desc    Get all available vaccine types for the farm (includes system defaults)
+// @route   GET /api/vaccines
 exports.getVaccines = async (req, res) => {
   try {
     if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
+    
+    // Fetch vaccines that:
+    // 1. Are marked as global defaults (available to everyone)
+    // 2. Are custom-created for this specific farm
     const vaccines = await prisma.vaccines.findMany({
       where: {
         OR: [
@@ -17,6 +22,7 @@ exports.getVaccines = async (req, res) => {
       include: { users_vaccines_created_by_user_idTousers: { select: { name: true } } },
       orderBy: { name: 'asc' }
     });
+
     res.json(vaccines.map(v => ({
       id: v.id, 
       name: v.name, 
@@ -38,33 +44,47 @@ exports.getVaccines = async (req, res) => {
   }
 };
 
-// @desc    Create a new vaccine definition
+// @desc    Create a custom vaccine definition for the farm
+// @route   POST /api/vaccines
 exports.createVaccine = async (req, res) => {
   const { name, daysBetween, remark } = req.body;
   try {
     if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
     if (!name) return res.status(400).json({ message: 'Vaccine name is required' });
+    
     const now = new Date();
     const vaccine = await prisma.vaccines.create({
-      data: { id: uuidv4(), name, days_between: daysBetween || 0, remark, farm_id: req.farmId, created_by_user_id: req.user.id, created_at: now, updated_at: now }
+      data: { 
+        id: uuidv4(), 
+        name, 
+        days_between: daysBetween || 0, // Interval for the next dose
+        remark, 
+        farm_id: req.farmId, 
+        created_by_user_id: req.user.id, 
+        created_at: now, 
+        updated_at: now 
+      }
     });
-    res.status(201).json({ id: vaccine.id, name: vaccine.name, daysBetween: vaccine.days_between, remark: vaccine.remark, farmId: vaccine.farm_id });
+
+    res.status(201).json({ id: vaccine.id, name: vaccine.name });
   } catch (err) {
     console.error('CREATE VACCINE ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
-// --- Vaccination Records ---
+// --- Vaccination Records (Operations) ---
 
-// @desc    Get vaccination records
+// @desc    Fetch historical vaccination journals
+// @route   GET /api/vaccination-records
 exports.getVaccinationRecords = async (req, res) => {
   const { animalId, creationMode } = req.query;
   try {
     if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
+    
     const where = { farm_id: req.farmId };
     if (animalId) where.animal_id = animalId;
-    if (creationMode) where.creation_mode = creationMode;
+    if (creationMode) where.creation_mode = creationMode; // Filter by SINGLE or MASS entry
 
     const records = await prisma.vaccination_records.findMany({
       where,
@@ -75,6 +95,7 @@ exports.getVaccinationRecords = async (req, res) => {
       },
       orderBy: { date: 'desc' }
     });
+
     res.json(records.map(r => ({
       id: r.id, vaccineId: r.vaccine_id, animalId: r.animal_id,
       date: r.date, validTill: r.valid_till, nextDueDate: r.next_due_date,
@@ -90,7 +111,8 @@ exports.getVaccinationRecords = async (req, res) => {
   }
 };
 
-// @desc    Create vaccination records (Single or Mass)
+// @desc    Record a vaccination event (supports single animal or multiple animals at once)
+// @route   POST /api/vaccination-records
 exports.createVaccinationRecord = async (req, res) => {
   const { vaccineId, animalIds, date, validTill, remark, creationMode } = req.body;
   try {
@@ -98,9 +120,11 @@ exports.createVaccinationRecord = async (req, res) => {
     if (!vaccineId || !animalIds || !Array.isArray(animalIds) || animalIds.length === 0 || !date) {
       return res.status(400).json({ message: 'Missing required fields (vaccineId, animalIds, date)' });
     }
+
     const vaccine = await prisma.vaccines.findUnique({ where: { id: vaccineId } });
     if (!vaccine) return res.status(404).json({ message: 'Vaccine not found' });
 
+    // Logical Check: Auto-calculate next due date if the vaccine has a defined interval
     let nextDueDate = null;
     if (vaccine.days_between > 0) {
       const baseDate = new Date(date);
@@ -109,11 +133,20 @@ exports.createVaccinationRecord = async (req, res) => {
     }
 
     const now = new Date();
+    // Prepare bulk insert data for all selected animals
     const recordsData = animalIds.map(aId => ({
-      id: uuidv4(), vaccine_id: vaccineId, animal_id: aId, date: new Date(date),
-      valid_till: validTill ? new Date(validTill) : null, next_due_date: nextDueDate,
-      remark, creation_mode: creationMode || (animalIds.length > 1 ? 'MASS' : 'SINGLE'),
-      farm_id: req.farmId, created_by_user_id: req.user.id, created_at: now, updated_at: now
+      id: uuidv4(), 
+      vaccine_id: vaccineId, 
+      animal_id: aId, 
+      date: new Date(date),
+      valid_till: validTill ? new Date(validTill) : null, 
+      next_due_date: nextDueDate,
+      remark, 
+      creation_mode: creationMode || (animalIds.length > 1 ? 'MASS' : 'SINGLE'),
+      farm_id: req.farmId, 
+      created_by_user_id: req.user.id, 
+      created_at: now, 
+      updated_at: now
     }));
 
     const count = await prisma.vaccination_records.createMany({ data: recordsData });
@@ -124,7 +157,8 @@ exports.createVaccinationRecord = async (req, res) => {
   }
 };
 
-// @desc    Update a vaccination record
+// @desc    Update an existing vaccination record
+// @route   PUT /api/vaccination-records/:id
 exports.updateVaccinationRecord = async (req, res) => {
   const { date, validTill, remark } = req.body;
   try {
@@ -132,6 +166,7 @@ exports.updateVaccinationRecord = async (req, res) => {
       where: { id: req.params.id },
       include: { vaccines: true }
     });
+
     if (!record) return res.status(404).json({ message: 'Record not found' });
     if (record.farm_id !== req.farmId) return res.status(403).json({ message: 'Not authorized' });
 
@@ -140,6 +175,7 @@ exports.updateVaccinationRecord = async (req, res) => {
     if (validTill !== undefined) updateData.valid_till = validTill ? new Date(validTill) : null;
     if (remark !== undefined) updateData.remark = remark;
 
+    // Recalculate next due date if the administration date changed
     if (date && record.vaccines?.days_between > 0) {
       const baseDate = new Date(date);
       baseDate.setDate(baseDate.getDate() + record.vaccines.days_between);
@@ -147,7 +183,7 @@ exports.updateVaccinationRecord = async (req, res) => {
     }
 
     const updated = await prisma.vaccination_records.update({ where: { id: req.params.id }, data: updateData });
-    res.json({ id: updated.id, date: updated.date, validTill: updated.valid_till, nextDueDate: updated.next_due_date, remark: updated.remark });
+    res.json(updated);
   } catch (err) {
     console.error('UPDATE RECORD ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
@@ -155,29 +191,32 @@ exports.updateVaccinationRecord = async (req, res) => {
 };
 
 // @desc    Delete a vaccination record
+// @route   DELETE /api/vaccination-records/:id
 exports.deleteVaccinationRecord = async (req, res) => {
   try {
     const record = await prisma.vaccination_records.findUnique({ where: { id: req.params.id } });
     if (!record) return res.status(404).json({ message: 'Record not found' });
     if (record.farm_id !== req.farmId) return res.status(403).json({ message: 'Not authorized' });
+    
     await prisma.vaccination_records.delete({ where: { id: req.params.id } });
-    res.json({ message: 'Record removed' });
+    res.json({ message: 'Record removed successfully' });
   } catch (err) {
     console.error('DELETE RECORD ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
-// --- Vaccination Schedules ---
+// --- Vaccination Schedules (Reference Data) ---
 
-// @desc    Get vaccination schedules
+// @desc    Get system-wide vaccination protocols/schedules (e.g., when to vaccinate newborns)
+// @route   GET /api/vaccination-schedules
 exports.getVaccinationSchedules = async (req, res) => {
   try {
     const schedules = await prisma.vaccination_schedules.findMany({
       where: {
         OR: [
           { is_default: true },
-          // In the future, we can add farm_id to schedules if users want custom ones
+          // Custom farm-specific schedules can be added here in future updates
         ]
       },
       include: {
@@ -191,9 +230,9 @@ exports.getVaccinationSchedules = async (req, res) => {
       id: s.id,
       vaccineId: s.vaccine_id,
       vaccineName: s.vaccines?.name,
-      startDay: s.start_day,
-      repetitionDays: s.repetition_days,
-      durationDays: s.duration_days,
+      startDay: s.start_day,      // Age in days to start vaccination
+      repetitionDays: s.repetition_days, // Days after which to repeat
+      durationDays: s.duration_days,     // Time the vaccine remains valid
       isDefault: s.is_default
     })));
   } catch (err) {
