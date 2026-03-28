@@ -20,8 +20,8 @@ export const lightTheme = {
     regular: 'Montserrat_400Regular',
     medium: 'Montserrat_500Medium',
     semiBold: 'Montserrat_600SemiBold',
-    bold: 'Montserrat_700Bold',
-    extraBold: 'Montserrat_800ExtraBold',
+    bold: 'Montserrat_600SemiBold',
+    extraBold: 'Montserrat_700Bold',
   },
   spacing: {
     xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 40,

@@ -16,21 +16,21 @@ import {
 import api from '../api';
 import { getFromCache } from '../utils/cache';
 
-const CheckBox = ({ label, value, onToggle }) => {
-  const { theme } = useTheme();
-  return (
-    <TouchableOpacity style={styles.checkboxContainer} onPress={onToggle} activeOpacity={0.7}>
-      <View style={[styles.checkbox, { borderColor: theme.colors.border }, value && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }]}>
-        {value && <Check size={14} color="#FFF" />}
-      </View>
-      <Text style={[styles.checkboxLabel, { color: theme.colors.text }]}>{label}</Text>
-    </TouchableOpacity>
-  );
-};
-
 const AddAnimalScreen = ({ navigation, route }) => {
   const { isDarkMode, theme } = useTheme();
   const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
+
+  const CheckBox = ({ label, value, onToggle }) => {
+    return (
+      <TouchableOpacity style={styles.checkboxContainer} onPress={onToggle} activeOpacity={0.7}>
+        <View style={[styles.checkbox, { borderColor: theme.colors.border }, value && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }]}>
+          {value && <Check size={14} color="#FFF" />}
+        </View>
+        <Text style={[styles.checkboxLabel, { color: theme.colors.text }]}>{label}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   const isEditing = !!route.params?.animal;
   const existingAnimal = route.params?.animal || {};
   const [weightExpanded, setWeightExpanded] = useState(false);

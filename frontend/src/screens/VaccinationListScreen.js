@@ -177,7 +177,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   dateText: {
     fontSize: 11,
     marginLeft: 4,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   rightCol: {
     alignItems: 'flex-end',
@@ -202,7 +202,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   dueLabel: {
     fontSize: 13,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Montserrat_600SemiBold',
   },
   dueValue: {
     fontSize: 13,
