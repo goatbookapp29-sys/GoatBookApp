@@ -91,7 +91,7 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   addNewBtn: {
-    backgroundColor: '#FF6B00',
+    backgroundColor: '#F95004',
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
@@ -126,7 +126,7 @@ export default StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 8,
-    backgroundColor: '#FFF1EA',
+    backgroundColor: '#FEF2E6',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,

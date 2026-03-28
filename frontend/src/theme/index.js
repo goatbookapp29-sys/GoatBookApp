@@ -1,7 +1,7 @@
 export const lightTheme = {
   colors: {
-    primary: '#FF6B00',
-    primaryDark: '#E65100',
+    primary: '#F95004',
+    primaryDark: '#D64403',
     secondary: '#4F46E5',
     background: '#FFFFFF',
     surface: '#FFFFFF',
@@ -35,8 +35,8 @@ export const lightTheme = {
 
 export const darkTheme = {
   colors: {
-    primary: '#FF6B00',
-    primaryDark: '#E65100',
+    primary: '#F95004',
+    primaryDark: '#D64403',
     secondary: '#818CF8', // Lighter indigo for Dark Mode
     background: '#0F172A', // Slate 900
     surface: '#1E293B',    // Slate 800
