@@ -31,7 +31,12 @@ const LoginScreen = ({ navigation }) => {
       } else if (farms && farms.length === 1) {
         await setSelectedFarm(farms[0].id);
         setLoading(false);
-        navigation.replace('Dashboard');
+        try {
+          navigation.replace('MainDrawer');
+        } catch (navError) {
+          console.error('Navigation Error:', navError);
+          alert('Navigation Failed: ' + navError.message);
+        }
       } else {
         alert('No farms found for this account.');
         setLoading(false);

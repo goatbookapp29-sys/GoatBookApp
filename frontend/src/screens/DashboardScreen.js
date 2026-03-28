@@ -5,8 +5,10 @@ import { useTheme } from '../theme/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { 
   Menu, GitBranch, PawPrint, User, Home, Syringe, Scale, 
-  Heart, Activity, ClipboardList, Globe, Settings, Briefcase
+  Heart, Activity, ClipboardList, Globe, Settings, Briefcase,
+  Search, Bell
 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import api, { setAuthToken, setSelectedFarm } from '../api';
 import styles from './DashboardScreen.styles';
 
@@ -63,13 +65,16 @@ const DashboardScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" backgroundColor={theme.colors.primary} />
       
-      {/* Header */}
+      {/* Header - Simple & Flat */}
       <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          <TouchableOpacity style={styles.menuButton}>
-            <Menu color="#FFF" size={28} />
+          <TouchableOpacity 
+            style={styles.menuButton}
+            onPress={() => navigation.openDrawer()}
+          >
+            <Menu color="#FFF" size={26} strokeWidth={2.5} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{farmName}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>{farmName}</Text>
         </View>
       </View>
 

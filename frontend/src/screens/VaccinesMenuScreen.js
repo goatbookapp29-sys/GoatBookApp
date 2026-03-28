@@ -36,7 +36,7 @@ const VaccinesMenuScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Vaccines Management" subTitle="Immunization" onBack={() => navigation.goBack()} />
+      <GHeader title="Vaccines Management" subTitle="Immunization" onMenu={() => navigation.openDrawer()} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.grid}>
           {options.map((item) => (

@@ -13,7 +13,7 @@ const FarmSelectionScreen = ({ navigation, route }) => {
     try {
       await setSelectedFarm(farm.id);
       setLoading(false);
-      navigation.replace('Dashboard');
+      navigation.replace('MainDrawer');
     } catch (error) {
       setLoading(false);
       alert('Failed to select farm');

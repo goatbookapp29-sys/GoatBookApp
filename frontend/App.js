@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, LogBox } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
 import * as Font from 'expo-font';
@@ -44,8 +46,31 @@ import VaccinationListScreen from './src/screens/VaccinationListScreen';
 import ReportsMenuScreen from './src/screens/ReportsMenuScreen';
 import OverallReportScreen from './src/screens/OverallReportScreen';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
+import SideMenu from './src/components/SideMenu';
 
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
+
+function MainDrawer() {
+  const { theme } = useTheme();
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <SideMenu {...props} />}
+      screenOptions={{
+        headerShown: false,
+        drawerStyle: { width: '80%', backgroundColor: theme.colors.surface }
+      }}
+    >
+      <Drawer.Screen name="Dashboard" component={DashboardScreen} />
+      <Drawer.Screen name="AnimalList" component={AnimalListScreen} />
+      <Drawer.Screen name="BreedList" component={BreedListScreen} />
+      <Drawer.Screen name="VaccinesMenu" component={VaccinesMenuScreen} />
+      <Drawer.Screen name="ReportsMenu" component={ReportsMenuScreen} />
+      <Drawer.Screen name="LocationList" component={LocationListScreen} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} />
+    </Drawer.Navigator>
+  );
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -90,7 +115,7 @@ function AppContent() {
       const farmId = await SecureStore.getItemAsync('selectedFarmId');
       
       if (token && farmId) {
-        setInitialRoute('Dashboard');
+        setInitialRoute('MainDrawer');
       } else {
         setInitialRoute('Login');
       }
@@ -108,50 +133,51 @@ function AppContent() {
   }
 
   return (
-    <NavigationContainer>
-      <StatusBar style="auto" />
-      <Stack.Navigator 
-        initialRouteName={initialRoute}
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: theme.colors.background },
-        }}
-      >
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-        <Stack.Screen name="Dashboard" component={DashboardScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} />
-        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-        <Stack.Screen name="BreedList" component={BreedListScreen} />
-        <Stack.Screen name="AddBreed" component={AddBreedScreen} />
-        <Stack.Screen name="EditBreed" component={AddBreedScreen} />
-        <Stack.Screen name="AnimalList" component={AnimalListScreen} />
-        <Stack.Screen name="AddAnimal" component={AddAnimalScreen} />
-        <Stack.Screen name="EditAnimal" component={AddAnimalScreen} />
-        <Stack.Screen name="EmployeeList" component={EmployeeListScreen} />
-        <Stack.Screen name="AddEmployee" component={AddEmployeeScreen} />
-        <Stack.Screen name="EditEmployee" component={AddEmployeeScreen} />
-        <Stack.Screen name="FarmSelection" component={FarmSelectionScreen} />
-        <Stack.Screen name="LocationList" component={LocationListScreen} />
-        <Stack.Screen name="AddLocation" component={AddLocationScreen} />
-        <Stack.Screen name="EditLocation" component={AddLocationScreen} />
-        <Stack.Screen name="LocationDetails" component={LocationDetailsScreen} />
-        <Stack.Screen name="BreedDetails" component={BreedDetailsScreen} />
-        <Stack.Screen name="AddWeight" component={AddWeightScreen} />
-        <Stack.Screen name="WeightList" component={WeightListScreen} />
-        <Stack.Screen name="FarmSettings" component={FarmSettingsScreen} />
-        <Stack.Screen name="VaccinesMenu" component={VaccinesMenuScreen} />
-        <Stack.Screen name="VaccineDefinitions" component={VaccineDefinitionsScreen} />
-        <Stack.Screen name="AddVaccineName" component={AddVaccineNameScreen} />
-        <Stack.Screen name="AddVaccination" component={AddVaccinationScreen} />
-        <Stack.Screen name="VaccinationList" component={VaccinationListScreen} />
-        <Stack.Screen name="ReportsMenu" component={ReportsMenuScreen} />
-        <Stack.Screen name="OverallReport" component={OverallReportScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <StatusBar style="auto" />
+        <Stack.Navigator 
+          initialRouteName={initialRoute}
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: theme.colors.background },
+          }}
+        >
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+          
+          {/* Main App (Drawer) */}
+          <Stack.Screen name="MainDrawer" component={MainDrawer} />
+          
+          {/* Detail/Modal Screens outside Drawer but in same stack */}
+          <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} />
+          <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+          <Stack.Screen name="AddBreed" component={AddBreedScreen} />
+          <Stack.Screen name="EditBreed" component={AddBreedScreen} />
+          <Stack.Screen name="AddAnimal" component={AddAnimalScreen} />
+          <Stack.Screen name="EditAnimal" component={AddAnimalScreen} />
+          <Stack.Screen name="EmployeeList" component={EmployeeListScreen} />
+          <Stack.Screen name="AddEmployee" component={AddEmployeeScreen} />
+          <Stack.Screen name="EditEmployee" component={AddEmployeeScreen} />
+          <Stack.Screen name="FarmSelection" component={FarmSelectionScreen} />
+          <Stack.Screen name="AddLocation" component={AddLocationScreen} />
+          <Stack.Screen name="EditLocation" component={AddLocationScreen} />
+          <Stack.Screen name="LocationDetails" component={LocationDetailsScreen} />
+          <Stack.Screen name="BreedDetails" component={BreedDetailsScreen} />
+          <Stack.Screen name="AddWeight" component={AddWeightScreen} />
+          <Stack.Screen name="WeightList" component={WeightListScreen} />
+          <Stack.Screen name="FarmSettings" component={FarmSettingsScreen} />
+          <Stack.Screen name="VaccineDefinitions" component={VaccineDefinitionsScreen} />
+          <Stack.Screen name="AddVaccineName" component={AddVaccineNameScreen} />
+          <Stack.Screen name="AddVaccination" component={AddVaccinationScreen} />
+          <Stack.Screen name="VaccinationList" component={VaccinationListScreen} />
+          <Stack.Screen name="ReportsMenu" component={ReportsMenuScreen} />
+          <Stack.Screen name="OverallReport" component={OverallReportScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
 

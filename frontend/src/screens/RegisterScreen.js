@@ -47,7 +47,7 @@ const RegisterScreen = ({ navigation }) => {
       await setAuthToken(response.data.token);
       await setSelectedFarm(response.data.farm.id);
       setLoading(false);
-      navigation.replace('Dashboard');
+      navigation.replace('MainDrawer');
     } catch (error) {
       setLoading(false);
       console.error('REGISTER ERROR FULL:', error);

@@ -2,9 +2,9 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../theme/ThemeContext';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, Menu } from 'lucide-react-native';
 
-const GHeader = ({ title, onBack, rightIcon, onRightPress, subTitle }) => {
+const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) => {
   const { theme } = useTheme();
 
   return (
@@ -12,9 +12,15 @@ const GHeader = ({ title, onBack, rightIcon, onRightPress, subTitle }) => {
       <StatusBar style="light" backgroundColor={theme.colors.primary} translucent={true} />
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
-            <ArrowLeft color={theme.colors.white} size={28} />
-          </TouchableOpacity>
+          {onMenu ? (
+            <TouchableOpacity onPress={onMenu} style={styles.backButton} activeOpacity={0.7}>
+              <Menu color={theme.colors.white} size={28} />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
+              <ArrowLeft color={theme.colors.white} size={28} />
+            </TouchableOpacity>
+          )}
           
           <View style={styles.titleContainer}>
             <Text style={[styles.title, { color: theme.colors.white }]} numberOfLines={1}>{title}</Text>
@@ -30,7 +36,6 @@ const GHeader = ({ title, onBack, rightIcon, onRightPress, subTitle }) => {
           )}
         </View>
       </SafeAreaView>
-      <View style={styles.curve} />
     </View>
   );
 };
