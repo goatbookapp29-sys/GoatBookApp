@@ -9,7 +9,12 @@ exports.getBreeds = async (req, res) => {
     }
 
     const breeds = await prisma.breeds.findMany({
-      where: { farm_id: req.farmId },
+      where: {
+        OR: [
+          { farm_id: req.farmId },
+          { is_default: true }
+        ]
+      },
       orderBy: { name: 'asc' }
     });
 
@@ -18,7 +23,9 @@ exports.getBreeds = async (req, res) => {
       id: b.id,
       name: b.name,
       animalType: b.animal_type,
+      category: b.category,
       farmId: b.farm_id,
+      isDefault: b.is_default,
       createdAt: b.created_at,
       updatedAt: b.updated_at
     })));

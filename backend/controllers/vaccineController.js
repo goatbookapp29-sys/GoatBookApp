@@ -8,13 +8,28 @@ exports.getVaccines = async (req, res) => {
   try {
     if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
     const vaccines = await prisma.vaccines.findMany({
-      where: { farm_id: req.farmId },
+      where: {
+        OR: [
+          { farm_id: req.farmId },
+          { is_default: true }
+        ]
+      },
       include: { users_vaccines_created_by_user_idTousers: { select: { name: true } } },
       orderBy: { name: 'asc' }
     });
     res.json(vaccines.map(v => ({
-      id: v.id, name: v.name, daysBetween: v.days_between, remark: v.remark,
-      farmId: v.farm_id, createdAt: v.created_at,
+      id: v.id, 
+      name: v.name, 
+      diseaseName: v.disease_name,
+      doseMl: v.dose_ml,
+      applicationRoute: v.application_route,
+      immunityDurationDays: v.immunity_duration_days,
+      nextDueDurationDays: v.next_due_duration_days,
+      daysBetween: v.days_between, 
+      remark: v.remark,
+      farmId: v.farm_id, 
+      isDefault: v.is_default,
+      createdAt: v.created_at,
       creator: v.users_vaccines_created_by_user_idTousers
     })));
   } catch (err) {
@@ -149,6 +164,40 @@ exports.deleteVaccinationRecord = async (req, res) => {
     res.json({ message: 'Record removed' });
   } catch (err) {
     console.error('DELETE RECORD ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// --- Vaccination Schedules ---
+
+// @desc    Get vaccination schedules
+exports.getVaccinationSchedules = async (req, res) => {
+  try {
+    const schedules = await prisma.vaccination_schedules.findMany({
+      where: {
+        OR: [
+          { is_default: true },
+          // In the future, we can add farm_id to schedules if users want custom ones
+        ]
+      },
+      include: {
+        vaccines: {
+          select: { name: true }
+        }
+      }
+    });
+
+    res.json(schedules.map(s => ({
+      id: s.id,
+      vaccineId: s.vaccine_id,
+      vaccineName: s.vaccines?.name,
+      startDay: s.start_day,
+      repetitionDays: s.repetition_days,
+      durationDays: s.duration_days,
+      isDefault: s.is_default
+    })));
+  } catch (err) {
+    console.error('GET SCHEDULES ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
   }
 };
