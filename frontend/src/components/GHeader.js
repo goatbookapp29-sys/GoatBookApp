@@ -8,18 +8,18 @@ const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) =
   const { theme } = useTheme();
 
   return (
-    <View style={[styles.outerContainer, { backgroundColor: theme.colors.primary, ...theme.shadow.md }]}>
+    <View style={[styles.outerContainer, { backgroundColor: theme.colors.primary }]}>
       <StatusBar style="light" backgroundColor={theme.colors.primary} translucent={true} />
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.headerContent}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={styles.leftAction}>
             {onMenu && (
-              <TouchableOpacity onPress={onMenu} style={styles.backButton} activeOpacity={0.7}>
+              <TouchableOpacity onPress={onMenu} style={styles.actionBtn} activeOpacity={0.7}>
                 <Menu color={theme.colors.white} size={28} />
               </TouchableOpacity>
             )}
             {onBack && (
-              <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
+              <TouchableOpacity onPress={onBack} style={styles.actionBtn} activeOpacity={0.7}>
                 <ArrowLeft color={theme.colors.white} size={28} />
               </TouchableOpacity>
             )}
@@ -27,18 +27,23 @@ const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) =
           
           <View style={styles.titleContainer}>
             <Text style={[styles.title, { color: theme.colors.white }]} numberOfLines={1}>{title}</Text>
-            {subTitle && <Text style={[styles.subTitle, { color: 'rgba(255,255,255,0.8)' }]}>{subTitle}</Text>}
+            {subTitle && (
+              <View style={styles.subTitleBox}>
+                <Text style={[styles.subTitle, { color: 'rgba(255,255,255,0.85)' }]}>{subTitle}</Text>
+              </View>
+            )}
           </View>
           
-          {rightIcon ? (
-            <TouchableOpacity onPress={onRightPress} style={styles.rightButton}>
-              {rightIcon}
-            </TouchableOpacity>
-          ) : (
-            <View style={{ width: 36 }} />
-          )}
+          <View style={styles.rightAction}>
+            {rightIcon && (
+              <TouchableOpacity onPress={onRightPress} style={styles.actionBtn}>
+                {rightIcon}
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </SafeAreaView>
+      <View style={[styles.bottomCurve, { backgroundColor: theme.colors.surface }]} />
     </View>
   );
 };
@@ -46,19 +51,28 @@ const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) =
 const styles = StyleSheet.create({
   outerContainer: {
     zIndex: 10,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
   },
   safeArea: {
     backgroundColor: 'transparent',
   },
   headerContent: {
-    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 24) : 48,
+    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 24) + 12 : 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 24,
   },
-  backButton: {
+  leftAction: {
+    width: 44,
+  },
+  rightAction: {
+    width: 44,
+    alignItems: 'flex-end',
+  },
+  actionBtn: {
     width: 44,
     height: 44,
     justifyContent: 'center',
@@ -69,31 +83,32 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
   },
   title: {
-    fontSize: 20,
-    fontFamily: 'Montserrat_600SemiBold',
-    letterSpacing: -0.5,
+    fontSize: 24,
+    fontFamily: 'Montserrat_700Bold',
+    letterSpacing: -1,
     textAlign: 'center',
   },
+  subTitleBox: {
+    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 4,
+  },
   subTitle: {
-    fontSize: 11,
-    fontFamily: 'Montserrat_500Medium',
-    marginTop: -2,
-    opacity: 0.9,
+    fontSize: 10,
+    fontFamily: 'Montserrat_700Bold',
+    letterSpacing: 1,
+    textAlign: 'center',
     textTransform: 'uppercase',
   },
-  rightButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
-  },
-  curve: {
-    height: 10,
-    backgroundColor: 'transparent',
+  bottomCurve: {
+    height: 24,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -24,
   }
 });
 
