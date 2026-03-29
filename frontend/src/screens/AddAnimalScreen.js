@@ -98,6 +98,11 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
   const [showTagHelp, setShowTagHelp] = useState(false);
   const [showShedHelp, setShowShedHelp] = useState(false);
+  const [helpInfo, setHelpInfo] = useState({ visible: false, title: '', content: '' });
+
+  const showHelp = (title, content) => {
+    setHelpInfo({ visible: true, title, content });
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -538,6 +543,33 @@ const AddAnimalScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </Modal>
 
+      {/* Reusable Record Help Modal */}
+      <Modal
+        visible={helpInfo.visible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setHelpInfo({ ...helpInfo, visible: false })}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setHelpInfo({ ...helpInfo, visible: false })}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{helpInfo.title}</Text>
+            <Text style={[styles.modalOptionText, { textAlign: 'left', marginBottom: 20, lineHeight: 20, opacity: 0.8 }]}>
+              {helpInfo.content}
+            </Text>
+            <TouchableOpacity 
+              style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
+              onPress={() => setHelpInfo({ ...helpInfo, visible: false })}
+            >
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       {/* Shed Help Modal */}
       <Modal
         visible={showShedHelp}
@@ -945,8 +977,11 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 activeOpacity={0.7}
                 onPress={() => setWeightExpanded(!weightExpanded)}
               >
-                <View style={styles.row}>
+                <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
                   <Text style={styles.sectionTitle}>WEIGHT HISTORY</Text>
+                  <TouchableOpacity onPress={() => showHelp('What is Weight Record?', 'This section allows you to maintain weight of animal that you measure periodically. This will help you to analyze weight gain chart.')}>
+                    <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6 }} strokeWidth={2} />
+                  </TouchableOpacity>
                 </View>
                 {weightExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
               </TouchableOpacity>
@@ -1000,8 +1035,11 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   activeOpacity={0.7}
                   onPress={() => setVaccinationExpanded(!vaccinationExpanded)}
                 >
-                <View style={styles.row}>
+                <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
                   <Text style={styles.sectionTitle}>VACCINATION RECORD</Text>
+                  <TouchableOpacity onPress={() => showHelp('What is Vaccination Record?', 'This section allows you to maintain each vaccination given to the animal. You can specify vaccination date, vaccination name and other detail like Dr. Name or dose, etc.')}>
+                    <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6 }} strokeWidth={2} />
+                  </TouchableOpacity>
                 </View>
                 {vaccinationExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
               </TouchableOpacity>
@@ -1059,6 +1097,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
                     <Text style={[styles.sectionTitle, { color: theme.colors.primary, marginBottom: 0, fontSize: 15, fontFamily: theme.typography.semiBold }]}>MATING RECORD</Text>
+                    <TouchableOpacity onPress={() => showHelp('What is Mating Record?', 'This section allows you to maintain mating details of animal. This will help you to analyze when goat expected to become pregnant and delivered kids.')}>
+                      <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6 }} strokeWidth={2} />
+                    </TouchableOpacity>
                   </View>
                   {matingExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
                 </TouchableOpacity>
@@ -1082,6 +1123,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
                     <Text style={[styles.sectionTitle, { color: theme.colors.primary, marginBottom: 0, fontSize: 15, fontFamily: theme.typography.semiBold }]}>BREEDING/DELIVERY RECORD</Text>
+                    <TouchableOpacity onPress={() => showHelp('What Is Breeding Record?', 'This section allow you to maintain each breeding record of individual goat.You can specify delivery date, birth type and also provid temporary tag id to the litters/kids and other detail like gender, birth weight, etc.')}>
+                      <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6 }} strokeWidth={2} />
+                    </TouchableOpacity>
                   </View>
                   {breedingExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
                 </TouchableOpacity>
@@ -1105,6 +1149,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
                     <Text style={[styles.sectionTitle, { color: theme.colors.primary, marginBottom: 0, fontSize: 15, fontFamily: theme.typography.semiBold }]}>MILK HISTORY</Text>
+                    <TouchableOpacity onPress={() => showHelp('What is Milk History?', 'Track daily or periodic milk production of your female goats. This helps in identifying high-yielding animals and monitoring lactation cycles.')}>
+                      <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6 }} strokeWidth={2} />
+                    </TouchableOpacity>
                   </View>
                   {milkExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
                 </TouchableOpacity>
@@ -1128,6 +1175,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
                     <Text style={[styles.sectionTitle, { color: theme.colors.primary, marginBottom: 0, fontSize: 15, fontFamily: theme.typography.semiBold }]}>INSURANCE</Text>
+                    <TouchableOpacity onPress={() => showHelp('What is Insurance?', 'Store insurance details for your livestock, including company name, policy number, and coverage period, ensuring your farm assets are well-protected.')}>
+                      <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6 }} strokeWidth={2} />
+                    </TouchableOpacity>
                   </View>
                   {insuranceExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
                 </TouchableOpacity>
