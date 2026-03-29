@@ -827,12 +827,11 @@ const AddAnimalScreen = ({ navigation, route }) => {
               />
               <GSelect 
                 containerStyle={styles.halfWidth}
-                label="Location/Shed" 
+                label="Location" 
                 value={locationId} 
                 onSelect={setLocationId}
                 options={locations}
                 placeholder="Select..."
-                helpAction={() => setShowShedHelp(true)}
               />
             </View>
 
