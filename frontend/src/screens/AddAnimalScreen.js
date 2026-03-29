@@ -97,6 +97,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [showSoldHelp, setShowSoldHelp] = useState(false);
 
   const [showTagHelp, setShowTagHelp] = useState(false);
+  const [showShedHelp, setShowShedHelp] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -537,6 +538,34 @@ const AddAnimalScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </Modal>
 
+      {/* Shed Help Modal */}
+      <Modal
+        visible={showShedHelp}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowShedHelp(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowShedHelp(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>What is Shed Name/ No?</Text>
+            <Text style={[styles.modalOptionText, { textAlign: 'left', marginBottom: 20, lineHeight: 20, opacity: 0.8 }]}>
+              This is the specific area, zone, or compartment of your farm where this animal is primarily kept. 
+              Assigning animals to sheds helps in tracking feed consumption, disease control, and space management.
+            </Text>
+            <TouchableOpacity 
+              style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
+              onPress={() => setShowShedHelp(false)}
+            >
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -774,11 +803,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
               />
               <GSelect 
                 containerStyle={styles.halfWidth}
-                label="Location" 
+                label="Location / Shed" 
                 value={locationId} 
                 onSelect={setLocationId}
                 options={locations}
                 placeholder="Select..."
+                helpAction={() => setShowShedHelp(true)}
               />
             </View>
 

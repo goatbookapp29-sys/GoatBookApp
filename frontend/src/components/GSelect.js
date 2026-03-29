@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Modal, FlatList, SafeAreaView, Platform } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
-import { ChevronDown, X, AlertCircle } from 'lucide-react-native';
+import { ChevronDown, X, AlertCircle, HelpCircle } from 'lucide-react-native';
 
 const GSelect = ({ 
   label, 
@@ -12,7 +12,8 @@ const GSelect = ({
   error, 
   required,
   placeholder = '',
-  containerStyle
+  containerStyle,
+  helpAction
 }) => {
   const { isDarkMode, theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
@@ -26,13 +27,22 @@ const GSelect = ({
     }).start();
   }, [value, modalVisible]);
 
-  const labelStyle = {
+  const labelContainerStyle = {
     position: 'absolute',
     left: 12,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [14, -10],
     }),
+    zIndex: 2,
+    backgroundColor: (value || modalVisible) ? theme.colors.surface : 'transparent',
+    paddingHorizontal: (value || modalVisible) ? 4 : 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    pointerEvents: 'box-none',
+  };
+
+  const labelTextStyle = {
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [16, 12],
@@ -41,11 +51,8 @@ const GSelect = ({
       inputRange: [0, 1],
       outputRange: [theme.colors.textLight, error ? theme.colors.error : theme.colors.primary],
     }),
-    backgroundColor: (value || modalVisible) ? theme.colors.surface : 'transparent',
-    paddingHorizontal: (value || modalVisible) ? 4 : 0,
-    zIndex: 1,
+    fontFamily: theme.typography.medium || 'System',
     fontWeight: (value || modalVisible) ? '700' : '500',
-    maxWidth: '90%',
   };
 
   const selectedOption = options.find(opt => opt.value === value);
@@ -62,9 +69,36 @@ const GSelect = ({
           modalVisible && { borderColor: theme.colors.primary, borderWidth: 2 }
         ]}
       >
-        <Animated.Text style={labelStyle} pointerEvents="none" numberOfLines={1} ellipsizeMode="tail">
-          {label}{required && '*'}
-        </Animated.Text>
+        <Animated.View style={labelContainerStyle} pointerEvents="box-none">
+          <Animated.Text style={labelTextStyle} numberOfLines={1}>
+            {label}{required && '*'}
+          </Animated.Text>
+          {helpAction && (
+            <Animated.View style={{
+              marginLeft: animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [8, 3],
+              }),
+              transform: [{
+                scale: animatedValue.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1.1, 0.85],
+                })
+              }],
+              marginTop: animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [2, 1],
+              }),
+            }}>
+              <TouchableOpacity 
+                onPress={helpAction}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={1.5} />
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+        </Animated.View>
         
         {value || modalVisible ? (
           <Text 
