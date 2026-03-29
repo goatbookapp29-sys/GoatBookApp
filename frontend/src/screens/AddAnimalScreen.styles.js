@@ -225,6 +225,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderWidth: 1.5,
     backgroundColor: theme.colors.surface,
     marginBottom: 12,
+    marginHorizontal: 16,
     overflow: 'hidden',
   },
   photoHeader: {
@@ -242,7 +243,6 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   photoContent: {
     padding: 16,
     paddingTop: 0,
-    alignItems: 'center',
   },
   imagePreview: {
     width: '100%',
