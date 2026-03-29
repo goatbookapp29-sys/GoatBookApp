@@ -46,7 +46,7 @@ const GSelect = ({
   const labelTextStyle = {
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [16, 12],
+      outputRange: [15, 11],
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     height: 56,
   },
   valueText: {
-    fontSize: 16,
+    fontSize: 15,
     flex: 1,
     marginRight: 8,
     fontWeight: '500',
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
   },
 });

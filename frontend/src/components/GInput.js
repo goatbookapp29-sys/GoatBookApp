@@ -50,7 +50,7 @@ const GInput = ({
   const labelTextStyle = {
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [16, 12],
+      outputRange: [15, 11],
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     height: '100%',
     textAlignVertical: 'center',
     paddingTop: Platform.OS === 'ios' ? 0 : 4,
