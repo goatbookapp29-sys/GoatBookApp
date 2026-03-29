@@ -260,7 +260,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   readyTitle: {
     fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   readyOptions: {
     flexDirection: 'row',
@@ -283,8 +283,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   photoTitle: {
     fontSize: 14,
     fontFamily: 'Montserrat_600SemiBold',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   photoContent: {
     padding: 20,
