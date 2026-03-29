@@ -80,7 +80,9 @@ exports.addAnimal = async (req, res) => {
     isBreeder, isQurbani, batchNo, acquisitionMethod,
     purchaseDate, purchasePrice, ageInMonths, femaleCondition,
     birthType, motherTagId, fatherTagId, remark,
-    status, isReadyForSale, currentWeight, salePrice, imageUrl 
+    status, isReadyForSale, currentWeight, salePrice, imageUrl,
+    deathDate, deathReason,
+    soldAt, soldRemark
   } = req.body;
   
   try {
@@ -147,6 +149,10 @@ exports.addAnimal = async (req, res) => {
         mother_tag_id: acquisitionMethod === 'BORN' ? motherTagId : null,
         father_tag_id: acquisitionMethod === 'BORN' ? fatherTagId : null,
         status: status || 'LIVE',
+        death_date: deathDate ? new Date(deathDate) : null,
+        death_reason: deathReason || null,
+        sold_at: soldAt ? new Date(soldAt) : null,
+        sold_remark: soldRemark || null,
         is_ready_for_sale: isReadyForSale || false,
         current_weight: isReadyForSale ? currentWeight : null,
         sale_price: isReadyForSale ? salePrice : null,
@@ -195,6 +201,10 @@ exports.getAnimal = async (req, res) => {
       fatherTagId: animal.father_tag_id,
       acquisitionMethod: animal.acquisition_method,
       status: animal.status,
+      deathDate: animal.death_date,
+      deathReason: animal.death_reason,
+      soldAt: animal.sold_at,
+      soldRemark: animal.sold_remark,
       isReadyForSale: animal.is_ready_for_sale,
       remark: animal.remark,
       imageUrl: animal.image_url,
@@ -215,7 +225,9 @@ exports.updateAnimal = async (req, res) => {
     isBreeder, isQurbani, batchNo, acquisitionMethod,
     purchaseDate, purchasePrice, ageInMonths, femaleCondition,
     birthType, motherTagId, fatherTagId, remark,
-    status, isReadyForSale, currentWeight, salePrice, imageUrl 
+    status, isReadyForSale, currentWeight, salePrice, imageUrl,
+    deathDate, deathReason,
+    soldAt, soldRemark
   } = req.body;
   
   try {
@@ -260,6 +272,10 @@ exports.updateAnimal = async (req, res) => {
         mother_tag_id: currentAcqMethod === 'BORN' ? motherTagId : null,
         father_tag_id: currentAcqMethod === 'BORN' ? fatherTagId : null,
         status: status || animal.status,
+        death_date: deathDate ? new Date(deathDate) : (status === 'LIVE' ? null : animal.death_date),
+        death_reason: deathReason !== undefined ? deathReason : (status === 'LIVE' ? null : animal.death_reason),
+        sold_at: soldAt ? new Date(soldAt) : (status === 'LIVE' ? null : animal.sold_at),
+        sold_remark: soldRemark !== undefined ? soldRemark : (status === 'LIVE' ? null : animal.sold_remark),
         is_ready_for_sale: isReadyForSale !== undefined ? isReadyForSale : animal.is_ready_for_sale,
         current_weight: isReadyForSale ? currentWeight : null,
         sale_price: isReadyForSale ? salePrice : null,
