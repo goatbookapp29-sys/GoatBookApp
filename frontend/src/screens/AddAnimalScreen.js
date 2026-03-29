@@ -832,6 +832,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 onSelect={setLocationId}
                 options={locations}
                 placeholder="Select..."
+                helpAction={() => setShowShedHelp(true)}
               />
             </View>
 
