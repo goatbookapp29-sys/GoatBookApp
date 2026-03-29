@@ -93,6 +93,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeadHelp, setShowDeadHelp] = useState(false);
+  const [showSoldHelp, setShowSoldHelp] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -449,6 +451,62 @@ const AddAnimalScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </Modal>
 
+      {/* Dead Record Help Modal */}
+      <Modal
+        visible={showDeadHelp}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDeadHelp(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowDeadHelp(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>About Death Records</Text>
+            <Text style={[styles.modalOptionText, { textAlign: 'left', marginBottom: 20, lineHeight: 20, opacity: 0.8 }]}>
+              Marking an animal as 'Dead' helps you maintain a complete history of your livestock. 
+              By recording the date and specific cause, you can better monitor health trends and improve farm management practices over time.
+            </Text>
+            <TouchableOpacity 
+              style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
+              onPress={() => setShowDeadHelp(false)}
+            >
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Sold Record Help Modal */}
+      <Modal
+        visible={showSoldHelp}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowSoldHelp(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowSoldHelp(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Sale Information</Text>
+            <Text style={[styles.modalOptionText, { textAlign: 'left', marginBottom: 20, lineHeight: 20, opacity: 0.8 }]}>
+              Use this section to finalize an animal's record once sold. 
+              Tracking the exact sale date and price is vital for accurate financial reporting and analyzing your farm's profitability.
+            </Text>
+            <TouchableOpacity 
+              style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
+              onPress={() => setShowSoldHelp(false)}
+            >
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -537,7 +595,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
                   <Text style={[styles.readyTitle, { color: theme.colors.primary }]}>Dead Record</Text>
-                  <HelpCircle size={18} color={theme.colors.textMuted} />
+                  <TouchableOpacity onPress={() => setShowDeadHelp(true)}>
+                    <HelpCircle size={18} color={theme.colors.textMuted} />
+                  </TouchableOpacity>
                </View>
                <View style={styles.formContainer}>
                   <GDatePicker 
@@ -560,7 +620,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
                   <Text style={[styles.readyTitle, { color: theme.colors.primary }]}>SOLD RECORD</Text>
-                  <HelpCircle size={18} color={theme.colors.textMuted} />
+                  <TouchableOpacity onPress={() => setShowSoldHelp(true)}>
+                    <HelpCircle size={18} color={theme.colors.textMuted} />
+                  </TouchableOpacity>
                </View>
                <View style={styles.formContainer}>
                   <View style={styles.row}>
