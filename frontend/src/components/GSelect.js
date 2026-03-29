@@ -40,7 +40,7 @@ const GSelect = ({
     flexDirection: 'row',
     alignItems: 'center',
     pointerEvents: 'box-none',
-    maxWidth: '85%',
+    maxWidth: '72%',
   };
 
   const labelTextStyle = {
