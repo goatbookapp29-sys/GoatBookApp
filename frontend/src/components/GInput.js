@@ -56,7 +56,7 @@ const GInput = ({
       inputRange: [0, 1],
       outputRange: [theme.colors.textLight, isFocused ? theme.colors.primary : theme.colors.textLight],
     }),
-    fontFamily: theme.typography.medium,
+    fontFamily: (isFocused || value) ? theme.typography.semiBold : theme.typography.medium,
   };
 
   const inputRef = useRef(null);

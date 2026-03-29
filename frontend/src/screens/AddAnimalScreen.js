@@ -429,19 +429,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
           activeOpacity={1}
           onPress={() => setShowStatusModal(false)}
         >
-          <View style={{ backgroundColor: '#FFF', width: '80%', borderRadius: 12, overflow: 'hidden' }}>
-            <View style={{ backgroundColor: theme.colors.primary, padding: 16, alignItems: 'center' }}>
-              <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Montserrat_700Bold' }}>Select Status</Text>
-            </View>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Status</Text>
             {['Live', 'Sold', 'Dead'].map((s) => (
               <TouchableOpacity
                 key={s}
-                style={{ 
-                  padding: 16, 
-                  borderBottomWidth: 1, 
-                  borderBottomColor: '#EEE',
-                  backgroundColor: status === s ? '#F9F9F9' : '#FFF'
-                }}
+                style={[styles.statusOption, status === s && { backgroundColor: isDarkMode ? '#1A1A1A' : '#F9F9F9' }]}
                 onPress={() => {
                   setStatus(s);
                   setShowStatusModal(false);
@@ -449,8 +442,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
               >
                 <Text style={{ 
                   fontSize: 16, 
-                  fontFamily: status === s ? 'Montserrat_700Bold' : 'Montserrat_500Medium',
-                  color: status === s ? theme.colors.primary : '#333'
+                  fontFamily: status === s ? 'Montserrat_600SemiBold' : 'Montserrat_500Medium',
+                  color: status === s ? theme.colors.primary : theme.colors.text
                 }}>{s}</Text>
               </TouchableOpacity>
             ))}
@@ -480,7 +473,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setShowDeadHelp(false)}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -508,7 +501,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setShowSoldHelp(false)}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -536,7 +529,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setShowTagHelp(false)}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -563,7 +556,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setHelpInfo({ ...helpInfo, visible: false })}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -591,7 +584,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setShowShedHelp(false)}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -605,7 +598,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
           <Text style={styles.headerTitle} numberOfLines={1}>{isEditing ? 'Edit Animal' : 'Add Animal'}</Text>
           <TouchableOpacity style={styles.statusContainer} onPress={() => setShowStatusModal(true)}>
             <View style={[styles.statusDot, { backgroundColor: getStatusColor() }]} />
-            <Text style={styles.statusText}>{status}</Text>
+            <Text style={styles.statusText}>{status.charAt(0) + status.slice(1).toLowerCase()}</Text>
             <ChevronDown color="#FFF" size={14} strokeWidth={3} style={styles.statusChevron} />
           </TouchableOpacity>
         </View>
@@ -787,13 +780,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
             </View>
 
             {gender === 'MALE' && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 12, marginLeft: 11 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 12, marginLeft: 16 }}>
                 <Text style={{ 
                   fontSize: 14, 
                   color: theme.colors.text, 
-                  fontFamily: theme.typography.semiBold,
+                  fontFamily: 'Montserrat_600SemiBold',
                   marginRight: 16,
-                  fontWeight: '500'
                 }}>Male Options:</Text>
                 <CheckBox label="Breeder" value={isBreeder} onToggle={toggleBreeder} />
                 <View style={{ width: 16 }} />
@@ -977,7 +969,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 onPress={() => setWeightExpanded(!weightExpanded)}
               >
                 <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                  <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Weight History</Text>
+                  <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0 }]}>Weight History</Text>
                   <TouchableOpacity onPress={() => showHelp('What is Weight Record?', 'This section allows you to maintain weight of animal that you measure periodically. This will help you to analyze weight gain chart.')}>
                     <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                   </TouchableOpacity>
@@ -1035,7 +1027,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setVaccinationExpanded(!vaccinationExpanded)}
                 >
                 <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                  <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Vaccination Record</Text>
+                  <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0 }]}>Vaccination Record</Text>
                   <TouchableOpacity onPress={() => showHelp('What is Vaccination Record?', 'This section allows you to maintain each vaccination given to the animal. You can specify vaccination date, vaccination name and other detail like Dr. Name or dose, etc.')}>
                     <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                   </TouchableOpacity>
@@ -1095,7 +1087,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setMatingExpanded(!matingExpanded)}
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Mating Record</Text>
+                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0 }]}>Mating Record</Text>
                     <TouchableOpacity onPress={() => showHelp('What is Mating Record?', 'This section allows you to maintain mating details of animal. This will help you to analyze when goat expected to become pregnant and delivered kids.')}>
                       <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                     </TouchableOpacity>
@@ -1121,7 +1113,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setBreedingExpanded(!breedingExpanded)}
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Breeding/Delivery Record</Text>
+                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0 }]}>Breeding/Delivery Record</Text>
                     <TouchableOpacity onPress={() => showHelp('What Is Breeding Record?', 'This section allow you to maintain each breeding record of individual goat.You can specify delivery date, birth type and also provid temporary tag id to the litters/kids and other detail like gender, birth weight, etc.')}>
                       <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                     </TouchableOpacity>
@@ -1147,7 +1139,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setMilkExpanded(!milkExpanded)}
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Milk History</Text>
+                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0 }]}>Milk History</Text>
                     <TouchableOpacity onPress={() => showHelp('What is Milk History?', 'Track daily or periodic milk production of your female goats. This helps in identifying high-yielding animals and monitoring lactation cycles.')}>
                       <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                     </TouchableOpacity>
@@ -1173,7 +1165,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setInsuranceExpanded(!insuranceExpanded)}
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Insurance</Text>
+                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0 }]}>Insurance</Text>
                     <TouchableOpacity onPress={() => showHelp('What is Insurance?', 'Store insurance details for your livestock, including company name, policy number, and coverage period, ensuring your farm assets are well-protected.')}>
                       <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                     </TouchableOpacity>

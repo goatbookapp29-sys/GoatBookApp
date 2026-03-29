@@ -37,10 +37,11 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingBottom: 40,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Montserrat_600SemiBold',
     color: theme.colors.primary,
     marginBottom: SPACING.md,
+    letterSpacing: 0.5,
   },
   formContainer: {
     marginTop: 0,
@@ -114,7 +115,6 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     color: '#FFF',
     fontSize: 12,
     fontFamily: 'Montserrat_700Bold',
-    textTransform: 'uppercase',
   },
   statusChevron: {
     marginLeft: 4,
@@ -241,7 +241,6 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     color: theme.colors.text,
     fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
-    textTransform: 'uppercase',
   },
   readyToSellCard: {
     padding: 16,
@@ -258,7 +257,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginBottom: 12,
   },
   readyTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Montserrat_600SemiBold',
     letterSpacing: 0.5,
   },
@@ -281,7 +280,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     padding: 16,
   },
   photoTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Montserrat_600SemiBold',
     letterSpacing: 0.5,
   },

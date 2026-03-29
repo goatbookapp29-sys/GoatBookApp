@@ -52,8 +52,7 @@ const GSelect = ({
       inputRange: [0, 1],
       outputRange: [theme.colors.textLight, error ? theme.colors.error : theme.colors.primary],
     }),
-    fontFamily: theme.typography.medium || 'System',
-    fontWeight: (value || modalVisible) ? '700' : '500',
+    fontFamily: (value || modalVisible) ? theme.typography.semiBold : (theme.typography.medium || 'System'),
   };
 
   const selectedOption = options.find(opt => opt.value === value);
