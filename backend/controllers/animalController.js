@@ -56,6 +56,7 @@ exports.getAnimals = async (req, res) => {
       salePrice: a.sale_price,
       currentWeight: a.current_weight,
       remark: a.remark,
+      imageUrl: a.image_url,
       createdByUserId: a.created_by_user_id,
       updatedByUserId: a.updated_by_user_id,
       createdAt: a.created_at,
@@ -79,7 +80,7 @@ exports.addAnimal = async (req, res) => {
     isBreeder, isQurbani, batchNo, acquisitionMethod,
     purchaseDate, purchasePrice, ageInMonths, femaleCondition,
     birthType, motherTagId, fatherTagId, remark,
-    status, isReadyForSale, currentWeight, salePrice 
+    status, isReadyForSale, currentWeight, salePrice, imageUrl 
   } = req.body;
   
   try {
@@ -150,6 +151,7 @@ exports.addAnimal = async (req, res) => {
         current_weight: isReadyForSale ? currentWeight : null,
         sale_price: isReadyForSale ? salePrice : null,
         remark,
+        image_url: imageUrl || null,
         created_at: now,
         updated_at: now
       }
@@ -195,6 +197,7 @@ exports.getAnimal = async (req, res) => {
       status: animal.status,
       isReadyForSale: animal.is_ready_for_sale,
       remark: animal.remark,
+      imageUrl: animal.image_url,
       Breed: animal.breeds,
       Location: animal.locations
     });
@@ -212,7 +215,7 @@ exports.updateAnimal = async (req, res) => {
     isBreeder, isQurbani, batchNo, acquisitionMethod,
     purchaseDate, purchasePrice, ageInMonths, femaleCondition,
     birthType, motherTagId, fatherTagId, remark,
-    status, isReadyForSale, currentWeight, salePrice 
+    status, isReadyForSale, currentWeight, salePrice, imageUrl 
   } = req.body;
   
   try {
@@ -261,6 +264,7 @@ exports.updateAnimal = async (req, res) => {
         current_weight: isReadyForSale ? currentWeight : null,
         sale_price: isReadyForSale ? salePrice : null,
         remark,
+        image_url: imageUrl !== undefined ? imageUrl : animal.image_url,
         updated_by_user_id: req.user.id,
         updated_at: new Date()
       }

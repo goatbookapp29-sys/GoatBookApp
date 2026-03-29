@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Image, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { SPACING } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import { getStyles } from './AddAnimalScreen.styles';
@@ -11,7 +12,7 @@ import GSelect from '../components/GSelect';
 import GDatePicker from '../components/GDatePicker';
 import { 
   Check, HelpCircle, ChevronDown, ChevronUp, Plus, Scale, Syringe, 
-  Heart, Baby, Milk, Shield 
+  Heart, Baby, Milk, Shield, Camera, Trash2, Edit2
 } from 'lucide-react-native';
 import api from '../api';
 import { getFromCache } from '../utils/cache';
@@ -34,6 +35,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const isEditing = !!route.params?.animal;
   const existingAnimal = route.params?.animal || {};
   const [weightExpanded, setWeightExpanded] = useState(false);
+  const [photoExpanded, setPhotoExpanded] = useState(true);
+  const [image, setImage] = useState(existingAnimal.imageUrl || null);
+  const [uploading, setUploading] = useState(false);
 
   const [tagNumber, setTagNumber] = useState(existingAnimal.tagNumber || '');
   const [weights, setWeights] = useState([]);
@@ -209,6 +213,69 @@ const AddAnimalScreen = ({ navigation, route }) => {
     });
   };
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera permissions to make this work!');
+      return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  const uploadToCloudinary = async (imageUri) => {
+    if (!imageUri || !imageUri.startsWith('file://')) return imageUri;
+
+    const data = new FormData();
+    data.append('file', {
+      uri: imageUri,
+      type: 'image/jpeg',
+      name: 'upload.jpg',
+    });
+    data.append('upload_preset', 'goatbook_preset'); 
+    data.append('cloud_name', 'dvtfv9vvr'); 
+
+    try {
+      setUploading(true);
+      const response = await fetch('https://api.cloudinary.com/v1_1/dvtfv9vvr/image/upload', {
+        method: 'POST',
+        body: data,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const resData = await response.json();
+      setUploading(false);
+      return resData.secure_url;
+    } catch (error) {
+      setUploading(false);
+      console.error('Upload to Cloudinary error:', error);
+      throw error;
+    }
+  };
+
   const handleSave = async () => {
     if (!tagNumber || !breedId || !gender || !acquisitionMethod) {
       alert('Please fill in all required fields marked with *');
@@ -230,6 +297,11 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
     setLoading(true);
     try {
+      let uploadedImageUrl = image;
+      if (image && image.startsWith('file://')) {
+        uploadedImageUrl = await uploadToCloudinary(image);
+      }
+
       const payload = { 
         tagNumber, 
         breedId, 
@@ -238,6 +310,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
         batchNo,
         acquisitionMethod,
         locationId,
+        imageUrl: uploadedImageUrl,
         birthDate: isValidDate(birthDate) ? birthDate : null,
         birthWeight: (birthWeight && !isNaN(parseFloat(birthWeight))) ? parseFloat(birthWeight) : null,
         ageInMonths: (ageInMonths && !isNaN(parseInt(ageInMonths))) ? parseInt(ageInMonths) : null,
@@ -327,6 +400,62 @@ const AddAnimalScreen = ({ navigation, route }) => {
       
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
+          
+          {/* PHOTO SECTION */}
+          <View style={[styles.photoCard, { borderColor: theme.colors.border }]}>
+            <TouchableOpacity 
+              style={styles.photoHeader} 
+              activeOpacity={0.7}
+              onPress={() => setPhotoExpanded(!photoExpanded)}
+            >
+              <View style={styles.iconGroup}>
+                <Text style={[styles.photoTitle, { color: theme.colors.text }]}>ADD PHOTO</Text>
+                <Camera size={20} color={theme.colors.primary} style={{ marginLeft: 8 }} />
+              </View>
+              {photoExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
+            </TouchableOpacity>
+
+            {photoExpanded && (
+              <View style={styles.photoContent}>
+                {image ? (
+                  <View style={{ width: '100%', position: 'relative' }}>
+                    <Image source={{ uri: image }} style={styles.imagePreview} />
+                    {uploading && (
+                      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center', borderRadius: 12 }]}>
+                        <ActivityIndicator color="#FFF" size="large" />
+                      </View>
+                    )}
+                    <View style={styles.imageActions}>
+                      <TouchableOpacity style={styles.imageActionBtn} onPress={takePhoto}>
+                        <Edit2 size={18} color="#FFF" />
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.imageActionBtn} onPress={() => setImage(null)}>
+                        <Trash2 size={18} color="#FFF" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : (
+                  <View style={styles.row}>
+                    <TouchableOpacity 
+                      style={[styles.photoPlaceholder, { borderColor: theme.colors.border, flex: 1, marginRight: 8 }]}
+                      onPress={takePhoto}
+                    >
+                      <Camera size={24} color={theme.colors.textMuted} />
+                      <Text style={{ color: theme.colors.textMuted, marginTop: 4, fontSize: 12 }}>Camera</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={[styles.photoPlaceholder, { borderColor: theme.colors.border, flex: 1 }]}
+                      onPress={pickImage}
+                    >
+                      <Plus size={24} color={theme.colors.textMuted} />
+                      <Text style={{ color: theme.colors.textMuted, marginTop: 4, fontSize: 12 }}>Import</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+
           {isEditing && (
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>

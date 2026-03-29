@@ -3,8 +3,8 @@
     "name": "GoatBook",
     "slug": "GoatBook",
     "version": "1.0.0",
+    "icon": "./assets/splash-icon.png",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -17,7 +17,7 @@
     "android": {
       "package": "com.goatwala.farm",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/splash-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
@@ -31,8 +31,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "dd8f4208-4b63-4651-9e04-dbbb71d2c706"
+        "projectId": "fbdd2a91-3947-442f-b555-79a7f85473d9"
       }
-    }
+    },
+    "owner": "ayush20001"
   }
 }

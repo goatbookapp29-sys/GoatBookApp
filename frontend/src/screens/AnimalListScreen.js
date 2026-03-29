@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, Image } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
@@ -116,6 +116,13 @@ const AnimalListScreen = ({ navigation, route }) => {
       style={[styles.animalItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
       onPress={() => navigation.navigate('EditAnimal', { animal: item })}
     >
+      {item.imageUrl ? (
+        <Image source={{ uri: item.imageUrl }} style={styles.animalThumbnail} />
+      ) : (
+        <View style={[styles.animalThumbnail, { backgroundColor: isDarkMode ? '#222' : '#F3F4F6', justifyContent: 'center', alignItems: 'center' }]}>
+           <Text style={{ fontSize: 10, color: theme.colors.textMuted }}>No Image</Text>
+        </View>
+      )}
 
       <View style={styles.animalInfo}>
         <Text style={[styles.tagNumber, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
@@ -288,6 +295,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     shadowOpacity: isDarkMode ? 0.3 : 0.05,
     shadowRadius: 2,
     elevation: 2,
+  },
+  animalThumbnail: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 12,
   },
   animalInfo: {
     flex: 1,
