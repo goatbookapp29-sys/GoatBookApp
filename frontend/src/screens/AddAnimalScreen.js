@@ -247,21 +247,22 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const uploadToCloudinary = async (imageUri) => {
     if (!imageUri || imageUri.startsWith('http')) return imageUri;
 
-    const data = new FormData();
-    data.append('upload_preset', 'goatbook_preset'); 
-    data.append('cloud_name', 'dvtfv9vvr'); 
-    data.append('file', {
-      uri: Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri,
-      type: 'image/jpeg',
-      name: 'upload.jpg',
-    });
-
     try {
       setUploading(true);
+      
+      // Convert URI to Blob for cross-platform compatibility (Web & Mobile)
+      const blobResponse = await fetch(imageUri);
+      const blob = await blobResponse.blob();
+
+      const data = new FormData();
+      data.append('upload_preset', 'goatbook_preset'); 
+      data.append('cloud_name', 'dvtfv9vvr'); 
+      data.append('file', blob, 'upload.jpg');
+
       const response = await fetch('https://api.cloudinary.com/v1_1/dvtfv9vvr/image/upload', {
         method: 'POST',
         body: data,
-        // Remove Content-Type header to allow fetch to set it with the boundary
+        // Content-Type will be automatically set with the multipart boundary
       });
       
       if (!response.ok) {
