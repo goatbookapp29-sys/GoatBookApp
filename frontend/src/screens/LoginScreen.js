@@ -58,7 +58,7 @@ const LoginScreen = ({ navigation }) => {
         <View style={styles.formWrapper}>
             <View style={styles.titleContainer}>
                 <Text style={styles.mainTitle}>Login</Text>
-                <Text style={styles.subTitle}>Login to Goatwala Farm APP!</Text>
+                <Text style={styles.subTitle}>Login to GoatBook App!</Text>
             </View>
 
             <View style={styles.form}>
