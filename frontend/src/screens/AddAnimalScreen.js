@@ -1194,10 +1194,22 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 </TouchableOpacity>
                 {insuranceExpanded && (
                   <View style={[styles.weightContent, { paddingHorizontal: 4 }]}>
-                    <GInput label="Insurance Company" placeholder="Insurance Company" />
-                    <GInput label="Plan Name" placeholder="Plan Name" />
-                    <GInput label="Policy Number" placeholder="Policy Number" />
-                    <GInput label="Agent Name" placeholder="Agent Name" />
+                    <View style={styles.row}>
+                      <View style={styles.halfWidth}>
+                        <GInput label="Insurance Company" placeholder="Company Name" />
+                      </View>
+                      <View style={styles.halfWidth}>
+                        <GInput label="Plan Name" placeholder="Plan Name" />
+                      </View>
+                    </View>
+                    <View style={styles.row}>
+                      <View style={styles.halfWidth}>
+                        <GInput label="Policy Number" placeholder="Policy No" />
+                      </View>
+                      <View style={styles.halfWidth}>
+                        <GInput label="Agent Name" placeholder="Agent Name" />
+                      </View>
+                    </View>
                   </View>
                 )}
               </View>
