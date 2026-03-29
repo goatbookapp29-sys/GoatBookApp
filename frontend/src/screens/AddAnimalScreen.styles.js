@@ -152,7 +152,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   addNewText: {
     color: '#FFF',
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Montserrat_500Medium',
     fontSize: 14,
     marginLeft: 6,
   },
