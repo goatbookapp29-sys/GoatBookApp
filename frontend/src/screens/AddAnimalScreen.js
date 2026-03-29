@@ -245,17 +245,19 @@ const AddAnimalScreen = ({ navigation, route }) => {
   };
 
   const uploadToCloudinary = async (imageUri) => {
-    if (!imageUri || !imageUri.startsWith('file://')) return imageUri;
+    if (!imageUri || imageUri.startsWith('http')) return imageUri;
 
     const data = new FormData();
     data.append('file', {
-      uri: imageUri,
+      uri: Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri,
       type: 'image/jpeg',
       name: 'upload.jpg',
     });
     data.append('upload_preset', 'goatbook_preset'); 
     data.append('cloud_name', 'dvtfv9vvr'); 
 
+    // Important: React Native FormData needs the 'file' field to be the LAST one sometimes, 
+    // but Cloudinary is fine either way. However, let's ensure it's correct.
     try {
       setUploading(true);
       const response = await fetch('https://api.cloudinary.com/v1_1/dvtfv9vvr/image/upload', {
@@ -266,12 +268,20 @@ const AddAnimalScreen = ({ navigation, route }) => {
           'Content-Type': 'multipart/form-data',
         },
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Cloudinary Upload Failed:', errorText);
+        throw new Error('Cloudinary Upload Failed');
+      }
+
       const resData = await response.json();
       setUploading(false);
       return resData.secure_url;
     } catch (error) {
       setUploading(false);
       console.error('Upload to Cloudinary error:', error);
+      Alert.alert('Upload Error', 'Failed to upload image to Cloudinary. Please check your connection.');
       throw error;
     }
   };
@@ -298,7 +308,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
     setLoading(true);
     try {
       let uploadedImageUrl = image;
-      if (image && image.startsWith('file://')) {
+      if (image && !image.startsWith('http')) {
         uploadedImageUrl = await uploadToCloudinary(image);
       }
 
