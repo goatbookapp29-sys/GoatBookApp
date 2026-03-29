@@ -40,7 +40,6 @@ const VaccinesMenuScreen = ({ navigation }) => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title="Vaccines Management" 
-        subTitle="Immunization" 
         onBack={() => navigation.goBack()}
       />
       <ScrollView contentContainerStyle={styles.content}>
@@ -90,12 +89,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   iconContainer: {
     marginBottom: 12,
-    width: 64,
-    height: 64,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: isDarkMode ? '#1E293B' : '#F9FAFB',
   },
   cardTitle: {
     fontSize: 14,

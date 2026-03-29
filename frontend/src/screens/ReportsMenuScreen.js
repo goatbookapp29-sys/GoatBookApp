@@ -39,7 +39,7 @@ const ReportsMenuScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Reports Center" subTitle="Analysis" onBack={() => navigation.goBack()} />
+      <GHeader title="Reports Center" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.grid}>
           {options.map((item) => (
@@ -90,12 +90,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   iconContainer: {
     marginBottom: 12,
-    width: 64,
-    height: 64,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: isDarkMode ? '#1E293B' : '#F9FAFB',
   },
   cardTitle: {
     fontSize: 14,

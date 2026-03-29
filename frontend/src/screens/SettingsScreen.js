@@ -115,9 +115,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   iconContainer: {
     marginBottom: SPACING.md,
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: isDarkMode ? '#1A1A1A' : '#F9FAFB',
   },
   cardTitle: {
     fontSize: 14,
