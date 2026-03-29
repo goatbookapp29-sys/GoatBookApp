@@ -134,7 +134,7 @@ const DashboardScreen = ({ navigation }) => {
              <View style={styles.modalIconContainer}>
                 <Activity color={theme.colors.primary} size={40} strokeWidth={1.5} />
              </View>
-             <Text style={styles.modalTitle}>Coming Soon! 🚀</Text>
+             <Text style={styles.modalTitle}>Coming Soon!</Text>
              <Text style={styles.modalMessage}>
                 We are currently working on this module. This feature will be available soon!
              </Text>
