@@ -99,7 +99,7 @@ const GInput = ({
                 onPress={helpAction}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={2.5} />
+                <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={1.5} />
               </TouchableOpacity>
             </Animated.View>
           )}
