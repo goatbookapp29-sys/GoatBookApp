@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Text, Animated, Platform, TouchableOpacity } from 'react-native';
-import { Eye, EyeOff } from 'lucide-react-native';
+import { Eye, EyeOff, HelpCircle } from 'lucide-react-native';
 import { COLORS, SPACING, lightTheme } from '../theme';
 
 import { useTheme } from '../theme/ThemeContext';
@@ -19,7 +19,6 @@ const GInput = ({
   ...props 
 }) => {
   const { isDarkMode, theme } = useTheme();
-  const { HelpCircle } = require('lucide-react-native');
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
@@ -110,7 +109,7 @@ const GInput = ({
             onPress={helpAction}
             style={styles.eyeIcon}
           >
-            <HelpCircle size={18} color={isFocused ? theme.colors.primary : theme.colors.textMuted} />
+            <HelpCircle size={20} color={theme.colors.primary} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
