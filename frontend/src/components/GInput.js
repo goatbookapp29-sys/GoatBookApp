@@ -81,10 +81,10 @@ const GInput = ({
           {helpAction && (
             <TouchableOpacity 
               onPress={helpAction}
-              style={{ marginLeft: 4 }}
+              style={{ marginLeft: 2, marginTop: 1 }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <HelpCircle size={14} color={theme.colors.textMuted} />
+              <HelpCircle size={12} color={theme.colors.textMuted} strokeWidth={2.5} />
             </TouchableOpacity>
           )}
         </Animated.View>
