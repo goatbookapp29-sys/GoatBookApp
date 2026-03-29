@@ -248,25 +248,20 @@ const AddAnimalScreen = ({ navigation, route }) => {
     if (!imageUri || imageUri.startsWith('http')) return imageUri;
 
     const data = new FormData();
+    data.append('upload_preset', 'goatbook_preset'); 
+    data.append('cloud_name', 'dvtfv9vvr'); 
     data.append('file', {
       uri: Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri,
       type: 'image/jpeg',
       name: 'upload.jpg',
     });
-    data.append('upload_preset', 'goatbook_preset'); 
-    data.append('cloud_name', 'dvtfv9vvr'); 
 
-    // Important: React Native FormData needs the 'file' field to be the LAST one sometimes, 
-    // but Cloudinary is fine either way. However, let's ensure it's correct.
     try {
       setUploading(true);
       const response = await fetch('https://api.cloudinary.com/v1_1/dvtfv9vvr/image/upload', {
         method: 'POST',
         body: data,
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data',
-        },
+        // Remove Content-Type header to allow fetch to set it with the boundary
       });
       
       if (!response.ok) {
