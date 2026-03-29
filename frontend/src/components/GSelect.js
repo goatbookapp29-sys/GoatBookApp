@@ -40,6 +40,7 @@ const GSelect = ({
     flexDirection: 'row',
     alignItems: 'center',
     pointerEvents: 'box-none',
+    maxWidth: '85%',
   };
 
   const labelTextStyle = {
@@ -70,7 +71,11 @@ const GSelect = ({
         ]}
       >
         <Animated.View style={labelContainerStyle} pointerEvents="box-none">
-          <Animated.Text style={labelTextStyle} numberOfLines={1}>
+          <Animated.Text 
+            style={labelTextStyle} 
+            numberOfLines={1} 
+            ellipsizeMode="tail"
+          >
             {label}{required && '*'}
           </Animated.Text>
           {helpAction && (
