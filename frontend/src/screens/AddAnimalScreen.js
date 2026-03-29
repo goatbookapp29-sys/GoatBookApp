@@ -405,9 +405,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
     { 
       color: theme.colors.primary, 
       fontFamily: 'Montserrat_600SemiBold',
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-      fontSize: 14,
+      letterSpacing: 0.5,
+      fontSize: 15,
       marginBottom: 16,
       marginTop: 24,
       borderBottomWidth:1.5,
@@ -622,7 +621,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               onPress={() => setPhotoExpanded(!photoExpanded)}
             >
               <View style={styles.iconGroup}>
-                <Text style={[styles.photoTitle, { color: theme.colors.text }]}>ADD PHOTO</Text>
+                <Text style={[styles.photoTitle, { color: theme.colors.text, fontFamily: 'Montserrat_600SemiBold' }]}>Add Photo</Text>
                 <Camera size={20} color={theme.colors.primary} style={{ marginLeft: 8 }} />
               </View>
               {photoExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
@@ -671,7 +670,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
           {isEditing && status === 'Live' && (
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
-                  <Text style={[styles.readyTitle, { color: theme.colors.error }]}>READY TO SELL</Text>
+                  <Text style={[styles.readyTitle, { color: theme.colors.error, fontFamily: 'Montserrat_600SemiBold' }]}>Ready to Sell</Text>
                   <HelpCircle size={18} color={theme.colors.textMuted} />
                </View>
                <View style={styles.readyOptions}>
@@ -685,7 +684,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
           {status === 'Dead' && (
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
-                  <Text style={[styles.readyTitle, { color: theme.colors.primary }]}>Dead Record</Text>
+                  <Text style={[styles.readyTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dead Record</Text>
                   <TouchableOpacity onPress={() => setShowDeadHelp(true)}>
                     <HelpCircle size={18} color={theme.colors.textMuted} />
                   </TouchableOpacity>
@@ -710,7 +709,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
           {status === 'Sold' && (
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
-                  <Text style={[styles.readyTitle, { color: theme.colors.primary }]}>SOLD RECORD</Text>
+                  <Text style={[styles.readyTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Sold Record</Text>
                   <TouchableOpacity onPress={() => setShowSoldHelp(true)}>
                     <HelpCircle size={18} color={theme.colors.textMuted} />
                   </TouchableOpacity>
@@ -978,7 +977,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 onPress={() => setWeightExpanded(!weightExpanded)}
               >
                 <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                  <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_700Bold' }]}>WEIGHT HISTORY</Text>
+                  <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Weight History</Text>
                   <TouchableOpacity onPress={() => showHelp('What is Weight Record?', 'This section allows you to maintain weight of animal that you measure periodically. This will help you to analyze weight gain chart.')}>
                     <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                   </TouchableOpacity>
@@ -1036,7 +1035,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setVaccinationExpanded(!vaccinationExpanded)}
                 >
                 <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                  <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_700Bold' }]}>VACCINATION RECORD</Text>
+                  <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Vaccination Record</Text>
                   <TouchableOpacity onPress={() => showHelp('What is Vaccination Record?', 'This section allows you to maintain each vaccination given to the animal. You can specify vaccination date, vaccination name and other detail like Dr. Name or dose, etc.')}>
                     <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                   </TouchableOpacity>
@@ -1096,7 +1095,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setMatingExpanded(!matingExpanded)}
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_700Bold' }]}>MATING RECORD</Text>
+                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Mating Record</Text>
                     <TouchableOpacity onPress={() => showHelp('What is Mating Record?', 'This section allows you to maintain mating details of animal. This will help you to analyze when goat expected to become pregnant and delivered kids.')}>
                       <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                     </TouchableOpacity>
@@ -1122,7 +1121,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setBreedingExpanded(!breedingExpanded)}
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_700Bold' }]}>BREEDING/DELIVERY RECORD</Text>
+                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Breeding/Delivery Record</Text>
                     <TouchableOpacity onPress={() => showHelp('What Is Breeding Record?', 'This section allow you to maintain each breeding record of individual goat.You can specify delivery date, birth type and also provid temporary tag id to the litters/kids and other detail like gender, birth weight, etc.')}>
                       <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                     </TouchableOpacity>
@@ -1148,7 +1147,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setMilkExpanded(!milkExpanded)}
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_700Bold' }]}>MILK HISTORY</Text>
+                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Milk History</Text>
                     <TouchableOpacity onPress={() => showHelp('What is Milk History?', 'Track daily or periodic milk production of your female goats. This helps in identifying high-yielding animals and monitoring lactation cycles.')}>
                       <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                     </TouchableOpacity>
@@ -1174,7 +1173,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={() => setInsuranceExpanded(!insuranceExpanded)}
                 >
                   <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_700Bold' }]}>INSURANCE</Text>
+                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0, fontSize: 14, fontFamily: 'Montserrat_600SemiBold' }]}>Insurance</Text>
                     <TouchableOpacity onPress={() => showHelp('What is Insurance?', 'Store insurance details for your livestock, including company name, policy number, and coverage period, ensuring your farm assets are well-protected.')}>
                       <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
                     </TouchableOpacity>
