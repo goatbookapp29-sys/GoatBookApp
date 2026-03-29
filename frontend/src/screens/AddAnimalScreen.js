@@ -615,8 +615,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
               onPress={() => setPhotoExpanded(!photoExpanded)}
             >
               <View style={styles.iconGroup}>
-                <Text style={[styles.photoTitle, { color: theme.colors.text, fontFamily: 'Montserrat_600SemiBold' }]}>Add Photo</Text>
-                <Camera size={20} color={theme.colors.primary} style={{ marginLeft: 8 }} />
+                <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Add Photo</Text>
+                <Camera size={20} color="#000" style={{ marginLeft: 8 }} />
               </View>
               {photoExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
             </TouchableOpacity>
