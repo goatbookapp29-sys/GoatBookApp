@@ -44,7 +44,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     letterSpacing: 0.5,
   },
   formContainer: {
-    marginTop: 0,
+    marginTop: 4,
   },
   row: {
     flexDirection: 'row',
@@ -136,8 +136,9 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderBottomColor: theme.colors.border,
   },
   weightContent: {
-    padding: SPACING.md,
-    alignItems: 'center',
+    padding: 16,
+    paddingTop: 8,
+    alignItems: 'stretch',
   },
   addNewBtn: {
     backgroundColor: theme.colors.primary,
@@ -243,12 +244,13 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
   },
   readyToSellCard: {
-    padding: 16,
+    padding: 20,
+    paddingTop: 16,
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   readyHeaderRow: {
     flexDirection: 'row',

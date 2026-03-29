@@ -407,11 +407,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
       fontFamily: 'Montserrat_600SemiBold',
       letterSpacing: 0.5,
       fontSize: 15,
-      marginBottom: 16,
-      marginTop: 24,
-      borderBottomWidth:1.5,
+      marginBottom: 20,
+      marginTop: 32,
+      borderBottomWidth: 1.5,
       borderBottomColor: theme.colors.border,
-      paddingBottom: 8
+      paddingBottom: 8,
+      paddingHorizontal: 4,
     }
   ];
 
@@ -716,7 +717,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                       containerStyle={{ flex: 1, marginRight: 12 }}
                     />
                     <GInput 
-                      label="Selling Price (Rs.)*" 
+                      label="Sale Price (Rs.)*" 
                       placeholder="Selling Price" 
                       value={sellingPrice} 
                       onChangeText={setSellingPrice} 
