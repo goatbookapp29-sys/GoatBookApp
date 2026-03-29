@@ -96,6 +96,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [showDeadHelp, setShowDeadHelp] = useState(false);
   const [showSoldHelp, setShowSoldHelp] = useState(false);
 
+  const [showTagHelp, setShowTagHelp] = useState(false);
+
   useFocusEffect(
     useCallback(() => {
       fetchBreeds();
@@ -507,6 +509,34 @@ const AddAnimalScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </Modal>
 
+      {/* Tag ID Help Modal */}
+      <Modal
+        visible={showTagHelp}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowTagHelp(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowTagHelp(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Identification Tag ID</Text>
+            <Text style={[styles.modalOptionText, { textAlign: 'left', marginBottom: 20, lineHeight: 20, opacity: 0.8 }]}>
+              A Tag ID is an essential identifier for every animal. It can be a simple number or a scannable barcode found on the animal's ear tag. 
+              Maintaining unique IDs ensures that health, weight, and breeding records are always linked to the correct animal for accurate history tracking and farm management.
+            </Text>
+            <TouchableOpacity 
+              style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
+              onPress={() => setShowTagHelp(false)}
+            >
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_700Bold' }]}>DISMISS</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -662,6 +692,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 onChangeText={setTagNumber} 
                 placeholder="2912"
                 required 
+                helpAction={() => setShowTagHelp(true)}
               />
               <GInput 
                 containerStyle={styles.halfWidth}

@@ -15,9 +15,11 @@ const GInput = ({
   required,
   placeholder,
   containerStyle,
+  helpAction,
   ...props 
 }) => {
   const { isDarkMode, theme } = useTheme();
+  const { HelpCircle } = require('lucide-react-native');
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
@@ -101,6 +103,14 @@ const GInput = ({
             ) : (
               <Eye size={20} color={theme.colors.textLight} />
             )}
+          </TouchableOpacity>
+        )}
+        {helpAction && (
+          <TouchableOpacity 
+            onPress={helpAction}
+            style={styles.eyeIcon}
+          >
+            <HelpCircle size={18} color={isFocused ? theme.colors.primary : theme.colors.textMuted} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
