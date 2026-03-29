@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Text, Animated, Platform, TouchableOpacity } from 'react-native';
-import { Eye, EyeOff, HelpCircle } from 'lucide-react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 import { COLORS, SPACING, lightTheme } from '../theme';
 
 import { useTheme } from '../theme/ThemeContext';
@@ -15,7 +15,6 @@ const GInput = ({
   required,
   placeholder,
   containerStyle,
-  helpAction,
   ...props 
 }) => {
   const { isDarkMode, theme } = useTheme();
@@ -102,14 +101,6 @@ const GInput = ({
             ) : (
               <Eye size={20} color={theme.colors.textLight} />
             )}
-          </TouchableOpacity>
-        )}
-        {helpAction && (
-          <TouchableOpacity 
-            onPress={helpAction}
-            style={styles.eyeIcon}
-          >
-            <HelpCircle size={20} color={theme.colors.primary} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>

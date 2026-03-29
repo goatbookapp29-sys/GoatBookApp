@@ -681,7 +681,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
             </View>
           )}
 
-          <Text style={sectionHeaderStyle}>Identification</Text>
+          <View style={[styles.readyHeaderRow, { marginTop: 16 }]}>
+            <Text style={[sectionHeaderStyle, { marginBottom: 0 }]}>Identification</Text>
+            <TouchableOpacity onPress={() => setShowTagHelp(true)}>
+              <HelpCircle size={18} color={theme.colors.textMuted} />
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.formContainer}>
             <View style={styles.row}>
@@ -692,7 +697,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 onChangeText={setTagNumber} 
                 placeholder="2912"
                 required 
-                helpAction={() => setShowTagHelp(true)}
               />
               <GInput 
                 containerStyle={styles.halfWidth}
