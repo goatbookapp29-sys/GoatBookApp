@@ -76,7 +76,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
   // Misc
   const [remark, setRemark] = useState(existingAnimal.remark || '');
-  const [animalStatus, setAnimalStatus] = useState(existingAnimal.status || 'LIVE');
+  const [status, setStatus] = useState(existingAnimal.status || 'Live');
+  const [showStatusModal, setShowStatusModal] = useState(false);
   const [isReadyForSale, setIsReadyForSale] = useState(existingAnimal.isReadyForSale || false);
   const [currentWeight, setCurrentWeight] = useState(existingAnimal.currentWeight?.toString() || '');
   const [salePrice, setSalePrice] = useState(existingAnimal.salePrice?.toString() || '');
@@ -91,12 +92,10 @@ const AddAnimalScreen = ({ navigation, route }) => {
     useCallback(() => {
       fetchBreeds();
       fetchLocations();
-      if (isEditing) {
-        fetchWeights();
-        fetchVaccinations();
-        if (existingAnimal.imageUrl) setImage(existingAnimal.imageUrl);
-        if (existingAnimal.status) setStatus(existingAnimal.status);
-      }
+        if (isEditing) {
+          fetchWeights();
+          fetchVaccinations();
+        }
     }, [])
   );
 
