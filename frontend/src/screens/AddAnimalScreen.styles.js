@@ -1,10 +1,32 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { SPACING } from '../theme';
 
 export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  header: {
+    backgroundColor: theme.colors.primary,
+    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 24) : 48,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    minHeight: 50,
+  },
+  backButton: {
+    padding: 4,
+    marginRight: 8,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontFamily: 'Montserrat_700Bold',
+    color: '#FFF',
   },
   flex: {
     flex: 1,

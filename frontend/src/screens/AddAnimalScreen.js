@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, View, Text, ScrollView, Image, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator, Modal, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Image, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
 import { SPACING } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
@@ -396,7 +397,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
   ];
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={styles.container}>
+      <StatusBar style="light" backgroundColor={theme.colors.primary} translucent={true} />
       <Modal
         visible={showStatusModal}
         transparent={true}
@@ -437,12 +439,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </Modal>
 
-      <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
+      <View style={styles.header}>
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ChevronLeft color="#FFF" size={28} strokeWidth={2.5} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{isEditing ? 'Edit Animal' : 'Add Animal'}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>{isEditing ? 'Edit Animal' : 'Add Animal'}</Text>
           <TouchableOpacity style={styles.statusContainer} onPress={() => setShowStatusModal(true)}>
             <View style={[styles.statusDot, { backgroundColor: getStatusColor() }]} />
             <Text style={styles.statusText}>{status}</Text>
@@ -982,7 +984,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
