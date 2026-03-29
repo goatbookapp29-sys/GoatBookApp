@@ -41,6 +41,7 @@ const GInput = ({
     zIndex: 2,
     backgroundColor: (isFocused || value) ? theme.colors.surface : 'transparent',
     paddingHorizontal: (isFocused || value) ? 4 : 0,
+    maxWidth: (isFocused || value) ? '88%' : '90%',
     flexDirection: 'row',
     alignItems: 'center',
     pointerEvents: 'box-none',
