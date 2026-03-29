@@ -1,5 +1,5 @@
 import { StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
-import { SPACING } from '../theme';
+import { SPACING, SHADOW } from '../theme';
 
 export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
@@ -63,5 +63,62 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     color: theme.colors.text,
     fontFamily: 'Montserrat_500Medium',
     textAlign: 'center',
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 24,
+    padding: 28,
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...SHADOW.medium,
+  },
+  modalIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: theme.colors.primary + '10', // 10% opacity
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: 'Montserrat_700Bold',
+    color: theme.colors.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 15,
+    fontFamily: 'Montserrat_500Medium',
+    color: theme.colors.textLight,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 28,
+  },
+  modalButton: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 14,
+    width: '100%',
+    alignItems: 'center',
+    ...SHADOW.small,
+  },
+  modalButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
   },
 });

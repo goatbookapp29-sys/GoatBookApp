@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, Platform, Modal, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../theme/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,6 +14,7 @@ import { getStyles } from './DashboardScreen.styles';
 const DashboardScreen = ({ navigation }) => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
   const [farmName, setFarmName] = useState('Goatwala Farm');
+  const [soonVisible, setSoonVisible] = useState(false);
   
   // Memoize styles to avoid re-calculation on every render
   const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
@@ -54,14 +55,7 @@ const DashboardScreen = ({ navigation }) => {
         if (item.screen) {
           navigation.navigate(item.screen);
         } else {
-          const title = "Coming Soon! 🚀";
-          const message = "We are currently working on this module. This feature will be available soon!";
-          
-          if (Platform.OS === 'web') {
-            alert(`${title}\n\n${message}`);
-          } else {
-            Alert.alert(title, message, [{ text: "OK" }]);
-          }
+          setSoonVisible(true);
         }
       }}
       activeOpacity={0.7}
@@ -115,6 +109,36 @@ const DashboardScreen = ({ navigation }) => {
           bounces={false}
         />
       </View>
+
+      {/* Custom Soon Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={soonVisible}
+        onRequestClose={() => setSoonVisible(false)}
+      >
+        <TouchableOpacity 
+           style={styles.modalOverlay} 
+           activeOpacity={1} 
+           onPress={() => setSoonVisible(false)}
+        >
+          <View style={styles.modalContent}>
+             <View style={styles.modalIconContainer}>
+                <Activity color={theme.colors.primary} size={40} strokeWidth={1.5} />
+             </View>
+             <Text style={styles.modalTitle}>Coming Soon! 🚀</Text>
+             <Text style={styles.modalMessage}>
+                We are currently working on this module. This feature will be available soon!
+             </Text>
+             <TouchableOpacity 
+                style={styles.modalButton}
+                onPress={() => setSoonVisible(false)}
+             >
+                <Text style={styles.modalButtonText}>Theek Hai</Text>
+             </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };
