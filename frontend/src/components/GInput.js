@@ -79,13 +79,29 @@ const GInput = ({
             {label}{required && '*'}
           </Animated.Text>
           {helpAction && (
-            <TouchableOpacity 
-              onPress={helpAction}
-              style={{ marginLeft: 2, marginTop: 1 }}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <HelpCircle size={12} color={theme.colors.textMuted} strokeWidth={2.5} />
-            </TouchableOpacity>
+            <Animated.View style={{
+              marginLeft: animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [8, 3],
+              }),
+              transform: [{
+                scale: animatedValue.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1.1, 0.85],
+                })
+              }],
+              marginTop: animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [2, 1],
+              }),
+            }}>
+              <TouchableOpacity 
+                onPress={helpAction}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={2.5} />
+              </TouchableOpacity>
+            </Animated.View>
           )}
         </Animated.View>
         <TextInput
