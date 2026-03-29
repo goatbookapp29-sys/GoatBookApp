@@ -980,13 +980,13 @@ const AddAnimalScreen = ({ navigation, route }) => {
               
               {weightExpanded && (
                 <View style={styles.weightContent}>
-                  <TouchableOpacity 
-                    style={styles.addNewBtn}
-                    onPress={() => navigation.navigate('AddWeight', { tagNumber: existingAnimal.tagNumber })}
-                  >
-                    <Plus size={16} color="#FFF" />
-                    <Text style={styles.addNewText}>Add New Record</Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.addNewBtn}
+                      onPress={() => navigation.navigate('AddWeight', { tagNumber: existingAnimal.tagNumber })}
+                    >
+                      <Plus size={14} color="#FFF" />
+                      <Text style={styles.addNewText}>Add New Record</Text>
+                    </TouchableOpacity>
 
                   {weightsLoading ? (
                     <ActivityIndicator color={theme.colors.primary} style={{ marginVertical: 20 }} />
@@ -1043,7 +1043,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                       style={styles.addNewBtn}
                       onPress={() => navigation.navigate('AddVaccination', { mode: 'single', preSelectedAnimal: existingAnimal })}
                     >
-                      <Plus size={16} color="#FFF" />
+                      <Plus size={14} color="#FFF" />
                       <Text style={styles.addNewText}>Add New Record</Text>
                     </TouchableOpacity>
 
@@ -1105,7 +1105,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                         style={styles.addNewBtn}
                         onPress={() => {}}
                       >
-                        <Plus size={16} color="#FFF" />
+                        <Plus size={14} color="#FFF" />
                         <Text style={styles.addNewText}>Add New Record</Text>
                       </TouchableOpacity>
                       <View style={{ alignItems: 'center', paddingVertical: 20 }}>
@@ -1136,7 +1136,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                         style={styles.addNewBtn}
                         onPress={() => {}}
                       >
-                        <Plus size={16} color="#FFF" />
+                        <Plus size={14} color="#FFF" />
                         <Text style={styles.addNewText}>Add New Record</Text>
                       </TouchableOpacity>
                       <View style={{ alignItems: 'center', paddingVertical: 20 }}>
@@ -1167,7 +1167,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                         style={styles.addNewBtn}
                         onPress={() => {}}
                       >
-                        <Plus size={16} color="#FFF" />
+                        <Plus size={14} color="#FFF" />
                         <Text style={styles.addNewText}>Add New Record</Text>
                       </TouchableOpacity>
                       <View style={{ alignItems: 'center', paddingVertical: 20 }}>
