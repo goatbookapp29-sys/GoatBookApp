@@ -82,6 +82,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [isReadyForSale, setIsReadyForSale] = useState(existingAnimal.isReadyForSale || false);
   const [currentWeight, setCurrentWeight] = useState(existingAnimal.currentWeight?.toString() || '');
   const [salePrice, setSalePrice] = useState(existingAnimal.salePrice?.toString() || '');
+  const [deathDate, setDeathDate] = useState(existingAnimal.deathDate || '');
+  const [deathReason, setDeathReason] = useState(existingAnimal.deathReason || '');
 
   // UI state
   const [breeds, setBreeds] = useState([]);
@@ -329,6 +331,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
         isReadyForSale,
         currentWeight: isReadyForSale ? (parseFloat(currentWeight) || null) : null,
         salePrice: isReadyForSale ? (parseFloat(salePrice) || null) : null,
+        deathDate: status === 'Dead' ? deathDate : null,
+        deathReason: status === 'Dead' ? deathReason : null,
       };
 
       if (isEditing) {
@@ -509,8 +513,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               </View>
             )}
           </View>
-
-          {isEditing && (
+          {isEditing && status !== 'Dead' && (
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
                   <Text style={[styles.readyTitle, { color: theme.colors.error }]}>READY TO SELL</Text>
@@ -520,6 +523,29 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   <CheckBox label="No" value={!isReadyForSale} onToggle={() => setIsReadyForSale(false)} />
                   <View style={{ width: 24 }} />
                   <CheckBox label="Yes" value={isReadyForSale} onToggle={() => setIsReadyForSale(true)} />
+               </View>
+            </View>
+          )}
+
+          {status === 'Dead' && (
+            <View style={styles.readyToSellCard}>
+               <View style={styles.readyHeaderRow}>
+                  <Text style={[styles.readyTitle, { color: theme.colors.primary }]}>Dead Record</Text>
+                  <HelpCircle size={18} color={theme.colors.textMuted} />
+               </View>
+               <View style={styles.formContainer}>
+                  <GDatePicker 
+                    label="Date*" 
+                    value={deathDate} 
+                    onDateChange={setDeathDate} 
+                    containerStyle={{ marginBottom: 12 }}
+                  />
+                  <GInput 
+                    label="Reason" 
+                    placeholder="Reason" 
+                    value={deathReason} 
+                    onChangeText={setDeathReason} 
+                  />
                </View>
             </View>
           )}
