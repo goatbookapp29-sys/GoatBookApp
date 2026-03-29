@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Text, Animated, Platform, TouchableOpacity } from 'react-native';
-import { Eye, EyeOff } from 'lucide-react-native';
+import { Eye, EyeOff, HelpCircle } from 'lucide-react-native';
 import { COLORS, SPACING, lightTheme } from '../theme';
 
 import { useTheme } from '../theme/ThemeContext';
@@ -15,6 +15,7 @@ const GInput = ({
   required,
   placeholder,
   containerStyle,
+  helpAction,
   ...props 
 }) => {
   const { isDarkMode, theme } = useTheme();
@@ -30,13 +31,22 @@ const GInput = ({
     }).start();
   }, [isFocused, value]);
 
-  const labelStyle = {
+  const labelContainerStyle = {
     position: 'absolute',
     left: 12,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [14, -10],
     }),
+    zIndex: 2,
+    backgroundColor: (isFocused || value) ? theme.colors.surface : 'transparent',
+    paddingHorizontal: (isFocused || value) ? 4 : 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    pointerEvents: 'box-none',
+  };
+
+  const labelTextStyle = {
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [16, 12],
@@ -45,11 +55,7 @@ const GInput = ({
       inputRange: [0, 1],
       outputRange: [theme.colors.textLight, isFocused ? theme.colors.primary : theme.colors.textLight],
     }),
-    backgroundColor: (isFocused || value) ? theme.colors.surface : 'transparent',
-    paddingHorizontal: (isFocused || value) ? 4 : 0,
-    zIndex: 1,
     fontFamily: theme.typography.medium,
-    maxWidth: '90%',
   };
 
   const inputRef = useRef(null);
@@ -68,9 +74,20 @@ const GInput = ({
           isMultiline && { height: 'auto', minHeight: 80, alignItems: 'flex-start', paddingTop: 16 }
         ]}
       >
-        <Animated.Text style={labelStyle} pointerEvents="none" numberOfLines={1} ellipsizeMode="tail">
-          {label}{required && '*'}
-        </Animated.Text>
+        <Animated.View style={labelContainerStyle} pointerEvents="box-none">
+          <Animated.Text style={labelTextStyle} numberOfLines={1}>
+            {label}{required && '*'}
+          </Animated.Text>
+          {helpAction && (
+            <TouchableOpacity 
+              onPress={helpAction}
+              style={{ marginLeft: 4 }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <HelpCircle size={14} color={theme.colors.textMuted} />
+            </TouchableOpacity>
+          )}
+        </Animated.View>
         <TextInput
           ref={inputRef}
           style={StyleSheet.flatten([
