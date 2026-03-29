@@ -6,7 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { 
   Menu, GitBranch, PawPrint, User, Home, Syringe, Scale, 
   Heart, Activity, ClipboardList, Globe, Settings, Briefcase,
-  Moon, Sun, RefreshCcw, Milk, Settings2
+  Moon, Sun, RefreshCcw, Milk, Settings2, Bell
 } from 'lucide-react-native';
 import api from '../api';
 import { getStyles } from './DashboardScreen.styles';
@@ -82,6 +82,14 @@ const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>{farmName}</Text>
           
+          {/* Notification Button */}
+          <TouchableOpacity 
+            style={styles.themeToggle}
+            onPress={() => setSoonVisible(true)}
+          >
+            <Bell color="#FFF" size={24} strokeWidth={2} />
+          </TouchableOpacity>
+
           {/* Theme Toggle Button */}
           <TouchableOpacity 
             style={styles.themeToggle}
