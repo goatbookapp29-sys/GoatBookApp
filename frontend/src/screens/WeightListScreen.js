@@ -108,7 +108,7 @@ const WeightListScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Weight Records" subTitle="Performance Tracking" onBack={() => navigation.goBack()} />
+      <GHeader title="Weight Records" onBack={() => navigation.goBack()} />
       
       <View style={styles.content}>
         <View style={styles.searchContainer}>
