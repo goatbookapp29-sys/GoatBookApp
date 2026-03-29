@@ -3,7 +3,7 @@
     "name": "GoatBook",
     "slug": "GoatBook",
     "version": "1.0.0",
-    "icon": "./assets/splash-icon.png",
+    "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
