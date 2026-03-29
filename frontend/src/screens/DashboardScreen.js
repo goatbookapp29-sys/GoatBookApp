@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../theme/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -54,11 +54,14 @@ const DashboardScreen = ({ navigation }) => {
         if (item.screen) {
           navigation.navigate(item.screen);
         } else {
-          Alert.alert(
-            "Soon! 🚀",
-            "Abhi ye modules pe kaam chal raha soon ye feature available ho jayega!",
-            [{ text: "Theek hai" }]
-          );
+          const title = "Soon! 🚀";
+          const message = "Abhi ye modules pe kaam chal raha soon ye feature available ho jayega!";
+          
+          if (Platform.OS === 'web') {
+            alert(`${title}\n\n${message}`);
+          } else {
+            Alert.alert(title, message, [{ text: "Theek hai" }]);
+          }
         }
       }}
       activeOpacity={0.7}
