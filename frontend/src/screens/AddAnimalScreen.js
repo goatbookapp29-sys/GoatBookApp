@@ -84,6 +84,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [salePrice, setSalePrice] = useState(existingAnimal.salePrice?.toString() || '');
   const [deathDate, setDeathDate] = useState(existingAnimal.deathDate || '');
   const [deathReason, setDeathReason] = useState(existingAnimal.deathReason || '');
+  const [soldDate, setSoldDate] = useState(existingAnimal.soldAt || '');
+  const [sellingPrice, setSellingPrice] = useState(existingAnimal.salePrice?.toString() || '');
+  const [soldRemark, setSoldRemark] = useState(existingAnimal.soldRemark || '');
 
   // UI state
   const [breeds, setBreeds] = useState([]);
@@ -333,6 +336,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
         salePrice: isReadyForSale ? (parseFloat(salePrice) || null) : null,
         deathDate: status === 'Dead' ? deathDate : null,
         deathReason: status === 'Dead' ? deathReason : null,
+        soldAt: status === 'Sold' ? soldDate : null,
+        soldRemark: status === 'Sold' ? soldRemark : null,
+        salePrice: status === 'Sold' ? (parseFloat(sellingPrice) || null) : (isReadyForSale ? (parseFloat(salePrice) || null) : null),
       };
 
       if (isEditing) {
@@ -513,7 +519,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               </View>
             )}
           </View>
-          {isEditing && status !== 'Dead' && (
+          {isEditing && status === 'Live' && (
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
                   <Text style={[styles.readyTitle, { color: theme.colors.error }]}>READY TO SELL</Text>
@@ -545,6 +551,39 @@ const AddAnimalScreen = ({ navigation, route }) => {
                     placeholder="Reason" 
                     value={deathReason} 
                     onChangeText={setDeathReason} 
+                  />
+               </View>
+            </View>
+          )}
+
+          {status === 'Sold' && (
+            <View style={styles.readyToSellCard}>
+               <View style={styles.readyHeaderRow}>
+                  <Text style={[styles.readyTitle, { color: theme.colors.primary }]}>SOLD RECORD</Text>
+                  <HelpCircle size={18} color={theme.colors.textMuted} />
+               </View>
+               <View style={styles.formContainer}>
+                  <View style={styles.row}>
+                    <GDatePicker 
+                      label="Date*" 
+                      value={soldDate} 
+                      onDateChange={setSoldDate} 
+                      containerStyle={{ flex: 1, marginRight: 12 }}
+                    />
+                    <GInput 
+                      label="Selling Price (Rs.)*" 
+                      placeholder="Selling Price" 
+                      value={sellingPrice} 
+                      onChangeText={setSellingPrice} 
+                      keyboardType="numeric"
+                      containerStyle={{ flex: 1 }}
+                    />
+                  </View>
+                  <GInput 
+                    label="Remark" 
+                    placeholder="Remark" 
+                    value={soldRemark} 
+                    onChangeText={setSoldRemark} 
                   />
                </View>
             </View>
