@@ -134,7 +134,7 @@ const DashboardScreen = ({ navigation }) => {
                 style={styles.modalButton}
                 onPress={() => setSoonVisible(false)}
              >
-                <Text style={styles.modalButtonText}>Theek Hai</Text>
+                <Text style={styles.modalButtonText}>Got it</Text>
              </TouchableOpacity>
           </View>
         </TouchableOpacity>
