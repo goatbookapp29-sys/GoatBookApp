@@ -54,13 +54,13 @@ const DashboardScreen = ({ navigation }) => {
         if (item.screen) {
           navigation.navigate(item.screen);
         } else {
-          const title = "Soon! 🚀";
-          const message = "Abhi ye modules pe kaam chal raha soon ye feature available ho jayega!";
+          const title = "Coming Soon! 🚀";
+          const message = "We are currently working on this module. This feature will be available soon!";
           
           if (Platform.OS === 'web') {
             alert(`${title}\n\n${message}`);
           } else {
-            Alert.alert(title, message, [{ text: "Theek hai" }]);
+            Alert.alert(title, message, [{ text: "OK" }]);
           }
         }
       }}
