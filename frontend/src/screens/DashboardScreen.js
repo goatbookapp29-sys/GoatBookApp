@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../theme/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -50,7 +50,17 @@ const DashboardScreen = ({ navigation }) => {
   const renderTile = ({ item }) => (
     <TouchableOpacity 
       style={styles.tile}
-      onPress={() => item.screen && navigation.navigate(item.screen)}
+      onPress={() => {
+        if (item.screen) {
+          navigation.navigate(item.screen);
+        } else {
+          Alert.alert(
+            "Soon! 🚀",
+            "Abhi ye modules pe kaam chal raha soon ye feature available ho jayega!",
+            [{ text: "Theek hai" }]
+          );
+        }
+      }}
       activeOpacity={0.7}
     >
       <View style={styles.tileIcon}>
