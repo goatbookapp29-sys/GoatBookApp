@@ -6,7 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { 
   Menu, GitBranch, PawPrint, User, Home, Syringe, Scale, 
   Heart, Activity, ClipboardList, Globe, Settings, Briefcase,
-  Moon, Sun, RefreshCcw
+  Moon, Sun, RefreshCcw, Milk, Settings2
 } from 'lucide-react-native';
 import api from '../api';
 import { getStyles } from './DashboardScreen.styles';
@@ -43,6 +43,8 @@ const DashboardScreen = ({ navigation }) => {
     { id: '11', title: 'Settings', icon: <Settings color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'Settings' },
     { id: '12', title: 'Financials', icon: <Briefcase color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
     { id: '13', title: 'Replace Tag', icon: <RefreshCcw color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'ReplaceTag' },
+    { id: '14', title: 'Milk Records', icon: <Milk color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
+    { id: '15', title: 'Farm Setting', icon: <Settings2 color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
   ];
 
   const renderTile = ({ item }) => (
