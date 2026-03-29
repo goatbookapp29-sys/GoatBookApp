@@ -72,6 +72,31 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontFamily: 'Montserrat_500Medium',
     color: theme.colors.text,
   },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontFamily: 'Montserrat_700Bold',
+    textTransform: 'uppercase',
+  },
+  statusChevron: {
+    marginLeft: 4,
+  },
   weightSection: {
     marginTop: SPACING.xl,
     backgroundColor: theme.colors.surface,

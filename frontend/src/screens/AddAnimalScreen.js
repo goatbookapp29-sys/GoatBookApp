@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, View, Text, ScrollView, Image, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Image, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator, Modal, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { SPACING } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
@@ -11,7 +11,7 @@ import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
 import GDatePicker from '../components/GDatePicker';
 import { 
-  Check, HelpCircle, ChevronDown, ChevronUp, Plus, Scale, Syringe, 
+  Check, HelpCircle, ChevronDown, ChevronUp, ChevronLeft, Plus, Scale, Syringe, 
   Heart, Baby, Milk, Shield, Camera, Trash2, Edit2
 } from 'lucide-react-native';
 import api from '../api';
@@ -94,6 +94,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
       if (isEditing) {
         fetchWeights();
         fetchVaccinations();
+        if (existingAnimal.imageUrl) setImage(existingAnimal.imageUrl);
+        if (existingAnimal.status) setStatus(existingAnimal.status);
       }
     }, [])
   );
@@ -156,10 +158,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
       } else {
         setAgeInMonths('');
       }
-    } else {
-      // If birthDate is cleared, we don't necessarily clear age if it was manually entered
-      // but if it was auto-calculated, maybe we should? 
-      // For now, let's just ensure it's not NaN.
     }
   }, [birthDate]);
 
@@ -250,7 +248,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
     try {
       setUploading(true);
       
-      // Convert URI to Blob for cross-platform compatibility (Web & Mobile)
       const blobResponse = await fetch(imageUri);
       const blob = await blobResponse.blob();
 
@@ -262,7 +259,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
       const response = await fetch('https://api.cloudinary.com/v1_1/dvtfv9vvr/image/upload', {
         method: 'POST',
         body: data,
-        // Content-Type will be automatically set with the multipart boundary
       });
       
       if (!response.ok) {
@@ -317,6 +313,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
         acquisitionMethod,
         locationId,
         imageUrl: uploadedImageUrl,
+        status: status,
         birthDate: isValidDate(birthDate) ? birthDate : null,
         birthWeight: (birthWeight && !isNaN(parseFloat(birthWeight))) ? parseFloat(birthWeight) : null,
         ageInMonths: (ageInMonths && !isNaN(parseInt(ageInMonths))) ? parseInt(ageInMonths) : null,
@@ -329,7 +326,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
         purchasePrice: (purchasePrice && !isNaN(parseFloat(purchasePrice))) ? parseFloat(purchasePrice) : null,
         femaleCondition: (gender === 'FEMALE' && acquisitionMethod === 'PURCHASED') ? femaleCondition : null,
         remark,
-        status: animalStatus,
         isReadyForSale,
         currentWeight: isReadyForSale ? (parseFloat(currentWeight) || null) : null,
         salePrice: isReadyForSale ? (parseFloat(salePrice) || null) : null,
@@ -375,6 +371,15 @@ const AddAnimalScreen = ({ navigation, route }) => {
     );
   };
 
+  const getStatusColor = () => {
+    switch (status.toLowerCase()) {
+      case 'live': return '#4CAF50';
+      case 'sold': return '#2196F3';
+      case 'dead': return '#F44336';
+      default: return '#4CAF50';
+    }
+  };
+
   const sectionHeaderStyle = [
     styles.sectionTitle, 
     { 
@@ -392,22 +397,64 @@ const AddAnimalScreen = ({ navigation, route }) => {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader 
-        title={isEditing ? "Edit Animal" : "Add New Animal"} 
-        onBack={() => navigation.goBack()} 
-        rightIcon={isEditing && (
-          <View style={styles.statusBadge}>
-            <View style={[styles.statusDot, { backgroundColor: animalStatus === 'LIVE' ? '#10B981' : '#EF4444' }]} />
-            <Text style={styles.statusText}>{animalStatus}</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Modal
+        visible={showStatusModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowStatusModal(false)}
+      >
+        <TouchableOpacity 
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}
+          activeOpacity={1}
+          onPress={() => setShowStatusModal(false)}
+        >
+          <View style={{ backgroundColor: '#FFF', width: '80%', borderRadius: 12, overflow: 'hidden' }}>
+            <View style={{ backgroundColor: theme.colors.primary, padding: 16, alignItems: 'center' }}>
+              <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Montserrat_700Bold' }}>Select Status</Text>
+            </View>
+            {['Live', 'Sold', 'Dead'].map((s) => (
+              <TouchableOpacity
+                key={s}
+                style={{ 
+                  padding: 16, 
+                  borderBottomWidth: 1, 
+                  borderBottomColor: '#EEE',
+                  backgroundColor: status === s ? '#F9F9F9' : '#FFF'
+                }}
+                onPress={() => {
+                  setStatus(s);
+                  setShowStatusModal(false);
+                }}
+              >
+                <Text style={{ 
+                  fontSize: 16, 
+                  fontFamily: status === s ? 'Montserrat_700Bold' : 'Montserrat_500Medium',
+                  color: status === s ? theme.colors.primary : '#333'
+                }}>{s}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        )}
-      />
+        </TouchableOpacity>
+      </Modal>
+
+      <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ChevronLeft color="#FFF" size={28} strokeWidth={2.5} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{isEditing ? 'Edit Animal' : 'Add Animal'}</Text>
+          <TouchableOpacity style={styles.statusContainer} onPress={() => setShowStatusModal(true)}>
+            <View style={[styles.statusDot, { backgroundColor: getStatusColor() }]} />
+            <Text style={styles.statusText}>{status}</Text>
+            <ChevronDown color="#FFF" size={14} strokeWidth={3} style={styles.statusChevron} />
+          </TouchableOpacity>
+        </View>
+      </View>
       
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           
-          {/* PHOTO SECTION */}
           <View style={[styles.photoCard, { borderColor: theme.colors.border }]}>
             <TouchableOpacity 
               style={styles.photoHeader} 
@@ -479,7 +526,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
           <Text style={sectionHeaderStyle}>Identification</Text>
 
           <View style={styles.formContainer}>
-            {/* ROW 1 */}
             <View style={styles.row}>
               <GInput 
                 containerStyle={styles.halfWidth}
@@ -498,7 +544,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
               />
             </View>
 
-            {/* ROW 2 */}
             <View style={styles.row}>
               <GSelect 
                 containerStyle={styles.halfWidth}
@@ -522,7 +567,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
               />
             </View>
 
-            {/* MALE CONDITIONAL ROW (Aligned with fields) */}
             {gender === 'MALE' && (
               <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 12, marginLeft: 11 }}>
                 <Text style={{ 
@@ -939,10 +983,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 };
-
-
 
 export default AddAnimalScreen;
