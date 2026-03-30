@@ -107,7 +107,7 @@ const VaccinationListScreen = ({ navigation, route }) => {
 
       {/* Floating Action Button to Add */}
       <TouchableOpacity 
-        style={[styles.fab, { backgroundColor: theme.colors.primary, ...theme.shadow.lg }]}
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         onPress={() => {
           Alert.alert(
             'Add Vaccination',
@@ -239,7 +239,8 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.primaryDark,
   }
 });
 

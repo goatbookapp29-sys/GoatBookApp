@@ -147,7 +147,7 @@ const WeightListScreen = ({ navigation }) => {
       </View>
 
       <TouchableOpacity 
-        style={[styles.fab, { backgroundColor: theme.colors.primary, ...theme.shadow.lg }]} 
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]} 
         onPress={() => navigation.navigate('AddWeight')}
       >
         <Plus size={30} color="#FFF" />
@@ -253,7 +253,8 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.primaryDark,
   },
 });
 

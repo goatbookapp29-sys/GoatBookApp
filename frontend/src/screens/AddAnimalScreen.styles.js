@@ -337,11 +337,8 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderRadius: 24,
     padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 10,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   modalTitle: {
     fontSize: 18,

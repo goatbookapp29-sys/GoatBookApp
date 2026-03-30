@@ -48,12 +48,6 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: theme.colors.border,
-    // Subtle shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: isDarkMode ? 0.3 : 0.05,
-    shadowRadius: 2,
-    elevation: 2,
   },
   tileIcon: {
     marginBottom: 12,
@@ -81,7 +75,6 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: theme.colors.border,
-    ...SHADOW.medium,
   },
   modalIconContainer: {
     width: 80,
@@ -114,7 +107,8 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 14,
     width: '100%',
     alignItems: 'center',
-    ...SHADOW.small,
+    borderWidth: 1,
+    borderColor: theme.colors.primaryDark,
   },
   modalButtonText: {
     color: '#FFF',
