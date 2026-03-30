@@ -15,7 +15,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      alert('Please enter your email and password');
+      alert('Please enter your Phone/Email and password');
       return;
     }
 
