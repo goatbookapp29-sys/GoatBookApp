@@ -14,6 +14,7 @@ import { getStyles } from './DashboardScreen.styles';
 const DashboardScreen = ({ navigation }) => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
   const [farmName, setFarmName] = useState('Goatwala Farm');
+  const [userRole, setUserRole] = useState(null);
   const [soonVisible, setSoonVisible] = useState(false);
   
   // Memoize styles to avoid re-calculation on every render
@@ -23,30 +24,40 @@ const DashboardScreen = ({ navigation }) => {
     useCallback(() => {
       // Fetch profile to get real farm name
       api.get('/users/profile').then(res => {
-         const currentFarmId = api.defaults.headers.common['X-Farm-ID'];
-         const farm = res.data.employeeProfile?.farms?.find(f => f.id === currentFarmId);
-         if (farm) setFarmName(farm.name);
+          const currentFarmId = api.defaults.headers.common['X-Farm-ID'];
+          const ep = res.data.employeeProfile;
+          setUserRole(ep?.employeeType || 'EMPLOYEE');
+          const farm = ep?.farms?.find(f => f.id === currentFarmId);
+          if (farm) setFarmName(farm.name);
       }).catch(err => console.warn('Silently failed to fetch profile in dashboard:', err));
     }, [])
   );
 
-  const tiles = [
-    { id: '1', title: 'Breed', icon: <GitBranch color={theme.colors.primary} size={34} strokeWidth={1.8} />, screen: 'BreedList' },
-    { id: '2', title: 'Animals', icon: <PawPrint color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'AnimalList' },
-    { id: '3', title: 'Employee', icon: <User color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'EmployeeList' },
-    { id: '4', title: 'Location', icon: <Home color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'LocationMenu' },
-    { id: '5', title: 'Vaccines', icon: <Syringe color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'VaccinesMenu' },
-    { id: '6', title: 'Weight', icon: <Scale color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'WeightList' },
-    { id: '7', title: 'Mating', icon: <Heart color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-    { id: '8', title: 'Breeding', icon: <Activity color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-    { id: '9', title: 'Report', icon: <ClipboardList color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'ReportsMenu' },
-    { id: '10', title: 'Language', icon: <Globe color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-    { id: '11', title: 'Settings', icon: <Settings color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'Settings' },
-    { id: '12', title: 'Financials', icon: <Briefcase color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-    { id: '13', title: 'Replace Tag', icon: <RefreshCcw color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'ReplaceTag' },
-    { id: '14', title: 'Milk Records', icon: <Milk color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-    { id: '15', title: 'Farm Setting', icon: <Settings2 color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-  ];
+  const tiles = useMemo(() => {
+    const allTiles = [
+      { id: '1', title: 'Breed', icon: <GitBranch color={theme.colors.primary} size={34} strokeWidth={1.8} />, screen: 'BreedList' },
+      { id: '2', title: 'Animals', icon: <PawPrint color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'AnimalList' },
+      { id: '3', title: 'Employee', icon: <User color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'EmployeeList' },
+      { id: '4', title: 'Location', icon: <Home color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'LocationMenu' },
+      { id: '5', title: 'Vaccines', icon: <Syringe color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'VaccinesMenu' },
+      { id: '6', title: 'Weight', icon: <Scale color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'WeightList' },
+      { id: '7', title: 'Mating', icon: <Heart color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
+      { id: '8', title: 'Breeding', icon: <Activity color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
+      { id: '9', title: 'Report', icon: <ClipboardList color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'ReportsMenu' },
+      { id: '10', title: 'Language', icon: <Globe color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
+      { id: '11', title: 'Settings', icon: <Settings color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'Settings' },
+      { id: '12', title: 'Financials', icon: <Briefcase color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
+      { id: '13', title: 'Replace Tag', icon: <RefreshCcw color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'ReplaceTag' },
+      { id: '14', title: 'Milk Records', icon: <Milk color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
+      { id: '15', title: 'Farm Setting', icon: <Settings2 color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
+    ];
+
+    // Filter out 'Employee' tile for non-OWNER roles
+    return allTiles.filter(tile => {
+      if (tile.id === '3' && userRole && userRole !== 'OWNER') return false;
+      return true;
+    });
+  }, [theme, userRole]);
 
   const renderTile = ({ item }) => (
     <TouchableOpacity 

@@ -18,6 +18,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
   const [name, setName] = useState(isEditing ? existingEmployee.name : '');
   const [email, setEmail] = useState(isEditing ? existingEmployee.email : '');
   const [password, setPassword] = useState(''); // Only used for registration or reset
+  const [phone, setPhone] = useState(isEditing ? existingEmployee.phone : '');
   const [role, setRole] = useState(isEditing ? existingEmployee.role : 'EMPLOYEE');
   
   const [loading, setLoading] = useState(false);
@@ -32,10 +33,10 @@ const AddEmployeeScreen = ({ navigation, route }) => {
     setLoading(true);
     try {
       if (isEditing) {
-        await api.put(`/users/employees/${existingEmployee.id}`, { name, role });
+        await api.put(`/users/employees/${existingEmployee.id}`, { name, role, email, phone });
         alert('Employee updated successfully');
       } else {
-        await api.post('/users/employees', { name, email, password, role });
+        await api.post('/users/employees', { name, email, password, role, phone });
         alert('Employee created successfully');
       }
       setLoading(false);
@@ -96,9 +97,17 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               onChangeText={setEmail} 
               keyboardType="email-address"
               autoCapitalize="none"
-              editable={!isEditing} // Email cannot be edited as per requirement
               required 
-              style={isEditing && { backgroundColor: theme.colors.surface, color: theme.colors.textMuted }}
+            />
+
+            <View style={styles.gap} />
+
+            <GInput 
+              label="Phone Number" 
+              value={phone} 
+              onChangeText={setPhone} 
+              keyboardType="phone-pad"
+              required 
             />
 
             {!isEditing && (

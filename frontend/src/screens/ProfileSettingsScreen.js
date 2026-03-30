@@ -115,6 +115,8 @@ const ProfileSettingsScreen = ({ navigation }) => {
               value={formData.email} 
               onChangeText={(v) => setFormData({...formData, email: v})} 
               keyboardType="email-address"
+              editable={formData.employeeType === 'OWNER'}
+              style={formData.employeeType !== 'OWNER' && { color: theme.colors.textMuted }}
             />
             
             <View style={styles.gap} />
@@ -124,7 +126,15 @@ const ProfileSettingsScreen = ({ navigation }) => {
               value={formData.phone} 
               onChangeText={(v) => setFormData({...formData, phone: v})}
               keyboardType="phone-pad"
+              editable={formData.employeeType === 'OWNER'}
+              style={formData.employeeType !== 'OWNER' && { color: theme.colors.textMuted }}
             />
+
+            {formData.employeeType !== 'OWNER' && (
+              <Text style={{ fontSize: 12, color: theme.colors.textLight, marginTop: 4, fontFamily: 'Montserrat_500Medium', fontStyle: 'italic' }}>
+                * Only the Farm Owner can update your phone number or email.
+              </Text>
+            )}
 
             <View style={styles.gap} />
 

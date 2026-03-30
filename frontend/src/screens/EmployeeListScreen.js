@@ -38,7 +38,10 @@ const EmployeeListScreen = ({ navigation }) => {
     >
       <View style={styles.info}>
         <Text style={[styles.name, { color: theme.colors.text }]}>{item.name}</Text>
-        <Text style={[styles.role, { color: theme.colors.textLight }]}>{item.role} • {item.email}</Text>
+        <Text style={[styles.role, { color: theme.colors.textLight }]}>
+          {item.role} • {item.email}
+          {item.phone !== 'N/A' && `\n${item.phone}`}
+        </Text>
       </View>
       <ChevronRight size={20} color={theme.colors.textMuted} />
     </TouchableOpacity>
