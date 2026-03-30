@@ -58,7 +58,7 @@ const LoginScreen = ({ navigation }) => {
         <View style={styles.formWrapper}>
             <View style={styles.titleContainer}>
                 <Text style={styles.mainTitle}>Login</Text>
-                <Text style={styles.subTitle}>Login to GoatBook App!</Text>
+                <Text style={styles.subTitle}>Login to your account and manage your farm.</Text>
             </View>
 
             <View style={styles.form}>
