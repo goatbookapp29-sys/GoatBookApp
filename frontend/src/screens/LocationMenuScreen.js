@@ -15,13 +15,13 @@ const LocationMenuScreen = ({ navigation }) => {
     {
       id: 'single',
       title: 'Single Location/Shed',
-      icon: <Home color={theme.colors.primary} size={48} strokeWidth={1.5} />,
+      icon: <Home color={theme.colors.primary} size={32} strokeWidth={2} />,
       screen: 'AddLocation',
     },
     {
       id: 'mass',
       title: 'Mass Location/Shed',
-      icon: <Users color={theme.colors.primary} size={48} strokeWidth={1.5} />,
+      icon: <Users color={theme.colors.primary} size={32} strokeWidth={2} />,
       screen: 'MassLocation',
     },
   ];
@@ -70,13 +70,13 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     justifyContent: 'space-between',
   },
   card: {
-    width: '48.5%',
+    width: '47%',
     height: 150,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.md,
-    borderWidth: 1,
+    borderWidth: 1.5,
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
   },
@@ -88,6 +88,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
     color: theme.colors.text,
     textAlign: 'center',
+    letterSpacing: -0.2,
   },
 });
 
