@@ -41,6 +41,10 @@ model animals {
   created_at                              DateTime                        @default(now()) @db.Timestamptz(6)
   updated_at                              DateTime                        @updatedAt @db.Timestamptz(6)
   image_url                               String?
+  death_date                              DateTime?                       @db.Date
+  death_reason                            String?
+  sold_at                                 DateTime?                       @db.Date
+  sold_remark                             String?
   animal_transactions                     animal_transactions[]
   breeds                                  breeds                          @relation(fields: [breed_id], references: [id], onDelete: Cascade)
   users_animals_created_by_user_idTousers users?                          @relation("animals_created_by_user_idTousers", fields: [created_by_user_id], references: [id])
