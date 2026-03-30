@@ -46,7 +46,7 @@ exports.register = async (req, res) => {
         data: {
           id: uuidv4(),
           name,
-          email,
+          email: email || null,
           phone,
           password: hashedPassword,
           created_at: now,

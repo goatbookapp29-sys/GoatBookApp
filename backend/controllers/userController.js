@@ -46,8 +46,8 @@ exports.updateProfile = async (req, res) => {
       where: { id: req.user.id },
       data: {
         name: name || user.name, 
-        email: email || user.email,
-        phone: phone !== undefined ? phone : user.phone,
+        email: email === "" ? null : (email || user.email),
+        phone: phone || user.phone,
         updated_by_user_id: req.user.id, 
         updated_at: new Date()
       }
