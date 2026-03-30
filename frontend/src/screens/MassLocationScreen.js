@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
+import GButton from '../components/GButton';
 import { ChevronDown, Check } from 'lucide-react-native';
 import { SPACING } from '../theme';
 import api from '../api';
@@ -184,17 +185,11 @@ const MassLocationScreen = ({ navigation }) => {
       />
 
       <View style={styles.footer}>
-         <TouchableOpacity 
-            style={[styles.submitBtn, { backgroundColor: theme.colors.primary }]}
+         <GButton 
+            title="Submit"
             onPress={handleSubmit}
-            disabled={submitting}
-         >
-            {submitting ? (
-               <ActivityIndicator color="#FFF" size="small" />
-            ) : (
-               <Text style={styles.submitBtnText}>Submit</Text>
-            )}
-         </TouchableOpacity>
+            loading={submitting}
+         />
       </View>
 
       {/* Location Picker Modal (Image 6) */}
@@ -389,17 +384,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     padding: SPACING.md,
     paddingBottom: Platform.OS === 'ios' ? 0 : SPACING.md,
     backgroundColor: 'transparent',
-  },
-  submitBtn: {
-    height: 52,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  submitBtnText: {
-    color: '#FFF',
-    fontWeight: '700',
-    fontSize: 16,
   },
   modalOverlay: {
     flex: 1,
