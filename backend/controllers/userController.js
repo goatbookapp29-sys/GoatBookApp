@@ -101,6 +101,7 @@ exports.createEmployee = async (req, res) => {
     const now = new Date();
 
     // 3. Atomicity: Perform a multi-step registration (User -> Employee -> Farm Link) in one transaction
+    console.log('Context check:', { userId: req.user.id, farmId: req.farmId });
     await prisma.$transaction(async (tx) => {
       // Create global user record
       const user = await tx.users.create({ 
@@ -115,14 +116,19 @@ exports.createEmployee = async (req, res) => {
           updated_at: now 
         } 
       });
+      console.log('User created:', user.id);
+
       // Create employee identity record
       const employee = await tx.employees.create({ 
         data: { id: uuidv4(), user_id: user.id, employee_type: role || 'EMPLOYEE', created_by_user_id: req.user.id, created_at: now, updated_at: now } 
       });
+      console.log('Employee created:', employee.id);
+
       // Link the new employee to the current farm context
       await tx.farm_employees.create({ 
         data: { id: uuidv4(), farm_id: req.farmId, employee_id: employee.id, created_by_user_id: req.user.id, created_at: now, updated_at: now } 
       });
+      console.log('Farm-Employee link created.');
     });
 
     console.log('Employee created and linked successfully.');
