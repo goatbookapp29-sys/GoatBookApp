@@ -411,3 +411,45 @@ exports.replaceTag = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
+
+// @desc    Update location for multiple animals
+// @route   PUT /api/animals/bulk-location
+exports.updateBulkLocation = async (req, res) => {
+  const { animalIds, locationId, remark } = req.body;
+
+  if (!Array.isArray(animalIds) || animalIds.length === 0) {
+    return res.status(400).json({ message: 'Please select at least one animal' });
+  }
+
+  try {
+    // 1. Verify location exists and belongs to farm
+    if (locationId) {
+      const location = await prisma.locations.findFirst({
+        where: { id: locationId, farm_id: req.farmId }
+      });
+      if (!location) return res.status(400).json({ message: 'Invalid location selected' });
+    }
+
+    // 2. Perform bulk update
+    const result = await prisma.animals.updateMany({
+      where: {
+        id: { in: animalIds },
+        farm_id: req.farmId
+      },
+      data: {
+        location_id: locationId || null,
+        remark: remark !== undefined ? remark : undefined,
+        updated_at: new Date(),
+        updated_by_user_id: req.user.id
+      }
+    });
+
+    res.json({ 
+      message: `Successfully updated location for ${result.count} animals`,
+      count: result.count 
+    });
+  } catch (err) {
+    console.error('BULK LOCATION UPDATE ERROR:', err);
+    res.status(500).json({ message: 'Server Error', error: err.message });
+  }
+};

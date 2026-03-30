@@ -13,7 +13,8 @@ const GSelect = ({
   required,
   placeholder = '',
   containerStyle,
-  helpAction
+  helpAction,
+  disabled = false
 }) => {
   const { isDarkMode, theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
@@ -61,12 +62,13 @@ const GSelect = ({
     <View style={[styles.container, containerStyle]}>
       <TouchableOpacity 
         activeOpacity={0.7}
-        onPress={() => setModalVisible(true)}
+        onPress={() => !disabled && setModalVisible(true)}
         style={[
           styles.inputWrapper, 
           { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
           error && { borderColor: theme.colors.error, borderWidth: 2 },
-          modalVisible && { borderColor: theme.colors.primary, borderWidth: 2 }
+          modalVisible && { borderColor: theme.colors.primary, borderWidth: 2 },
+          disabled && { opacity: 0.6, backgroundColor: isDarkMode ? '#111' : '#F3F4F6' }
         ]}
       >
         <Animated.View style={labelContainerStyle} pointerEvents="box-none">
@@ -117,7 +119,7 @@ const GSelect = ({
           {error ? (
             <AlertCircle size={20} color={theme.colors.error} />
           ) : (
-            <ChevronDown size={20} color={theme.colors.textLight} />
+            <ChevronDown size={20} color={theme.colors.textMuted} />
           )}
         </View>
       </TouchableOpacity>
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderRadius: 14,
     paddingHorizontal: 12,
-    height: 56,
+    height: 52,
   },
   valueText: {
     fontSize: 15,

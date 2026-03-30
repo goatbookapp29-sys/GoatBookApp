@@ -46,6 +46,8 @@ import VaccinationListScreen from './src/screens/VaccinationListScreen';
 import ReportsMenuScreen from './src/screens/ReportsMenuScreen';
 import OverallReportScreen from './src/screens/OverallReportScreen';
 import ReplaceTagScreen from './src/screens/ReplaceTagScreen';
+import LocationMenuScreen from './src/screens/LocationMenuScreen';
+import MassLocationScreen from './src/screens/MassLocationScreen';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import SideMenu from './src/components/SideMenu';
 
@@ -67,7 +69,7 @@ function MainDrawer() {
       <Drawer.Screen name="BreedList" component={BreedListScreen} />
       <Drawer.Screen name="VaccinesMenu" component={VaccinesMenuScreen} />
       <Drawer.Screen name="ReportsMenu" component={ReportsMenuScreen} />
-      <Drawer.Screen name="LocationList" component={LocationListScreen} />
+      <Drawer.Screen name="LocationList" component={LocationMenuScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
     </Drawer.Navigator>
   );
@@ -177,6 +179,9 @@ function AppContent() {
           <Stack.Screen name="ReportsMenu" component={ReportsMenuScreen} />
           <Stack.Screen name="OverallReport" component={OverallReportScreen} />
           <Stack.Screen name="ReplaceTag" component={ReplaceTagScreen} />
+          <Stack.Screen name="AnimalList" component={AnimalListScreen} />
+          <Stack.Screen name="LocationMenu" component={LocationMenuScreen} />
+          <Stack.Screen name="MassLocation" component={MassLocationScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

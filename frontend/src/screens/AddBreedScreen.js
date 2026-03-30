@@ -73,8 +73,7 @@ const AddBreedScreen = ({ navigation, route }) => {
               onSelect={setAnimalType}
               options={[
                 { label: 'Goat', value: 'Goat' },
-                { label: 'Sheep', value: 'Sheep' },
-                { label: 'Other', value: 'Other' }
+                { label: 'Sheep', value: 'Sheep' }
               ]}
               required
             />

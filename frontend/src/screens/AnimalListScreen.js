@@ -126,7 +126,9 @@ const AnimalListScreen = ({ navigation, route }) => {
 
       <View style={styles.animalInfo}>
         <Text style={[styles.tagNumber, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
-        <Text style={[styles.breedName, { color: theme.colors.textLight }]}>{item.Breed?.name} • {item.gender}</Text>
+        <Text style={[styles.breedName, { color: theme.colors.textLight }]}>
+          {item.Breed?.name} • {item.gender ? item.gender.charAt(0).toUpperCase() + item.gender.slice(1).toLowerCase() : ''}
+        </Text>
         {item.Location && (
           <View style={[styles.locationTag, { backgroundColor: isDarkMode ? '#222' : '#F3F4F6' }]}>
             <MapPin size={12} color={theme.colors.textLight} style={styles.locIcon} />
@@ -135,7 +137,9 @@ const AnimalListScreen = ({ navigation, route }) => {
         )}
       </View>
       <View style={[styles.statusBadge, styles[`status${item.status}`]]}>
-        <Text style={styles.statusText}>{item.status}</Text>
+        <Text style={styles.statusText}>
+          {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase() : ''}
+        </Text>
       </View>
       <ChevronRight size={20} color={theme.colors.textMuted} />
     </TouchableOpacity>
@@ -159,8 +163,8 @@ const AnimalListScreen = ({ navigation, route }) => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title="Animals List" 
-        onMenu={() => navigation.openDrawer()} 
-        onBack={() => navigation.goBack()}
+        onMenu={!navigation.canGoBack() ? () => navigation.openDrawer() : undefined} 
+        onBack={navigation.canGoBack() ? () => navigation.goBack() : undefined} 
         rightIcon={isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
         onRightPress={toggleSearch}
       />
@@ -257,8 +261,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: theme.colors.primaryDark,
   },
   plusIcon: {
     marginRight: 8,

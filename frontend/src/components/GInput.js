@@ -109,9 +109,13 @@ const GInput = ({
           ref={inputRef}
           style={StyleSheet.flatten([
             styles.input,
-            isMultiline && { textAlignVertical: 'top', height: 'auto', minHeight: 60, marginTop: 4 },
+            isMultiline && { textAlignVertical: 'top', height: 'auto', minHeight: 60, marginTop: 8 },
             props.style,
-            { color: theme.colors.text, fontFamily: theme.typography.medium },
+            { 
+              color: theme.colors.text, 
+              fontFamily: theme.typography.medium,
+              outlineStyle: Platform.OS === 'web' ? 'none' : undefined 
+            },
           ])}
           value={value}
           onChangeText={onChangeText}
@@ -131,9 +135,9 @@ const GInput = ({
             style={styles.eyeIcon}
           >
             {showPassword ? (
-              <EyeOff size={20} color={theme.colors.textLight} />
+              <EyeOff size={20} color={theme.colors.textMuted} />
             ) : (
-              <Eye size={20} color={theme.colors.textLight} />
+              <Eye size={20} color={theme.colors.textMuted} />
             )}
           </TouchableOpacity>
         )}
@@ -154,14 +158,15 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderRadius: 14,
     paddingHorizontal: 12,
-    height: 56,
+    height: 52,
   },
   input: {
     flex: 1,
     fontSize: 15,
     height: '100%',
     textAlignVertical: 'center',
-    paddingTop: Platform.OS === 'ios' ? 0 : 4,
+    paddingTop: Platform.OS === 'ios' ? 0 : 0,
+    outlineWidth: 0,
   },
   errorText: {
     fontSize: 12,

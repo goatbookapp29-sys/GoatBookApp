@@ -52,6 +52,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [batchNo, setBatchNo] = useState(existingAnimal.batchNo || '');
   const [acquisitionMethod, setAcquisitionMethod] = useState(existingAnimal.acquisitionMethod || '');
   const [locationId, setLocationId] = useState(existingAnimal.locationId || null);
+  const [animalType, setAnimalType] = useState(existingAnimal.animalType || '');
   
   const [matingExpanded, setMatingExpanded] = useState(false);
   const [breedingExpanded, setBreedingExpanded] = useState(false);
@@ -89,7 +90,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [soldRemark, setSoldRemark] = useState(existingAnimal.soldRemark || '');
 
   // UI state
-  const [breeds, setBreeds] = useState([]);
+  const [allBreeds, setAllBreeds] = useState([]);
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -103,6 +104,11 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const showHelp = (title, content) => {
     setHelpInfo({ visible: true, title, content });
   };
+
+  const filteredBreeds = useMemo(() => {
+    if (!animalType) return [];
+    return allBreeds.filter(b => b.animalType === animalType);
+  }, [allBreeds, animalType]);
 
   useFocusEffect(
     useCallback(() => {
@@ -179,12 +185,14 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const fetchBreeds = async () => {
     try {
       const response = await api.get('/breeds');
-      setBreeds(response.data.map(b => ({ label: `${b.name} (${b.animalType})`, value: b.id, animalType: b.animalType })));
+      const mapped = response.data.map(b => ({ label: `${b.name} (${b.animalType})`, value: b.id, animalType: b.animalType }));
+      setAllBreeds(mapped);
     } catch (error) {
       console.warn('Fetch breeds failed, trying cache...', error);
       const cached = await getFromCache('breeds');
       if (cached) {
-        setBreeds(cached.map(b => ({ label: `${b.name} (${b.animalType})`, value: b.id, animalType: b.animalType })));
+        const mapped = cached.map(b => ({ label: `${b.name} (${b.animalType})`, value: b.id, animalType: b.animalType }));
+        setAllBreeds(mapped);
       }
     }
   };
@@ -263,13 +271,24 @@ const AddAnimalScreen = ({ navigation, route }) => {
     try {
       setUploading(true);
       
-      const blobResponse = await fetch(imageUri);
-      const blob = await blobResponse.blob();
-
       const data = new FormData();
       data.append('upload_preset', 'goatbook_preset'); 
       data.append('cloud_name', 'dvtfv9vvr'); 
-      data.append('file', blob, 'upload.jpg');
+
+      if (Platform.OS === 'web') {
+        const blobResponse = await fetch(imageUri);
+        const blob = await blobResponse.blob();
+        data.append('file', blob, 'upload.jpg');
+      } else {
+        // Correct way for React Native / Mobile
+        const fileName = imageUri.split('/').pop();
+        const fileType = fileName.split('.').pop();
+        data.append('file', {
+          uri: imageUri,
+          name: fileName || 'upload.jpg',
+          type: `image/${fileType === 'jpg' ? 'jpeg' : fileType}`,
+        });
+      }
 
       const response = await fetch('https://api.cloudinary.com/v1_1/dvtfv9vvr/image/upload', {
         method: 'POST',
@@ -616,7 +635,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
             >
               <View style={styles.iconGroup}>
                 <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Add Photo</Text>
-                <Camera size={20} color="#000" style={{ marginLeft: 8 }} />
+                <Camera size={20} color={theme.colors.textMuted} style={{ marginLeft: 8 }} />
               </View>
               {photoExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
             </TouchableOpacity>
@@ -748,25 +767,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 required 
                 helpAction={() => setShowTagHelp(true)}
               />
-              <GInput 
-                containerStyle={styles.halfWidth}
-                label="Animal Type" 
-                value={breedId ? breeds.find(b => b.value === breedId)?.animalType || 'Goat' : 'Goat'} 
-                editable={false}
-                style={{ backgroundColor: theme.colors.surface, color: theme.colors.textMuted }}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <GSelect 
-                containerStyle={styles.halfWidth}
-                label="Breed" 
-                value={breedId} 
-                onSelect={setBreedId}
-                options={breeds}
-                placeholder="Select..."
-                required
-              />
               <GSelect 
                 containerStyle={styles.halfWidth}
                 label="Gender" 
@@ -776,6 +776,33 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   { label: 'Male', value: 'MALE' },
                   { label: 'Female', value: 'FEMALE' }
                 ]}
+                required
+              />
+            </View>
+
+            <View style={styles.row}>
+              <GSelect 
+                containerStyle={styles.halfWidth}
+                label="Animal Type" 
+                value={animalType} 
+                onSelect={(val) => {
+                  setAnimalType(val);
+                  setBreedId(''); 
+                }}
+                options={[
+                  { label: 'Goat', value: 'Goat' },
+                  { label: 'Sheep', value: 'Sheep' }
+                ]}
+                required
+              />
+              <GSelect 
+                containerStyle={styles.halfWidth}
+                label="Breed" 
+                value={breedId} 
+                onSelect={setBreedId}
+                options={filteredBreeds}
+                placeholder={animalType ? "Select Breed" : "Select Type First"}
+                disabled={!animalType}
                 required
               />
             </View>
@@ -965,7 +992,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
           {isEditing && (
             <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
               <TouchableOpacity 
-                style={[styles.weightHeader, { borderBottomColor: theme.colors.border }]}
+                style={[styles.weightHeader, { borderBottomWidth: weightExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]}
                 activeOpacity={0.7}
                 onPress={() => setWeightExpanded(!weightExpanded)}
               >
@@ -995,7 +1022,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                       {weights.map((w, idx) => (
                         <View key={w.id} style={[styles.weightItem, { borderBottomColor: theme.colors.border }, idx === weights.length - 1 && { borderBottomWidth: 0 }]}>
                           <View style={[styles.weightIconBox, { backgroundColor: isDarkMode ? theme.colors.surface : '#FFF1EA' }]}>
-                            <Scale size={16} color={theme.colors.primary} />
+                            <Calendar size={20} color={theme.colors.textMuted} />
                           </View>
                           <View style={styles.weightInfoBlock}>
                             <Text style={[styles.weightKg, { color: theme.colors.text }]}>{w.weight} KG</Text>
@@ -1025,7 +1052,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               {/* VACCINATION RECORD */}
               <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                 <TouchableOpacity 
-                  style={[styles.weightHeader, { borderBottomColor: theme.colors.border }]}
+                  style={[styles.weightHeader, { borderBottomWidth: vaccinationExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]}
                   activeOpacity={0.7}
                   onPress={() => setVaccinationExpanded(!vaccinationExpanded)}
                 >
@@ -1058,7 +1085,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                             onPress={() => navigation.navigate('AddVaccination', { mode: 'single', record: v })}
                           >
                             <View style={styles.weightIconBox}>
-                              <Syringe size={16} color={theme.colors.primary} />
+                              <Syringe size={16} color={theme.colors.textMuted} />
                             </View>
                             <View style={styles.weightInfoBlock}>
                               <Text style={[styles.weightKg, { color: theme.colors.text }]}>{v.vaccine?.name}</Text>
@@ -1087,7 +1114,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               {/* MATING RECORD */}
               <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                 <TouchableOpacity 
-                  style={[styles.weightHeader, { borderBottomColor: theme.colors.border }]}
+                  style={[styles.weightHeader, { borderBottomWidth: matingExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]}
                   activeOpacity={0.7}
                   onPress={() => setMatingExpanded(!matingExpanded)}
                 >
@@ -1118,7 +1145,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               {/* BREEDING/DELIVERY */}
               <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                 <TouchableOpacity 
-                  style={[styles.weightHeader, { borderBottomColor: theme.colors.border }]}
+                  style={[styles.weightHeader, { borderBottomWidth: breedingExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]}
                   activeOpacity={0.7}
                   onPress={() => setBreedingExpanded(!breedingExpanded)}
                 >
@@ -1149,7 +1176,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               {/* MILK HISTORY */}
               <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                 <TouchableOpacity 
-                  style={[styles.weightHeader, { borderBottomColor: theme.colors.border }]}
+                  style={[styles.weightHeader, { borderBottomWidth: milkExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]}
                   activeOpacity={0.7}
                   onPress={() => setMilkExpanded(!milkExpanded)}
                 >
@@ -1180,7 +1207,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               {/* INSURANCE */}
               <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                 <TouchableOpacity 
-                  style={[styles.weightHeader, { borderBottomColor: theme.colors.border }]}
+                  style={[styles.weightHeader, { borderBottomWidth: insuranceExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]}
                   activeOpacity={0.7}
                   onPress={() => setInsuranceExpanded(!insuranceExpanded)}
                 >

@@ -239,7 +239,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginRight: 6,
   },
   statusText: {
-    color: theme.colors.text,
+    color: '#FFF',
     fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
   },

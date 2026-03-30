@@ -107,8 +107,6 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 14,
     width: '100%',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.primaryDark,
   },
   modalButtonText: {
     color: '#FFF',

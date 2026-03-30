@@ -99,7 +99,7 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
           </Text>
         ) : <View style={{ flex: 1 }} />}
 
-        <Calendar size={20} color={theme.colors.textLight} />
+        <Calendar size={20} color={theme.colors.textMuted} />
       </TouchableOpacity>
 
       {error ? (
