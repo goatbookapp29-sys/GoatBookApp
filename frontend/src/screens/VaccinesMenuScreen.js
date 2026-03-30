@@ -31,7 +31,7 @@ const VaccinesMenuScreen = ({ navigation }) => {
     { 
       id: 'history', 
       title: 'All Records', 
-      icon: <ClipboardList color="#10B981" size={32} />, 
+      icon: <ClipboardList color={theme.colors.primary} size={32} />, 
       onPress: () => navigation.navigate('VaccinationList') 
     },
   ];
