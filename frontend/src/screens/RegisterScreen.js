@@ -92,15 +92,18 @@ const RegisterScreen = ({ navigation }) => {
 
         <View style={styles.titleContainer}>
             <Text style={styles.mainTitle}>Register</Text>
-            <Text style={styles.subTitle}>Start your journey to smarter goat farming.</Text>
+            <Text style={styles.subTitle}>Create your owner account and set up your farm.</Text>
+            <Text style={[styles.subTitle, { fontSize: 13, marginTop: 4, color: theme.colors.primary }]}>
+                * This will be the primary administrative account for your farm.
+            </Text>
         </View>
 
         <View style={styles.form}>
-            <Text style={styles.sectionTitle}>Personal Details</Text>
+            <Text style={styles.sectionTitle}>Farm Owner Details</Text>
             <View style={styles.row}>
                 <View style={{ flex: 1, marginRight: 8 }}>
                     <GInput 
-                        label="First Name" 
+                        label="Owner First Name" 
                         value={formData.firstName} 
                         onChangeText={(v) => updateField('firstName', v)} 
                         required 
@@ -108,7 +111,7 @@ const RegisterScreen = ({ navigation }) => {
                 </View>
                 <View style={{ flex: 1, marginLeft: 8 }}>
                     <GInput 
-                        label="Last Name" 
+                        label="Owner Last Name" 
                         value={formData.lastName} 
                         onChangeText={(v) => updateField('lastName', v)} 
                     />
