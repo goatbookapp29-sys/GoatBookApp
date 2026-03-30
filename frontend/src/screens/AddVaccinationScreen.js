@@ -449,9 +449,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   editInfoLabel: {
     fontSize: 12,
     fontFamily: 'Montserrat_600SemiBold',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    color: COLORS.primary,
+    marginBottom: 16,
+    letterSpacing: 0.5,
+    borderBottomWidth: 1.5,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   editInfoValue: {
     flexDirection: 'row',

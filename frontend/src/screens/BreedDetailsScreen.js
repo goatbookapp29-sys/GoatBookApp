@@ -141,9 +141,9 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
-    marginBottom: 16,
+    marginBottom: 12,
     marginLeft: 4,
-    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   actionButton: {
     borderRadius: 12,

@@ -174,7 +174,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
     marginBottom: 16,
     marginLeft: 4,
-    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   breedRow: {
     borderRadius: 12,

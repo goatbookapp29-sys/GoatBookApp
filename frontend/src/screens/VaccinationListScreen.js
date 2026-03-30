@@ -207,6 +207,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   dueValue: {
     fontSize: 13,
     fontFamily: 'Montserrat_600SemiBold',
+    letterSpacing: 0.2,
   },
   remarkText: {
     fontSize: 13,
