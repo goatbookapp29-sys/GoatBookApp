@@ -26,7 +26,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
 
   const handleSave = async () => {
     if (!name || !email || (!isEditing && !password)) {
-      alert('Please fill in Name, Email, and Password');
+      Alert.alert('Validation Error', 'Please fill in Name, Email, and Password');
       return;
     }
 
@@ -34,22 +34,24 @@ const AddEmployeeScreen = ({ navigation, route }) => {
     try {
       if (isEditing) {
         await api.put(`/users/employees/${existingEmployee.id}`, { name, role, email, phone });
-        alert('Employee updated successfully');
+        Alert.alert('Success', 'Employee updated successfully');
       } else {
         await api.post('/users/employees', { name, email, password, role, phone });
-        alert('Employee created successfully');
+        Alert.alert('Success', 'Employee created successfully');
       }
       setLoading(false);
       navigation.goBack();
     } catch (error) {
       setLoading(false);
-      alert(error.response?.data?.message || 'Operation failed');
+      const msg = error.response?.data?.message || 'Operation failed';
+      const detail = error.response?.data?.error ? `\n\nDetail: ${error.response.data.error}` : '';
+      Alert.alert('Error', `${msg}${detail}`);
     }
   };
 
   const handleResetPassword = async () => {
     if (!password) {
-      alert('Please enter a new password');
+      Alert.alert('Validation Error', 'Please enter a new password');
       return;
     }
 

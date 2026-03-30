@@ -64,12 +64,9 @@ const RegisterScreen = ({ navigation }) => {
       setLoading(false);
       console.error('REGISTER ERROR:', error);
       
-      // 7. Error handling: show backend message or fallback
-      let message = 'Registration failed';
-      if (error.response?.data?.message) {
-        message = error.response.data.message;
-      }
-      alert(message);
+      const msg = error.response?.data?.message || 'Registration failed';
+      const detail = error.response?.data?.error ? ` (Detail: ${error.response.data.error})` : '';
+      alert(`${msg}${detail}`);
     }
   };
 
