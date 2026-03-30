@@ -12,8 +12,8 @@ exports.register = async (req, res) => {
   const { name, email, phone, password, farmName, farmLocation } = req.body;
 
   // Basic validation to ensure required fields are present
-  if (!email || !password || !name || !farmName) {
-    return res.status(400).json({ message: 'Name, email/phone, password, and farm name are required' });
+  if (!phone || !password || !name || !farmName) {
+    return res.status(400).json({ message: 'Name, phone, password, and farm name are required' });
   }
 
   try {
@@ -21,14 +21,14 @@ exports.register = async (req, res) => {
     const existingUser = await prisma.users.findFirst({
       where: {
         OR: [
-          { email },
-          { phone: phone || '' }
-        ]
+          email ? { email } : null,
+          { phone }
+        ].filter(Boolean)
       }
     });
     
     if (existingUser) {
-      if (existingUser.email === email) {
+      if (email && existingUser.email === email) {
         return res.status(400).json({ message: 'User with this email already exists' });
       } else {
         return res.status(400).json({ message: 'User with this phone number already exists' });

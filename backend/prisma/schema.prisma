@@ -136,8 +136,8 @@ model locations {
 model users {
   id                                                                String                @id @db.Uuid
   name                                                              String                @db.VarChar(255)
-  email                                                             String                @unique @db.VarChar(255)
-  phone                                                             String?               @db.VarChar(255)
+  email                                                             String?               @unique @db.VarChar(255)
+  phone                                                             String                @unique @db.VarChar(255)
   password                                                          String                @db.VarChar(255)
   created_by_user_id                                                String?               @db.Uuid
   updated_by_user_id                                                String?               @db.Uuid
