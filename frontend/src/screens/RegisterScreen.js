@@ -92,9 +92,9 @@ const RegisterScreen = ({ navigation }) => {
 
         <View style={styles.titleContainer}>
             <Text style={styles.mainTitle}>Register</Text>
-            <Text style={styles.subTitle}>Create your owner account and set up your farm.</Text>
-            <Text style={[styles.subTitle, { fontSize: 13, marginTop: 4, color: theme.colors.primary }]}>
-                * This will be the primary administrative account for your farm.
+            <Text style={styles.subTitle}>Register as an owner to set up and manage your farm.</Text>
+            <Text style={[styles.subTitle, { fontSize: 13, marginTop: 8, color: theme.colors.textLight, fontFamily: 'Montserrat_500Medium' }]}>
+                This will be the primary administrative account for your farm.
             </Text>
         </View>
 
