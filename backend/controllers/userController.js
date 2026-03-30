@@ -42,12 +42,16 @@ exports.updateProfile = async (req, res) => {
     const user = await prisma.users.findUnique({ where: { id: req.user.id } });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    const isOwner = req.employee?.employee_type === 'OWNER';
+
     const updated = await prisma.users.update({
       where: { id: req.user.id },
       data: {
         name: name || user.name, 
-        email: email === "" ? null : (email || user.email),
-        phone: phone || user.phone,
+        // Only OWNER can update their own email/phone via this endpoint (usually they are the ones who created the farm)
+        // Others cannot change their own sensitive info
+        email: isOwner ? (email === "" ? null : (email || user.email)) : user.email,
+        phone: isOwner ? (phone || user.phone) : user.phone,
         updated_by_user_id: req.user.id, 
         updated_at: new Date()
       }
@@ -83,7 +87,16 @@ exports.createEmployee = async (req, res) => {
     await prisma.$transaction(async (tx) => {
       // Create global user record
       const user = await tx.users.create({ 
-        data: { id: uuidv4(), name, email, password: hashedPassword, created_by_user_id: req.user.id, created_at: now, updated_at: now } 
+        data: { 
+          id: uuidv4(), 
+          name, 
+          email: email || null, 
+          phone: req.body.phone || null, 
+          password: hashedPassword, 
+          created_by_user_id: req.user.id, 
+          created_at: now, 
+          updated_at: now 
+        } 
       });
       // Create employee identity record
       const employee = await tx.employees.create({ 
@@ -105,7 +118,7 @@ exports.createEmployee = async (req, res) => {
 // @desc    Modify staff details (Owner only)
 // @route   PUT /api/users/employees/:id
 exports.updateEmployee = async (req, res) => {
-  const { name, role } = req.body;
+  const { name, role, email, phone } = req.body;
   try {
     if (req.employee.employee_type !== 'OWNER') return res.status(403).json({ message: 'Permission denied' });
     
@@ -122,11 +135,17 @@ exports.updateEmployee = async (req, res) => {
       data: { employee_type: role || employee.employee_type, updated_by_user_id: req.user.id, updated_at: new Date() } 
     });
 
-    // Update the human name if provided
-    if (name) {
+    // Update the human name and contact info if provided
+    if (name || email !== undefined || phone !== undefined) {
       await prisma.users.update({ 
         where: { id: employee.user_id }, 
-        data: { name, updated_by_user_id: req.user.id, updated_at: new Date() } 
+        data: { 
+          name: name || employee.users.name,
+          email: email === "" ? null : (email || employee.users.email),
+          phone: phone || employee.users.phone,
+          updated_by_user_id: req.user.id, 
+          updated_at: new Date() 
+        } 
       });
     }
 
@@ -171,7 +190,7 @@ exports.getEmployees = async (req, res) => {
       include: { 
         employees: { 
           include: { 
-            users: { select: { id: true, name: true, email: true } } 
+            users: { select: { id: true, name: true, email: true, phone: true } } 
           } 
         } 
       }
@@ -183,6 +202,7 @@ exports.getEmployees = async (req, res) => {
         id: fe.employees.id, 
         name: fe.employees.users?.name || 'Unknown', 
         email: fe.employees.users?.email || 'N/A', 
+        phone: fe.employees.users?.phone || 'N/A', 
         role: fe.employees.employee_type 
       };
     }).filter(e => e !== null));
