@@ -103,7 +103,7 @@ const RegisterScreen = ({ navigation }) => {
             <View style={styles.row}>
                 <View style={{ flex: 1, marginRight: 8 }}>
                     <GInput 
-                        label="Owner First Name" 
+                        label="First Name" 
                         value={formData.firstName} 
                         onChangeText={(v) => updateField('firstName', v)} 
                         required 
@@ -111,7 +111,7 @@ const RegisterScreen = ({ navigation }) => {
                 </View>
                 <View style={{ flex: 1, marginLeft: 8 }}>
                     <GInput 
-                        label="Owner Last Name" 
+                        label="Last Name" 
                         value={formData.lastName} 
                         onChangeText={(v) => updateField('lastName', v)} 
                     />

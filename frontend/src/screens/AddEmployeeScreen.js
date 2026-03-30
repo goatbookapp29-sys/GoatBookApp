@@ -123,6 +123,9 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               value={role} 
               onSelect={setRole}
               options={[
+                { label: 'Manager', value: 'MANAGER' },
+                { label: 'Supervisor', value: 'SUPERVISOR' },
+                { label: 'Veterinarian', value: 'VETERINARIAN' },
                 { label: 'Farm Worker', value: 'EMPLOYEE' },
                 { label: 'Butcher', value: 'BUTCHER' },
                 { label: 'Agent', value: 'AGENT' }
