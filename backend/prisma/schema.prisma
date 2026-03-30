@@ -254,6 +254,9 @@ enum enum_animals_status {
 
 enum enum_employees_employee_type {
   OWNER
+  MANAGER
+  SUPERVISOR
+  VETERINARIAN
   EMPLOYEE
   BUTCHER
   AGENT
