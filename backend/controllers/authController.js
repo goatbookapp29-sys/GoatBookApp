@@ -17,6 +17,7 @@ exports.register = async (req, res) => {
   }
 
   try {
+    console.log('--- Register Attempt ---', { name, email, phone, farmName });
     // 1. Check if user already exists by either email or phone for uniqueness
     const existingUser = await prisma.users.findFirst({
       where: {
@@ -28,12 +29,14 @@ exports.register = async (req, res) => {
     });
     
     if (existingUser) {
+      console.log('User already exists:', existingUser.id);
       if (email && existingUser.email === email) {
         return res.status(400).json({ message: 'User with this email already exists' });
       } else {
         return res.status(400).json({ message: 'User with this phone number already exists' });
       }
     }
+    console.log('User check passed, starting transaction...');
 
     // Encrypt password before saving
     const hashedPassword = await hashPassword(password);
@@ -53,6 +56,7 @@ exports.register = async (req, res) => {
           updated_at: now
         }
       });
+      console.log('User created:', user.id);
 
       // 3. Every owner is also an employee record with type 'OWNER'
       const employee = await tx.employees.create({
@@ -65,6 +69,7 @@ exports.register = async (req, res) => {
           updated_at: now
         }
       });
+      console.log('Employee created:', employee.id);
 
       // 4. Initialize the farm for the new owner
       const farm = await tx.farms.create({
@@ -78,6 +83,7 @@ exports.register = async (req, res) => {
           updated_at: now
         }
       });
+      console.log('Farm created:', farm.id);
 
       // 5. Explicitly link the owner (employee) to the newly created farm
       await tx.farm_employees.create({
@@ -90,6 +96,7 @@ exports.register = async (req, res) => {
           updated_at: now
         }
       });
+      console.log('Farm-Employee link created.');
 
       return { user, farm };
     });
