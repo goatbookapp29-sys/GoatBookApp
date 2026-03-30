@@ -130,7 +130,7 @@ exports.addAnimal = async (req, res) => {
         id: uuidv4(),
         tag_number: tagNumber,
         breed_id: breedId,
-        gender,
+        gender: gender?.toUpperCase(),
         color,
         birth_date: birthDate ? new Date(birthDate) : null,
         birth_weight: birthWeight || null,
@@ -140,15 +140,15 @@ exports.addAnimal = async (req, res) => {
         is_breeder: finalIsBreeder,
         is_qurbani: finalIsQurbani,
         batch_no: batchNo,
-        acquisition_method: acquisitionMethod || 'BORN',
-        purchase_date: acquisitionMethod === 'PURCHASED' && purchaseDate ? new Date(purchaseDate) : null,
-        purchase_price: acquisitionMethod === 'PURCHASED' ? purchasePrice : null,
-        age_in_months: acquisitionMethod === 'PURCHASED' ? ageInMonths : null,
-        female_condition: gender === 'FEMALE' && acquisitionMethod === 'PURCHASED' ? femaleCondition : null,
+        acquisition_method: acquisitionMethod?.toUpperCase() || 'BORN',
+        purchase_date: (acquisitionMethod?.toUpperCase() === 'PURCHASED') && purchaseDate ? new Date(purchaseDate) : null,
+        purchase_price: (acquisitionMethod?.toUpperCase() === 'PURCHASED') ? purchasePrice : null,
+        age_in_months: (acquisitionMethod?.toUpperCase() === 'PURCHASED') ? ageInMonths : null,
+        female_condition: gender?.toUpperCase() === 'FEMALE' && (acquisitionMethod?.toUpperCase() === 'PURCHASED') ? femaleCondition : null,
         birth_type: birthType || null,
-        mother_tag_id: acquisitionMethod === 'BORN' ? motherTagId : null,
-        father_tag_id: acquisitionMethod === 'BORN' ? fatherTagId : null,
-        status: status || 'LIVE',
+        mother_tag_id: (acquisitionMethod?.toUpperCase() === 'BORN') ? motherTagId : null,
+        father_tag_id: (acquisitionMethod?.toUpperCase() === 'BORN') ? fatherTagId : null,
+        status: status?.toUpperCase() || 'LIVE',
         death_date: deathDate ? new Date(deathDate) : null,
         death_reason: deathReason || null,
         sold_at: soldAt ? new Date(soldAt) : null,
@@ -245,9 +245,9 @@ exports.updateAnimal = async (req, res) => {
         if (existingTag) return res.status(400).json({ message: 'Tag Number already exists' });
     }
 
-    const currentAcqMethod = acquisitionMethod || animal.acquisition_method;
-    const finalIsBreeder = gender === 'MALE' ? (isBreeder || false) : false;
-    const finalIsQurbani = gender === 'MALE' ? (!finalIsBreeder && isQurbani || false) : false;
+    const currentAcqMethod = (acquisitionMethod?.toUpperCase() || animal.acquisition_method)?.toUpperCase();
+    const finalIsBreeder = gender?.toUpperCase() === 'MALE' ? (isBreeder || false) : false;
+    const finalIsQurbani = gender?.toUpperCase() === 'MALE' ? (!finalIsBreeder && isQurbani || false) : false;
 
     // 3. Commit updates to database
     const updated = await prisma.animals.update({
@@ -255,7 +255,7 @@ exports.updateAnimal = async (req, res) => {
       data: {
         tag_number: tagNumber,
         breed_id: breedId,
-        gender,
+        gender: gender?.toUpperCase(),
         color,
         birth_date: birthDate ? new Date(birthDate) : null,
         birth_weight: birthWeight,
@@ -267,15 +267,15 @@ exports.updateAnimal = async (req, res) => {
         purchase_date: currentAcqMethod === 'PURCHASED' && purchaseDate ? new Date(purchaseDate) : null,
         purchase_price: currentAcqMethod === 'PURCHASED' ? purchasePrice : null,
         age_in_months: currentAcqMethod === 'PURCHASED' ? ageInMonths : null,
-        female_condition: gender === 'FEMALE' && currentAcqMethod === 'PURCHASED' ? femaleCondition : null,
+        female_condition: gender?.toUpperCase() === 'FEMALE' && currentAcqMethod === 'PURCHASED' ? femaleCondition : null,
         birth_type: birthType || null,
         mother_tag_id: currentAcqMethod === 'BORN' ? motherTagId : null,
         father_tag_id: currentAcqMethod === 'BORN' ? fatherTagId : null,
-        status: status || animal.status,
-        death_date: deathDate ? new Date(deathDate) : (status === 'LIVE' ? null : animal.death_date),
-        death_reason: deathReason !== undefined ? deathReason : (status === 'LIVE' ? null : animal.death_reason),
-        sold_at: soldAt ? new Date(soldAt) : (status === 'LIVE' ? null : animal.sold_at),
-        sold_remark: soldRemark !== undefined ? soldRemark : (status === 'LIVE' ? null : animal.sold_remark),
+        status: status?.toUpperCase() || animal.status,
+        death_date: deathDate ? new Date(deathDate) : (status?.toUpperCase() === 'LIVE' ? null : animal.death_date),
+        death_reason: deathReason !== undefined ? deathReason : (status?.toUpperCase() === 'LIVE' ? null : animal.death_reason),
+        sold_at: soldAt ? new Date(soldAt) : (status?.toUpperCase() === 'LIVE' ? null : animal.sold_at),
+        sold_remark: soldRemark !== undefined ? soldRemark : (status?.toUpperCase() === 'LIVE' ? null : animal.sold_remark),
         is_ready_for_sale: isReadyForSale !== undefined ? isReadyForSale : animal.is_ready_for_sale,
         current_weight: isReadyForSale ? currentWeight : null,
         sale_price: isReadyForSale ? salePrice : null,
