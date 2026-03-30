@@ -29,6 +29,18 @@ app.use('/api/transactions', require('./routes/transactions'));
 // Basic route for testing
 app.get('/', (req, res) => res.send('GoatBook API Running'));
 
+// Diagnostic route for DB
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const start = Date.now();
+    await prisma.$queryRaw`SELECT 1`;
+    const duration = Date.now() - start;
+    res.json({ status: 'connected', duration: `${duration}ms` });
+  } catch (err) {
+    res.status(500).json({ status: 'failed', error: err.message });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('GLOBAL ERROR:', err);
