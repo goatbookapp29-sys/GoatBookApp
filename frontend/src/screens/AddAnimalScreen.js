@@ -767,20 +767,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
               />
               <GSelect 
                 containerStyle={styles.halfWidth}
-                label="Gender" 
-                value={gender} 
-                onSelect={setGender}
-                options={[
-                  { label: 'Male', value: 'MALE' },
-                  { label: 'Female', value: 'FEMALE' }
-                ]}
-                required
-              />
-            </View>
-
-            <View style={styles.row}>
-              <GSelect 
-                containerStyle={styles.halfWidth}
                 label="Animal Type" 
                 value={animalType} 
                 onSelect={(val) => {
@@ -793,6 +779,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 ]}
                 required
               />
+            </View>
+
+            <View style={styles.row}>
               <GSelect 
                 containerStyle={styles.halfWidth}
                 label="Breed" 
@@ -801,6 +790,17 @@ const AddAnimalScreen = ({ navigation, route }) => {
                 options={filteredBreeds}
                 placeholder={animalType ? "Select Breed" : "Select Type First"}
                 disabled={!animalType}
+                required
+              />
+              <GSelect 
+                containerStyle={styles.halfWidth}
+                label="Gender" 
+                value={gender} 
+                onSelect={setGender}
+                options={[
+                  { label: 'Male', value: 'MALE' },
+                  { label: 'Female', value: 'FEMALE' }
+                ]}
                 required
               />
             </View>
