@@ -5,14 +5,15 @@ require('dotenv').config();
 const app = express();
 const prisma = require('./config/prisma');
 
-// Test DB Connection on startup
-prisma.$connect()
-  .then(() => console.log('Prisma: Connected to PostgreSQL successfully.'))
-  .catch(err => console.error('Prisma: Connection failed:', err.message));
-
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Request logger
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+  next();
+});
 
 // Diagnostic route for DB
 app.get('/api/test-db', async (req, res) => {
