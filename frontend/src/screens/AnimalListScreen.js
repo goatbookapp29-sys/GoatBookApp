@@ -326,7 +326,8 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 80,
+    paddingTop: 20, // Reduced from 80 to move it up
+    paddingBottom: 100, // Balanced to keep it feels centered but higher
     paddingHorizontal: 32,
   },
   noRecords: {

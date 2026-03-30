@@ -224,7 +224,9 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   emptyContainer: {
     alignItems: 'center',
-    marginTop: 100,
+    justifyContent: 'center',
+    marginTop: 40,
+    paddingBottom: 80,
   },
   emptyText: {
     marginTop: 16,

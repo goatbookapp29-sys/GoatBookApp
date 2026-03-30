@@ -228,7 +228,9 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   emptyContainer: {
     alignItems: 'center',
-    marginTop: 80,
+    justifyContent: 'center',
+    paddingTop: 40,
+    paddingBottom: 80,
     paddingHorizontal: 40,
   },
   noRecords: {

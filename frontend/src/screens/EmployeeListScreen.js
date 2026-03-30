@@ -139,8 +139,10 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     alignItems: 'center',
   },
   empty: {
-    padding: 60,
+    paddingTop: 80,
+    paddingBottom: 40,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyText: {
     fontSize: 15,

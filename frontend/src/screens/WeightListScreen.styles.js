@@ -92,7 +92,8 @@ export default StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 100,
+    paddingTop: 40,
+    paddingBottom: 80,
   },
   emptyText: {
     marginTop: 16,
