@@ -15,6 +15,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root health check (Render heartbeat)
+app.get('/', (req, res) => res.status(200).send('GoatBook API Running'));
+
 // Diagnostic route for DB
 app.get('/api/test-db', async (req, res) => {
   try {
@@ -38,9 +41,6 @@ app.use('/api/farms', require('./routes/farms'));
 app.use('/api/vaccines', require('./routes/vaccines'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/transactions', require('./routes/transactions'));
-
-// Basic route for testing
-app.get('/', (req, res) => res.send('GoatBook API Running'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
