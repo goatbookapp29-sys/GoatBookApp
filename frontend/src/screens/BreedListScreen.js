@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, Alert, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, Alert, SafeAreaView, Modal } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
@@ -20,6 +20,8 @@ const BreedListScreen = ({ navigation }) => {
   // Selection State
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const searchBarTranslateY = useRef(new Animated.Value(-100)).current;
 
@@ -124,37 +126,37 @@ const BreedListScreen = ({ navigation }) => {
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
+    setIsDeleteModalVisible(true);
+  };
 
-    const isMultiple = selectedIds.length > 1;
-    const message = isMultiple 
-        ? `Do you want to delete these breeds? Are you sure?`
-        : `Do you want to delete this breed? Are you sure?`;
-
-    safeAlert(
-      isMultiple ? 'Delete Breeds' : 'Delete Breed',
-      message,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await api.delete('/breeds/bulk', { data: { ids: selectedIds } });
-              await fetchBreeds();
-              exitSelectionMode();
-            } catch (error) {
-              const msg = error.response?.data?.message || 'Delete failed';
-              safeAlert('Error', msg, [{ text: 'OK' }]);
-              setLoading(false);
-            }
-          }
+  const confirmBulkDelete = async () => {
+    try {
+      setIsDeleteModalVisible(false);
+      setLoading(true);
+      setIsDeleting(true);
+      
+      const response = await api.delete('/breeds/bulk', {
+        data: { 
+          ids: selectedIds,
+          farm_id: breeds[0]?.farm_id // Assuming all breeds belong to the same farm context
         }
-      ]
-    );
+      });
+      
+      if (response.data.success) {
+        setBreeds(prev => prev.filter(b => !selectedIds.includes(b.id)));
+        setFilteredBreeds(prev => prev.filter(b => !selectedIds.includes(b.id)));
+        exitSelectionMode();
+        Alert.alert('Success', 'Selected breeds deleted successfully.');
+      }
+    } catch (error) {
+      console.error('Bulk delete failed', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to delete some breeds. They might be assigned to animals.');
+    } finally {
+      setIsDeleting(false);
+      setLoading(false);
+    }
   };
 
   const renderItem = ({ item }) => {
@@ -284,21 +286,59 @@ const BreedListScreen = ({ navigation }) => {
           {isSelectionMode && (
             <View style={styles.bottomActions}>
                 <TouchableOpacity 
-                    style={styles.deleteAction}
+                    style={[styles.deleteAction, isDeleting && { opacity: 0.5 }]} 
                     onPress={handleBulkDelete}
-                    disabled={selectedIds.length === 0}
+                    disabled={isDeleting || selectedIds.length === 0}
                 >
-                    <Trash2 size={26} color={selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted} />
-                    <Text style={[styles.deleteText, { color: selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted }]}>
-                        Delete
-                    </Text>
+                    <Trash2 size={26} color="#FF3B30" />
+                    <Text style={[styles.deleteText, { color: "#FF3B30" }]}>Delete</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={styles.deleteAction} onPress={exitSelectionMode}>
-                    <X size={26} color={theme.colors.textMuted} />
-                    <Text style={[styles.deleteText, { color: theme.colors.textMuted }]}>Cancel</Text>
+                    <X size={26} color={theme.colors.textLight} />
+                    <Text style={[styles.deleteText, { color: theme.colors.textLight }]}>Cancel</Text>
                 </TouchableOpacity>
             </View>
           )}
+
+          {/* Custom Delete Confirmation Modal */}
+          <Modal
+            visible={isDeleteModalVisible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setIsDeleteModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalIconContainer}>
+                  <View style={styles.iconCircle}>
+                    <Trash2 size={32} color="#FF3B30" />
+                  </View>
+                </View>
+                
+                <Text style={styles.modalTitle}>Confirm Delete?</Text>
+                <Text style={styles.modalSubtitle}>
+                  Are you sure you want to delete {selectedIds.length === 1 ? 'this breed' : `these ${selectedIds.length} breeds`}? This action cannot be undone.
+                </Text>
+                
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity 
+                    style={styles.modalCancelButton} 
+                    onPress={() => setIsDeleteModalVisible(false)}
+                  >
+                    <Text style={styles.modalCancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={styles.modalDeleteButton} 
+                    onPress={confirmBulkDelete}
+                  >
+                    <Text style={styles.modalDeleteText}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </>
       )}
     </View>
@@ -388,6 +428,81 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     alignItems: 'center',
     elevation: 8,
     zIndex: 90,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '90%',
+    maxWidth: 400,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    ...theme.shadow.lg,
+  },
+  modalIconContainer: {
+    marginBottom: 20,
+  },
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#FFE5E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Montserrat_700Bold',
+    color: theme.colors.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_500Medium',
+    color: theme.colors.textLight,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 28,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+  },
+  modalCancelButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#FF3B30',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  modalCancelText: {
+    fontSize: 15,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: '#FF3B30',
+  },
+  modalDeleteButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#FF3B30',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalDeleteText: {
+    fontSize: 15,
+    fontFamily: 'Montserrat_600SemiBold',
+    color: 'white',
   },
 });
 
