@@ -151,27 +151,29 @@ exports.bulkDeleteBreeds = async (req, res) => {
       }
     });
 
-    if (breeds.length !== ids.length) {
-      return res.status(403).json({ message: 'Some breeds are not manageable by your farm' });
+    if (breeds.length === 0) {
+      return res.status(404).json({ message: 'No manageable breeds found' });
     }
 
-    // 2. Integrity Check: Ensure no animals are assigned to any of these breeds
+    const manageableIds = breeds.map(b => b.id);
+
+    // 2. Integrity Check: Ensure no animals are assigned to any of these manageable breeds
     const animalCount = await prisma.animals.count({
-      where: { breed_id: { in: ids } }
+      where: { breed_id: { in: manageableIds } }
     });
 
     if (animalCount > 0) {
       return res.status(400).json({ 
-        message: 'Cannot delete breeds that are assigned to animals. Please reassign animals first.' 
+        message: 'Cannot delete one or more breeds because they are assigned to animals.' 
       });
     }
 
     // 3. Bulk Delete
     await prisma.breeds.deleteMany({
-      where: { id: { in: ids } }
+      where: { id: { in: manageableIds } }
     });
 
-    res.json({ message: `Successfully deleted ${ids.length} breeds` });
+    res.json({ success: true, message: `Successfully deleted ${manageableIds.length} breeds` });
   } catch (err) {
     console.error('BULK DELETE BREEDS ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
