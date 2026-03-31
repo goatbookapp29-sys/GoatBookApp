@@ -273,7 +273,7 @@ const BreedListScreen = ({ navigation }) => {
           )}
           
           {isSelectionMode && (
-            <View style={styles.bottomActions}>
+            <View style={[styles.bottomActions, { justifyContent: 'center' }]}>
                 <TouchableOpacity 
                     style={[styles.deleteAction, isDeleting && { opacity: 0.5 }]} 
                     onPress={handleBulkDelete}
@@ -281,11 +281,6 @@ const BreedListScreen = ({ navigation }) => {
                 >
                     <Trash2 size={26} color={theme.colors.primary} />
                     <Text style={[styles.deleteText, { color: theme.colors.primary }]}>Delete</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.deleteAction} onPress={exitSelectionMode}>
-                    <X size={26} color={theme.colors.textLight} />
-                    <Text style={[styles.deleteText, { color: theme.colors.textLight }]}>Cancel</Text>
                 </TouchableOpacity>
             </View>
           )}
