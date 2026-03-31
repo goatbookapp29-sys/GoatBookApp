@@ -453,3 +453,71 @@ exports.updateBulkLocation = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
+
+// @desc    Bulk delete animals
+// @route   DELETE /api/animals/bulk
+exports.deleteAnimalsBulk = async (req, res) => {
+  const { ids } = req.body;
+
+  if (!req.farmId) {
+    return res.status(400).json({ message: 'No farm selected' });
+  }
+
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ message: 'No animal IDs provided' });
+  }
+
+  try {
+    // 1. Verify existence and ownership, and get tag numbers
+    const animalsToDelete = await prisma.animals.findMany({
+      where: {
+        id: { in: ids },
+        farm_id: req.farmId
+      },
+      select: { id: true, tag_number: true }
+    });
+
+    if (animalsToDelete.length === 0) {
+      return res.status(400).json({ message: 'No manageable animals found' });
+    }
+
+    const manageableIds = animalsToDelete.map(a => a.id);
+    const tagNumbers = animalsToDelete.map(a => a.tag_number);
+
+    // 2. Integrity Check: Ensure none of these animals are parents to other livestock
+    const parentCheck = await prisma.animals.findFirst({
+      where: {
+        farm_id: req.farmId,
+        OR: [
+          { mother_tag_id: { in: tagNumbers } },
+          { father_tag_id: { in: tagNumbers } }
+        ]
+      },
+      select: { tag_number: true, mother_tag_id: true, father_tag_id: true }
+    });
+
+    if (parentCheck) {
+      // Find which tag is a parent
+      const parentTag = tagNumbers.find(t => t === parentCheck.mother_tag_id || t === parentCheck.father_tag_id);
+      return res.status(400).json({ 
+        message: `Cannot delete selected animals because tag ${parentTag || 'one of them'} is a parent to other livestock.` 
+      });
+    }
+
+    // 3. Perform Bulk Deletion
+    const result = await prisma.animals.deleteMany({
+      where: {
+        id: { in: manageableIds }
+      }
+    });
+
+    res.json({ 
+      success: true, 
+      message: `Successfully removed ${result.count} animals from inventory`,
+      count: result.count 
+    });
+  } catch (err) {
+    console.error('BULK DELETE ANIMALS ERROR:', err);
+    res.status(500).json({ message: 'Server Error', error: err.message });
+  }
+};
