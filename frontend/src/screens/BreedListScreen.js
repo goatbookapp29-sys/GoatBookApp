@@ -167,7 +167,7 @@ const BreedListScreen = ({ navigation }) => {
               <View style={[
                 styles.checkbox, 
                 isSelected ? styles.checkboxSelected : styles.checkboxUnselected,
-                isSelected && { backgroundColor: '#007AFF', borderColor: '#007AFF' }
+                isSelected && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
               ]}>
                 {isSelected && <Check size={14} color="white" strokeWidth={3} />}
               </View>
@@ -189,7 +189,7 @@ const BreedListScreen = ({ navigation }) => {
       {isSelectionMode ? (
         <View style={styles.selectionHeader}>
             <TouchableOpacity onPress={exitSelectionMode} style={styles.headerButton}>
-                <Text style={[styles.headerButtonText, { color: '#007AFF' }]}>Cancel</Text>
+                <Text style={[styles.headerButtonText, { color: theme.colors.primary }]}>Cancel</Text>
             </TouchableOpacity>
             <View style={{ flex: 1, alignItems: 'center' }}>
                 <Text style={[styles.selectionTitle, { color: theme.colors.text }]}>
@@ -197,7 +197,7 @@ const BreedListScreen = ({ navigation }) => {
                 </Text>
             </View>
             <TouchableOpacity onPress={handleSelectAll} style={styles.headerButton}>
-                <Text style={[styles.headerButtonText, { color: '#007AFF' }]}>
+                <Text style={[styles.headerButtonText, { color: theme.colors.primary }]}>
                     {isAllSelected ? 'None' : 'All'}
                 </Text>
             </TouchableOpacity>
