@@ -150,7 +150,7 @@ const AnimalListScreen = ({ navigation, route }) => {
       exitSelectionMode();
       showAlert('Deleted', `Successfully removed ${selectedIds.length} animals.`, 'success');
     } catch (error) {
-      const message = error.response?.data?.message || 'Failed to delete animals';
+      const message = error.response?.data?.error || error.response?.data?.message || 'Failed to delete animals';
       showAlert('Delete Error', message, 'error');
     } finally {
       setDeleting(false);

@@ -518,6 +518,11 @@ exports.deleteAnimalsBulk = async (req, res) => {
     });
   } catch (err) {
     console.error('BULK DELETE ANIMALS ERROR:', err);
-    res.status(500).json({ message: 'Server Error', error: err.message });
+    // Provide full error details to help frontend/developer troubleshoot 500 errors
+    res.status(500).json({ 
+      message: 'Internal Server Error', 
+      error: err.message,
+      code: err.code 
+    });
   }
 };
