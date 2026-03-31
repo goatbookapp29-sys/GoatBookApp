@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, MapPin, X, SearchX } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, MapPin, X, SearchX, Users } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -78,7 +78,9 @@ const LocationListScreen = ({ navigation }) => {
     >
       <View style={styles.locationInfo}>
         <Text style={[styles.locationName, { color: theme.colors.text }]} numberOfLines={1}>{item.displayName || item.name}</Text>
-        <Text style={[styles.locationMeta, { color: theme.colors.textLight }]}>{item.code} • {item.type}</Text>
+        {item.parentLocationId && (
+          <Text style={[styles.locationMeta, { color: theme.colors.textLight }]}>Sub-Location</Text>
+        )}
       </View>
       <ChevronRight size={20} color={theme.colors.textMuted} />
     </TouchableOpacity>
@@ -118,11 +120,18 @@ const LocationListScreen = ({ navigation }) => {
       {!isSearching && (
         <View style={styles.actionRow}>
           <TouchableOpacity 
+            style={[styles.addButton, { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border }]}
+            onPress={() => navigation.navigate('MassLocation')}
+          >
+            <Users color={theme.colors.text} size={20} style={styles.plusIcon} />
+            <Text style={[styles.addButtonText, { color: theme.colors.text }]}>Mass Assign</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
             style={[styles.addButton, { backgroundColor: theme.colors.primary, ...theme.shadow.sm }]}
-            onPress={() => navigation.navigate('AddLocation')}
+            onPress={() => navigation.navigate('CreateLocation')}
           >
             <Plus color={theme.colors.white} size={20} style={styles.plusIcon} />
-            <Text style={styles.addButtonText}>Add Location</Text>
+            <Text style={styles.addButtonText}>Create Shed</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -181,7 +190,9 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   actionRow: {
     padding: 16,
     paddingBottom: 8,
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
   },
   addButton: {
     flexDirection: 'row',

@@ -13,14 +13,20 @@ const LocationMenuScreen = ({ navigation }) => {
 
   const menuItems = [
     {
-      id: 'single',
-      title: 'Single Location/Shed',
+      id: 'create',
+      title: 'Create Location/Shed',
       icon: <Home color={theme.colors.primary} size={32} strokeWidth={2} />,
+      screen: 'CreateLocation',
+    },
+    {
+      id: 'single',
+      title: 'Assign Single Animal',
+      icon: <Users color={theme.colors.primary} size={32} strokeWidth={2} />,
       screen: 'AddLocation',
     },
     {
       id: 'mass',
-      title: 'Mass Location/Shed',
+      title: 'Assign Mass Animals',
       icon: <Users color={theme.colors.primary} size={32} strokeWidth={2} />,
       screen: 'MassLocation',
     },

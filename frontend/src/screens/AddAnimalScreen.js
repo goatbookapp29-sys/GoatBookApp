@@ -364,7 +364,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
         isQurbani: gender === 'MALE' ? isQurbani : false,
         purchaseDate: (acquisitionMethod === 'PURCHASED' && isValidDate(purchaseDate)) ? purchaseDate : null,
         purchasePrice: (purchasePrice && !isNaN(parseFloat(purchasePrice))) ? parseFloat(purchasePrice) : null,
-        femaleCondition: (gender === 'FEMALE' && acquisitionMethod === 'PURCHASED') ? femaleCondition : null,
+        femaleCondition: (gender === 'FEMALE') ? femaleCondition : null,
         remark,
         isReadyForSale,
         currentWeight: isReadyForSale ? (parseFloat(currentWeight) || null) : null,
@@ -978,43 +978,42 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
                     {/* PURCHASE SECTION */}
                     {acquisitionMethod === 'PURCHASED' && (
-                      <>
-                        <View style={styles.row}>
-                          <GDatePicker 
-                            containerStyle={styles.halfWidth}
-                            label="Purchase Date" 
-                            value={purchaseDate} 
-                            onDateChange={setPurchaseDate}
-                            placeholder="Select Date"
-                            required
-                          />
-                          <GInput 
-                            containerStyle={styles.halfWidth}
-                            label="Purchase Price" 
-                            value={purchasePrice} 
-                            onChangeText={setPurchasePrice} 
-                            keyboardType="number-pad"
-                            placeholder="e.g. 5000"
-                            required
-                          />
-                        </View>
-                        {gender === 'FEMALE' && (
-                          <View style={styles.row}>
-                            <GSelect 
-                              containerStyle={styles.halfWidth}
-                              label="Female Cond." 
-                              value={femaleCondition} 
-                              onSelect={setFemaleCondition}
-                              options={[
-                                { label: 'None', value: 'NONE' },
-                                { label: 'Mated', value: 'MATED' },
-                                { label: 'Pregnant', value: 'PREGNANT' }
-                              ]}
-                            />
-                            <View style={styles.halfWidth} />
-                          </View>
-                        )}
-                      </>
+                      <View style={styles.row}>
+                        <GDatePicker 
+                          containerStyle={styles.halfWidth}
+                          label="Purchase Date" 
+                          value={purchaseDate} 
+                          onDateChange={setPurchaseDate}
+                          placeholder="Select Date"
+                          required
+                        />
+                        <GInput 
+                          containerStyle={styles.halfWidth}
+                          label="Purchase Price" 
+                          value={purchasePrice} 
+                          onChangeText={setPurchasePrice} 
+                          keyboardType="number-pad"
+                          placeholder="e.g. 5000"
+                          required
+                        />
+                      </View>
+                    )}
+                    
+                    {gender === 'FEMALE' && (
+                      <View style={styles.row}>
+                        <GSelect 
+                          containerStyle={styles.halfWidth}
+                          label="Female Cond." 
+                          value={femaleCondition} 
+                          onSelect={setFemaleCondition}
+                          options={[
+                            { label: 'None', value: 'NONE' },
+                            { label: 'Mated', value: 'MATED' },
+                            { label: 'Pregnant', value: 'PREGNANT' }
+                          ]}
+                        />
+                        <View style={styles.halfWidth} />
+                      </View>
                     )}
 
                     <GInput 

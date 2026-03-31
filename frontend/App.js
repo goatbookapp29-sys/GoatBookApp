@@ -34,6 +34,7 @@ import FarmSelectionScreen from './src/screens/FarmSelectionScreen';
 import LocationListScreen from './src/screens/LocationListScreen';
 import AddLocationScreen from './src/screens/AddLocationScreen';
 import LocationDetailsScreen from './src/screens/LocationDetailsScreen';
+import CreateLocationScreen from './src/screens/CreateLocationScreen';
 import BreedDetailsScreen from './src/screens/BreedDetailsScreen';
 import AddWeightScreen from './src/screens/AddWeightScreen';
 import WeightListScreen from './src/screens/WeightListScreen';
@@ -69,7 +70,7 @@ function MainDrawer() {
       <Drawer.Screen name="BreedList" component={BreedListScreen} />
       <Drawer.Screen name="VaccinesMenu" component={VaccinesMenuScreen} />
       <Drawer.Screen name="ReportsMenu" component={ReportsMenuScreen} />
-      <Drawer.Screen name="LocationList" component={LocationMenuScreen} />
+      <Drawer.Screen name="LocationList" component={LocationListScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
     </Drawer.Navigator>
   );
@@ -172,7 +173,8 @@ function AppContent() {
           <Stack.Screen name="EditEmployee" component={AddEmployeeScreen} />
           <Stack.Screen name="FarmSelection" component={FarmSelectionScreen} />
           <Stack.Screen name="AddLocation" component={AddLocationScreen} />
-          <Stack.Screen name="EditLocation" component={AddLocationScreen} />
+          <Stack.Screen name="EditLocation" component={CreateLocationScreen} />
+          <Stack.Screen name="CreateLocation" component={CreateLocationScreen} />
           <Stack.Screen name="LocationDetails" component={LocationDetailsScreen} />
           <Stack.Screen name="BreedDetails" component={BreedDetailsScreen} />
           <Stack.Screen name="AddWeight" component={AddWeightScreen} />

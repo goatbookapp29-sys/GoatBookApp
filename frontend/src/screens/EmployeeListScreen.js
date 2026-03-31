@@ -39,11 +39,14 @@ const EmployeeListScreen = ({ navigation }) => {
       <View style={styles.info}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={[styles.name, { color: theme.colors.text }]}>{item.name}</Text>
-          {item.state === 'Terminated' && (
-            <View style={{ backgroundColor: theme.colors.error, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 8 }}>
-              <Text style={{ color: 'white', fontSize: 10, fontFamily: 'Montserrat_700Bold' }}>TERMINATED</Text>
-            </View>
-          )}
+          <View style={{ 
+            backgroundColor: item.state === 'Terminated' ? theme.colors.error : (theme.colors.success || '#10B981'), 
+            paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, marginLeft: 8 
+          }}>
+            <Text style={{ color: 'white', fontSize: 10, fontFamily: 'Montserrat_700Bold' }}>
+              {item.state === 'Terminated' ? 'TERMINATED' : 'WORKING'}
+            </Text>
+          </View>
         </View>
         <Text style={[styles.role, { color: theme.colors.textLight }]}>
           {item.role} • {item.email}

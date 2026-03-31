@@ -59,7 +59,6 @@ const LocationDetailsScreen = ({ navigation, route }) => {
              <MapPin size={24} color={theme.colors.primary} />
              <Text style={[styles.locationTitle, { color: theme.colors.text }]}>{location.displayName || location.name}</Text>
           </View>
-          <Text style={[styles.locationSubtitle, { color: theme.colors.textLight }]}>{location.code} • {location.type}</Text>
           
           <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
           
