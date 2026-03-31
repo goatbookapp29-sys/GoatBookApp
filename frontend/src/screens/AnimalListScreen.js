@@ -112,17 +112,19 @@ const AnimalListScreen = ({ navigation, route }) => {
   const handleLongPress = (item) => {
     if (!isSelectionMode) {
       setIsSelectionMode(true);
-      setSelectedIds([item.id]);
+      // Ensure the ID is always a string to prevent UUID casting errors
+      setSelectedIds([String(item.id)]);
     }
   };
 
   const toggleSelection = (id) => {
-    if (selectedIds.includes(id)) {
-      const next = selectedIds.filter(idx => idx !== id);
+    const stringId = String(id);
+    if (selectedIds.includes(stringId)) {
+      const next = selectedIds.filter(idx => idx !== stringId);
       setSelectedIds(next);
       if (next.length === 0) setIsSelectionMode(false);
     } else {
-      setSelectedIds([...selectedIds, id]);
+      setSelectedIds([...selectedIds, stringId]);
     }
   };
 

@@ -459,68 +459,72 @@ exports.updateBulkLocation = async (req, res) => {
 exports.deleteAnimalsBulk = async (req, res) => {
   const { ids } = req.body;
 
-  if (!req.farmId) {
-    return res.status(400).json({ message: 'No farm selected' });
-  }
-
   if (!ids || !Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({ message: 'No animal IDs provided' });
   }
 
+  if (!req.farmId) {
+    return res.status(400).json({ message: 'No farm selected' });
+  }
+
+  // UUID Validation Helper
+  const isUUID = (str) => /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+
   try {
-    // 1. Verify existence and ownership, and get tag numbers
+    // 0. Validate that farm_id and all animal_ids are correct UUID formats
+    if (!isUUID(req.farmId)) {
+       throw new Error(`Invalid Farm ID format: ${req.farmId}`);
+    }
+
+    const validIds = ids.filter(id => isUUID(id));
+    if (validIds.length === 0) {
+       return res.status(400).json({ message: 'None of the provided IDs are valid animal UUIDs' });
+    }
+
+    // 1. Fetch only animals that belong to this farm
     const animalsToDelete = await prisma.animals.findMany({
       where: {
-        id: { in: ids },
+        id: { in: validIds },
         farm_id: req.farmId
       },
       select: { id: true, tag_number: true }
     });
 
     if (animalsToDelete.length === 0) {
-      return res.status(400).json({ message: 'No manageable animals found' });
+      return res.status(404).json({ message: 'No matching animals found for your farm.' });
     }
 
     const manageableIds = animalsToDelete.map(a => a.id);
     const tagNumbers = animalsToDelete.map(a => a.tag_number);
 
-    console.log('DEBUG: Parent Check Diagnostics', {
-      farmId: req.farmId,
-      farmIdType: typeof req.farmId,
-      tagNumbers: tagNumbers
-    });
-
-    // 2. Integrity Check: Ensure none of these animals are parents to other livestock
-    const parentCheck = await prisma.animals.findFirst({
+    // 2. Integrity Check: Ensure none of these animals are parents to other livestock (using tag_number)
+    // We use count as it's more definitive and avoids casting issues in findFirst OR blocks
+    const childCount = await prisma.animals.count({
       where: {
         farm_id: req.farmId,
         OR: [
           { mother_tag_id: { in: tagNumbers } },
           { father_tag_id: { in: tagNumbers } }
         ]
-      },
-      select: { tag_number: true, mother_tag_id: true, father_tag_id: true }
+      }
     });
 
-    if (parentCheck) {
-      // Find which tag is a parent
-      const parentTag = tagNumbers.find(t => t === parentCheck.mother_tag_id || t === parentCheck.father_tag_id);
+    if (childCount > 0) {
       return res.status(400).json({ 
-        message: `Cannot delete selected animals because tag ${parentTag || 'one of them'} is a parent to other livestock.` 
+        message: `Cannot delete these animals because some are parents to ${childCount} other livestock in the system.` 
       });
     }
 
-    // 3. Perform Bulk Deletion
-    const result = await prisma.animals.deleteMany({
+    // 3. Batch delete all related data (if not cascaded) and the animals themselves
+    await prisma.animals.deleteMany({
       where: {
         id: { in: manageableIds }
       }
     });
 
     res.json({ 
-      success: true, 
-      message: `Successfully removed ${result.count} animals from inventory`,
-      count: result.count 
+      message: `Successfully deleted ${animalsToDelete.length} animals.`,
+      deletedCount: animalsToDelete.length
     });
   } catch (err) {
     console.error('BULK DELETE ANIMALS ERROR:', err);
