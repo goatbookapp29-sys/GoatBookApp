@@ -632,7 +632,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     height: 85,
     backgroundColor: theme.colors.surface,
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
