@@ -137,11 +137,8 @@ const BreedListScreen = ({ navigation }) => {
       setLoading(true);
       setIsDeleting(true);
       
-      const response = await api.delete('/breeds/bulk', {
-        data: { 
-          ids: selectedIds,
-          farm_id: breeds[0]?.farm_id // Assuming all breeds belong to the same farm context
-        }
+      const response = await api.post('/breeds/bulk-delete', { 
+          ids: selectedIds
       });
       
       if (response.data.success) {

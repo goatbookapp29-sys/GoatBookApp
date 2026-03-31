@@ -138,6 +138,10 @@ exports.deleteBreed = async (req, res) => {
 exports.bulkDeleteBreeds = async (req, res) => {
   const { ids } = req.body;
   
+  if (!req.farmId) {
+    return res.status(400).json({ message: 'No farm selected' });
+  }
+
   if (!ids || !Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({ message: 'No breed IDs provided' });
   }
@@ -152,7 +156,7 @@ exports.bulkDeleteBreeds = async (req, res) => {
     });
 
     if (breeds.length === 0) {
-      return res.status(404).json({ message: 'No manageable breeds found' });
+      return res.status(400).json({ message: 'No manageable breeds found in this farm context' });
     }
 
     const manageableIds = breeds.map(b => b.id);
