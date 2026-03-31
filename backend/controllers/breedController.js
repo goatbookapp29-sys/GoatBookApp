@@ -224,6 +224,8 @@ exports.getBreedStats = async (req, res) => {
           id: animal.id,
           tagNumber: animal.tag_number,
           gender: animal.gender,
+          status: animal.status,
+          imageUrl: animal.image_url,
           Location: animal.locations
       });
     });
