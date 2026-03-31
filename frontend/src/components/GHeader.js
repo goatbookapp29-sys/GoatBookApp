@@ -14,7 +14,7 @@ import { ArrowLeft, Menu, Sun, Moon } from 'lucide-react-native';
  * - onRightPress: Action for the right icon
  * - subTitle: Small text below the title
  */
-const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) => {
+const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle, leftAlign }) => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
 
   return (
@@ -37,8 +37,8 @@ const GHeader = ({ title, onBack, onMenu, rightIcon, onRightPress, subTitle }) =
             )}
           </View>
           
-          <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: theme.colors.white }]} numberOfLines={1}>{title}</Text>
+          <View style={[styles.titleContainer, leftAlign && { alignItems: 'flex-start', marginLeft: 8 }]}>
+            <Text style={[styles.title, { color: theme.colors.white }, leftAlign && { textAlign: 'left' }]} numberOfLines={1}>{title}</Text>
             {subTitle && <Text style={[styles.subTitle, { color: 'rgba(255,255,255,0.8)' }]}>{subTitle}</Text>}
           </View>
           

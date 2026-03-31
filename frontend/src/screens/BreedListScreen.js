@@ -221,13 +221,14 @@ const BreedListScreen = ({ navigation }) => {
           title="Breeds List" 
           onMenu={() => navigation.openDrawer()} 
           onBack={() => navigation.goBack()}
+          leftAlign={true}
           rightIcon={
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity onPress={handleMoreOptions} style={{ marginRight: 15 }}>
-                    <MoreVertical color={theme.colors.white} size={24} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => { setIsSearching(!isSearching); if(!isSearching) setSearchQuery(''); }}>
+                <TouchableOpacity onPress={() => { setIsSearching(!isSearching); if(!isSearching) setSearchQuery(''); }} style={{ marginRight: 18 }}>
                     {isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleMoreOptions}>
+                    <MoreVertical color={theme.colors.white} size={24} />
                 </TouchableOpacity>
             </View>
           }
