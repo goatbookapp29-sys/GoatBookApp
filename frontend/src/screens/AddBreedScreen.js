@@ -7,6 +7,7 @@ import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
 import api from '../api';
+import GAlert from '../components/GAlert';
 
 const AddBreedScreen = ({ navigation, route }) => {
   const { isDarkMode, theme } = useTheme();
@@ -20,9 +21,24 @@ const AddBreedScreen = ({ navigation, route }) => {
   const [deleting, setDeleting] = useState(false);
   const isSystemBreed = isEditing && existingBreed.isDefault;
 
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'error'
+  });
+
+  const showAlert = (title, message, type = 'error') => {
+    setAlertConfig({ visible: true, title, message, type });
+  };
+
+  const hideAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
+
   const handleSubmit = async () => {
     if (!name.trim()) {
-      alert('Please enter a breed name');
+      showAlert('Input Required', 'Please enter a breed name to proceed.', 'warning');
       return;
     }
 
@@ -38,7 +54,8 @@ const AddBreedScreen = ({ navigation, route }) => {
     } catch (error) {
       setLoading(false);
       const message = error.response?.data?.message || 'Something went wrong';
-      alert(message);
+      const title = message.includes('system breed') ? 'System Protection' : 'Action Failed';
+      showAlert(title, message, 'error');
     }
   };
 
@@ -51,12 +68,20 @@ const AddBreedScreen = ({ navigation, route }) => {
     } catch (error) {
       setDeleting(false);
       const message = error.response?.data?.message || 'Failed to delete breed';
-      alert(message);
+      showAlert('Deletion Error', message, 'error');
     }
   };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <GAlert 
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onClose={hideAlert}
+      />
+
       <GHeader 
         title={isEditing ? "Edit Breed" : "Add New Breed"} 
         onBack={() => navigation.goBack()} 
@@ -91,14 +116,6 @@ const AddBreedScreen = ({ navigation, route }) => {
               editable={!isSystemBreed}
             />
           </View>
-
-          {isSystemBreed && (
-            <View style={[styles.warningContainer, { backgroundColor: '#FEF2F2', borderColor: '#FEE2E2' }]}>
-               <Text style={[styles.warningText, { color: '#B91C1C' }]}>
-                  This is a standard system breed and cannot be modified.
-               </Text>
-            </View>
-          )}
 
           <View style={[styles.noteContainer, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}>
             <Text style={[styles.note, { color: theme.colors.textMuted }]}>

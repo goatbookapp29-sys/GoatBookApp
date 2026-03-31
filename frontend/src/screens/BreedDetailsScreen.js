@@ -3,8 +3,9 @@ import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator
 import { COLORS, SPACING, SHADOW, lightTheme } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
-import { Ghost, Bug, Edit, ArrowRight, ClipboardList, MapPin, ChevronRight, SearchX, Plus } from 'lucide-react-native';
+import { Ghost, Bug, Edit, ArrowRight, ClipboardList, MapPin, ChevronRight, SearchX, Plus, XCircle } from 'lucide-react-native';
 import api from '../api';
+import GAlert from '../components/GAlert';
 import { useFocusEffect } from '@react-navigation/native';
 
 const BreedDetailsScreen = ({ navigation, route }) => {
@@ -13,6 +14,10 @@ const BreedDetailsScreen = ({ navigation, route }) => {
   const { breedId } = route.params;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [alertConfig, setAlertConfig] = useState({ visible: false, title: '', message: '', type: 'info' });
+
+  const showAlert = (title, message, type = 'info') => setAlertConfig({ visible: true, title, message, type });
+  const hideAlert = () => setAlertConfig({ ...alertConfig, visible: false });
 
   useFocusEffect(
     useCallback(() => {
@@ -28,8 +33,7 @@ const BreedDetailsScreen = ({ navigation, route }) => {
       setLoading(false);
     } catch (error) {
       console.error('Fetch breed details error:', error);
-      alert('Failed to load breed record');
-      navigation.goBack();
+      showAlert('Load Failed', 'Could not retrieve breed record. Please try again.', 'error');
     }
   };
 
@@ -45,6 +49,17 @@ const BreedDetailsScreen = ({ navigation, route }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <GAlert 
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onClose={() => {
+          hideAlert();
+          if (alertConfig.title === 'Load Failed') navigation.goBack();
+        }}
+      />
+
       <GHeader 
         title="Breed Record" 
         onBack={() => navigation.goBack()}

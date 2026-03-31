@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
+import GAlert from '../components/GAlert';
 import { Search, Plus, ChevronRight, X, SearchX, Square, CheckSquare, Trash2, CheckCircle2, Lock, Check, MoreVertical } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
@@ -16,6 +17,10 @@ const BreedListScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [alertConfig, setAlertConfig] = useState({ visible: false, title: '', message: '', type: 'info' });
+
+  const showAlert = (title, message, type = 'info') => setAlertConfig({ visible: true, title, message, type });
+  const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
   
   // Selection State
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -71,18 +76,6 @@ const BreedListScreen = ({ navigation }) => {
     setSelectedIds([]);
   };
 
-  const safeAlert = (title, message, buttons) => {
-    console.log(`ALERT: ${title} - ${message}`);
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm(`${title}: ${message}`);
-      if (confirmed && buttons && buttons[1] && buttons[1].onPress) {
-        buttons[1].onPress();
-      }
-    } else {
-      Alert.alert(title, message, buttons);
-    }
-  };
-
   const handleLongPress = (item) => {
     if (!item.isDefault) {
       if (!isSelectionMode) {
@@ -90,7 +83,7 @@ const BreedListScreen = ({ navigation }) => {
         setSelectedIds([item.id]);
       }
     } else {
-      safeAlert('System Breed', 'This is a default breed and cannot be deleted.', [{ text: 'OK' }]);
+      showAlert('System Breed', 'This is a default breed and cannot be deleted.', 'info');
     }
   };
 
@@ -187,6 +180,14 @@ const BreedListScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]} pointerEvents="box-none">
+      <GAlert 
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onClose={hideAlert}
+      />
+
       {isSelectionMode ? (
         <View style={styles.selectionHeader}>
             <TouchableOpacity onPress={exitSelectionMode} style={styles.headerButton}>
