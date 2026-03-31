@@ -331,7 +331,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, fontSize: 15, fontFamily: 'Montserrat_500Medium' },
-  listContent: { flexGrow: 1, paddingHorizontal: 16, paddingBottom: 120 },
+  listContent: { flexGrow: 1, paddingHorizontal: 16, paddingBottom: 120, paddingTop: 16 },
   breedCard: {
     flexDirection: 'row',
     alignItems: 'center',
