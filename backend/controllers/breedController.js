@@ -133,6 +133,51 @@ exports.deleteBreed = async (req, res) => {
   }
 };
 
+// @desc    Bulk delete breeds
+// @route   DELETE /api/breeds/bulk
+exports.bulkDeleteBreeds = async (req, res) => {
+  const { ids } = req.body;
+  
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ message: 'No breed IDs provided' });
+  }
+
+  try {
+    // 1. Verify all breeds belong to this farm (security)
+    const breeds = await prisma.breeds.findMany({
+      where: {
+        id: { in: ids },
+        farm_id: req.farmId
+      }
+    });
+
+    if (breeds.length !== ids.length) {
+      return res.status(403).json({ message: 'Some breeds are not manageable by your farm' });
+    }
+
+    // 2. Integrity Check: Ensure no animals are assigned to any of these breeds
+    const animalCount = await prisma.animals.count({
+      where: { breed_id: { in: ids } }
+    });
+
+    if (animalCount > 0) {
+      return res.status(400).json({ 
+        message: 'Cannot delete breeds that are assigned to animals. Please reassign animals first.' 
+      });
+    }
+
+    // 3. Bulk Delete
+    await prisma.breeds.deleteMany({
+      where: { id: { in: ids } }
+    });
+
+    res.json({ message: `Successfully deleted ${ids.length} breeds` });
+  } catch (err) {
+    console.error('BULK DELETE BREEDS ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 // @desc    Get detailed statistics for a specific breed within the farm
 // @route   GET /api/breeds/:id/stats
 exports.getBreedStats = async (req, res) => {
