@@ -11,5 +11,6 @@ router.post('/replace-tag', auth, animalController.replaceTag);
 router.put('/bulk-location', auth, animalController.updateBulkLocation);
 router.put('/:id', auth, animalController.updateAnimal);
 router.delete('/:id', auth, animalController.deleteAnimal);
+router.delete('/bulk', auth, animalController.deleteAnimalsBulk);
 
 module.exports = router;
