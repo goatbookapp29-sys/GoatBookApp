@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, X, SearchX, Square, CheckSquare, Trash2, CheckCircle2, Lock, Check } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, X, SearchX, Square, CheckSquare, Trash2, CheckCircle2, Lock, Check, MoreVertical } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
@@ -60,6 +60,20 @@ const BreedListScreen = ({ navigation }) => {
       }
       setLoading(false);
     }
+  };
+
+  const handleMoreOptions = () => {
+    safeAlert(
+      'Options',
+      'Choose an action',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Select for Delete', 
+          onPress: () => setIsSelectionMode(true) 
+        }
+      ]
+    );
   };
 
   const exitSelectionMode = () => {
@@ -209,8 +223,8 @@ const BreedListScreen = ({ navigation }) => {
           onBack={() => navigation.goBack()}
           rightIcon={
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity onPress={() => setIsSelectionMode(true)} style={{ marginRight: 15 }}>
-                    <Text style={{ color: theme.colors.white, fontFamily: 'Montserrat_600SemiBold', fontSize: 14 }}>Select</Text>
+                <TouchableOpacity onPress={handleMoreOptions} style={{ marginRight: 15 }}>
+                    <MoreVertical color={theme.colors.white} size={24} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setIsSearching(!isSearching); if(!isSearching) setSearchQuery(''); }}>
                     {isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
