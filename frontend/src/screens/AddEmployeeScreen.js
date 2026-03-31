@@ -150,17 +150,6 @@ const AddEmployeeScreen = ({ navigation, route }) => {
       <GHeader 
         title={isEditing ? "Edit employee" : "Add employee"} 
         onBack={() => navigation.goBack()} 
-        rightIcon={
-          <View style={{ 
-            backgroundColor: state === 'Terminated' ? theme.colors.error : (theme.colors.success || '#10B981'), 
-            paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, opacity: 0.9,
-            width: 75, alignItems: 'center'
-          }}>
-            <Text style={{ color: 'white', fontSize: 9, fontFamily: 'Montserrat_700Bold' }}>
-              {state === 'Terminated' ? 'TERMINATED' : 'WORKING'}
-            </Text>
-          </View>
-        }
       />
       
       <KeyboardAvoidingView 
