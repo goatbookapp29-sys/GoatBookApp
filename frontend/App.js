@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator, LogBox } from 'react-native';
+import { View, ActivityIndicator, LogBox, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -114,8 +114,14 @@ function AppContent() {
 
   const checkSession = async () => {
     try {
-      const token = await SecureStore.getItemAsync('token');
-      const farmId = await SecureStore.getItemAsync('selectedFarmId');
+      let token, farmId;
+      if (Platform.OS === 'web') {
+        token = localStorage.getItem('token');
+        farmId = localStorage.getItem('selectedFarmId');
+      } else {
+        token = await SecureStore.getItemAsync('token');
+        farmId = await SecureStore.getItemAsync('selectedFarmId');
+      }
       
       if (token && farmId) {
         setInitialRoute('MainDrawer');

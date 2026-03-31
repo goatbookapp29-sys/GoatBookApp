@@ -37,7 +37,14 @@ const EmployeeListScreen = ({ navigation }) => {
       onPress={() => navigation.navigate('EditEmployee', { employee: item })}
     >
       <View style={styles.info}>
-        <Text style={[styles.name, { color: theme.colors.text }]}>{item.name}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={[styles.name, { color: theme.colors.text }]}>{item.name}</Text>
+          {item.state === 'Terminated' && (
+            <View style={{ backgroundColor: theme.colors.error, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 8 }}>
+              <Text style={{ color: 'white', fontSize: 10, fontFamily: 'Montserrat_700Bold' }}>TERMINATED</Text>
+            </View>
+          )}
+        </View>
         <Text style={[styles.role, { color: theme.colors.textLight }]}>
           {item.role} • {item.email}
           {item.phone !== 'N/A' && `\n${item.phone}`}

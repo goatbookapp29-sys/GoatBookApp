@@ -60,7 +60,7 @@ const VaccinationListScreen = ({ navigation, route }) => {
         <View style={styles.rightCol}>
           <View style={[styles.dateBox, { backgroundColor: isDarkMode ? '#334155' : '#F3F4F6' }]}>
             <Calendar size={12} color={theme.colors.textLight} />
-            <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{item.date}</Text>
+            <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{new Date(item.date).toLocaleDateString()}</Text>
           </View>
           <View style={[styles.modeBadge, 
             { backgroundColor: isDarkMode ? '#1E293B' : (item.creationMode === 'MASS' ? '#EEF2FF' : '#F3F4F6') }]}>
@@ -72,7 +72,7 @@ const VaccinationListScreen = ({ navigation, route }) => {
       {item.nextDueDate && (
         <View style={[styles.dueSection, { backgroundColor: isDarkMode ? '#451A03' : '#FFFBEB' }]}>
           <Text style={[styles.dueLabel, { color: isDarkMode ? '#FCD34D' : '#D97706' }]}>Next Due Date:</Text>
-          <Text style={[styles.dueValue, { color: isDarkMode ? '#FCD34D' : '#D97706' }]}>{item.nextDueDate}</Text>
+          <Text style={[styles.dueValue, { color: isDarkMode ? '#FCD34D' : '#D97706' }]}>{new Date(item.nextDueDate).toLocaleDateString()}</Text>
         </View>
       )}
 

@@ -120,7 +120,7 @@ exports.createEmployee = async (req, res) => {
 
       // Create employee identity record
       const employee = await tx.employees.create({ 
-        data: { id: uuidv4(), user_id: user.id, employee_type: role || 'EMPLOYEE', created_by_user_id: req.user.id, created_at: now, updated_at: now } 
+        data: { id: uuidv4(), user_id: user.id, employee_type: role || 'EMPLOYEE', state: req.body.state || 'Working', created_by_user_id: req.user.id, created_at: now, updated_at: now } 
       });
       console.log('Employee created:', employee.id);
 
@@ -158,10 +158,10 @@ exports.updateEmployee = async (req, res) => {
     const ownedFarm = await prisma.farms.findFirst({ where: { owner_employee_id: employee.id } });
     if (ownedFarm && role && role !== 'OWNER') return res.status(403).json({ message: 'The primary owner role cannot be changed' });
 
-    // Update the functional role
+    // Update the functional role and state
     await prisma.employees.update({ 
       where: { id: req.params.id }, 
-      data: { employee_type: role || employee.employee_type, updated_by_user_id: req.user.id, updated_at: new Date() } 
+      data: { employee_type: role || employee.employee_type, state: req.body.state || employee.state, updated_by_user_id: req.user.id, updated_at: new Date() } 
     });
 
     // Update the human name and contact info if provided
@@ -232,7 +232,8 @@ exports.getEmployees = async (req, res) => {
         name: fe.employees.users?.name || 'Unknown', 
         email: fe.employees.users?.email || 'N/A', 
         phone: fe.employees.users?.phone || 'N/A', 
-        role: fe.employees.employee_type 
+        role: fe.employees.employee_type,
+        state: fe.employees.state
       };
     }).filter(e => e !== null));
   } catch (err) {

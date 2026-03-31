@@ -13,7 +13,7 @@ import GSelect from '../components/GSelect';
 import GDatePicker from '../components/GDatePicker';
 import { 
   Check, HelpCircle, ChevronDown, ChevronUp, ChevronLeft, Plus, Scale, Syringe, 
-  Heart, Baby, Milk, Shield, Camera, Trash2, Edit2
+  Heart, Baby, Milk, Shield, Camera, Trash2, Edit2, Calendar
 } from 'lucide-react-native';
 import api from '../api';
 import { getFromCache } from '../utils/cache';
@@ -1070,14 +1070,14 @@ const AddAnimalScreen = ({ navigation, route }) => {
                             </View>
                             <View style={styles.weightInfoBlock}>
                               <Text style={[styles.weightKg, { color: theme.colors.text }]}>{w.weight} KG</Text>
-                              <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{w.date}</Text>
+                              <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{new Date(w.date).toLocaleDateString()}</Text>
                             </View>
-                            {w.height && (
+                            {w.height ? (
                               <View style={styles.heightInfoBlock}>
                                 <Text style={[styles.weightLabel, { color: theme.colors.textLight }]}>Height</Text>
                                 <Text style={[styles.weightValue, { color: theme.colors.text }]}>{w.height}</Text>
                               </View>
-                            )}
+                            ) : null}
                           </View>
                         ))}
                       </View>
@@ -1130,12 +1130,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
                             </View>
                             <View style={styles.weightInfoBlock}>
                               <Text style={[styles.weightKg, { color: theme.colors.text }]}>{v.vaccine?.name}</Text>
-                              <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{v.date}</Text>
+                              <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{new Date(v.date).toLocaleDateString()}</Text>
                             </View>
                             {v.nextDueDate && (
                               <View style={[styles.heightInfoBlock, { minWidth: 100 }]}>
                                 <Text style={[styles.weightLabel, { color: theme.colors.primary, fontFamily: theme.typography.medium }]}>Due Date</Text>
-                                <Text style={[styles.weightValue, { color: theme.colors.text, fontFamily: theme.typography.semiBold }]}>{v.nextDueDate}</Text>
+                                <Text style={[styles.weightValue, { color: theme.colors.text, fontFamily: theme.typography.semiBold }]}>{new Date(v.nextDueDate).toLocaleDateString()}</Text>
                               </View>
                             )}
                           </TouchableOpacity>

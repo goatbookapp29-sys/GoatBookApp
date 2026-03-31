@@ -91,11 +91,11 @@ const WeightListScreen = ({ navigation }) => {
     <View style={styles.card}>
       <View style={styles.mainInfo}>
         <Text style={[styles.tagText, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
-        <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{item.date}</Text>
+        <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{new Date(item.date).toLocaleDateString()}</Text>
       </View>
       <View style={styles.statsBox}>
         <Text style={[styles.weightValue, { color: theme.colors.primary }]}>{item.weight} KG</Text>
-        {item.height && <Text style={[styles.heightValue, { color: theme.colors.textLight }]}>H: {item.height}</Text>}
+        {item.height ? <Text style={[styles.heightValue, { color: theme.colors.textLight }]}>H: {item.height}</Text> : null}
       </View>
       <TouchableOpacity 
         style={styles.deleteBtn} 

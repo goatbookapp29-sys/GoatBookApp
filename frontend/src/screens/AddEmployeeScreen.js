@@ -20,6 +20,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
   const [password, setPassword] = useState(''); // Only used for registration or reset
   const [phone, setPhone] = useState(isEditing ? existingEmployee.phone : '');
   const [role, setRole] = useState(isEditing ? existingEmployee.role : 'EMPLOYEE');
+  const [state, setState] = useState(isEditing ? existingEmployee.state || 'Working' : 'Working');
   
   const [loading, setLoading] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -33,10 +34,10 @@ const AddEmployeeScreen = ({ navigation, route }) => {
     setLoading(true);
     try {
       if (isEditing) {
-        await api.put(`/users/employees/${existingEmployee.id}`, { name, role, email, phone });
+        await api.put(`/users/employees/${existingEmployee.id}`, { name, role, email, phone, state });
         Alert.alert('Success', 'Employee updated successfully');
       } else {
-        await api.post('/users/employees', { name, email, password, role, phone });
+        await api.post('/users/employees', { name, email, password, role, phone, state });
         Alert.alert('Success', 'Employee created successfully');
       }
       setLoading(false);
@@ -140,6 +141,17 @@ const AddEmployeeScreen = ({ navigation, route }) => {
                 { label: 'Farm Worker', value: 'EMPLOYEE' },
                 { label: 'Butcher', value: 'BUTCHER' },
                 { label: 'Agent', value: 'AGENT' }
+              ]}
+              required
+            />
+            <View style={styles.gap} />
+            <GSelect 
+              label="Employment State" 
+              value={state} 
+              onSelect={setState}
+              options={[
+                { label: 'Working', value: 'Working' },
+                { label: 'Terminated', value: 'Terminated' }
               ]}
               required
             />

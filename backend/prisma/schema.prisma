@@ -76,6 +76,7 @@ model employees {
   id                 String                       @id @db.Uuid
   user_id            String                       @db.Uuid
   employee_type      enum_employees_employee_type @default(EMPLOYEE)
+  state              String                       @default("Working") @db.VarChar(50)
   created_by_user_id String?                      @db.Uuid
   updated_by_user_id String?                      @db.Uuid
   created_at         DateTime                     @default(now()) @db.Timestamptz(6)
