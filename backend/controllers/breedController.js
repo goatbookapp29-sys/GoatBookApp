@@ -48,6 +48,25 @@ exports.addBreed = async (req, res) => {
       return res.status(400).json({ message: 'No farm selected' });
     }
 
+    // Check for duplicate breed name (case-insensitive) in both system breeds and this farm
+    const duplicate = await prisma.breeds.findFirst({
+      where: {
+        name: { equals: name, mode: 'insensitive' },
+        OR: [
+          { is_default: true },
+          { farm_id: req.farmId }
+        ]
+      }
+    });
+
+    if (duplicate) {
+      if (duplicate.is_default) {
+        return res.status(400).json({ message: 'A system breed with this name already exists. Please choose a different name.' });
+      } else {
+        return res.status(400).json({ message: 'A breed with this name already exists in your farm.' });
+      }
+    }
+
     const now = new Date();
     // Create new breed record private to the current farm
     const breed = await prisma.breeds.create({
@@ -95,6 +114,26 @@ exports.updateBreed = async (req, res) => {
 
     if (breed.farm_id !== req.farmId) {
       return res.status(404).json({ message: 'Breed does not belong to your farm' });
+    }
+
+    // Check for duplicate breed name (case-insensitive) excluding the current breed
+    const duplicate = await prisma.breeds.findFirst({
+      where: {
+        name: { equals: name, mode: 'insensitive' },
+        id: { not: req.params.id },
+        OR: [
+          { is_default: true },
+          { farm_id: req.farmId }
+        ]
+      }
+    });
+
+    if (duplicate) {
+      if (duplicate.is_default) {
+        return res.status(400).json({ message: 'A system breed with this name already exists. Please choose a different name.' });
+      } else {
+        return res.status(400).json({ message: 'A breed with this name already exists in your farm.' });
+      }
     }
 
     const updated = await prisma.breeds.update({
