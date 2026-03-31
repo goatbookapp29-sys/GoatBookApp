@@ -261,19 +261,6 @@ const BreedListScreen = ({ navigation }) => {
             data={filteredBreeds}
             renderItem={renderItem}
             keyExtractor={item => item.id}
-            ListHeaderComponent={
-              !isSearching && !isSelectionMode ? (
-                <View style={styles.actionRow}>
-                  <TouchableOpacity 
-                    style={[styles.addButton, { backgroundColor: theme.colors.primary, ...theme.shadow.sm }]}
-                    onPress={() => navigation.navigate('AddBreed')}
-                  >
-                    <Plus color={theme.colors.white} size={20} style={styles.plusIcon} />
-                    <Text style={styles.addButtonText}>Add New Breed</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : null
-            }
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                   <SearchX size={64} color={theme.colors.border} />
@@ -283,6 +270,16 @@ const BreedListScreen = ({ navigation }) => {
             contentContainerStyle={styles.listContent}
             keyboardShouldPersistTaps="handled"
           />
+          
+          {!isSelectionMode && (
+            <TouchableOpacity 
+              style={[styles.fab, { backgroundColor: theme.colors.primary, ...theme.shadow.lg }]}
+              onPress={() => navigation.navigate('AddBreed')}
+              activeOpacity={0.8}
+            >
+              <Plus color={theme.colors.white} size={30} strokeWidth={2.5} />
+            </TouchableOpacity>
+          )}
           
           {isSelectionMode && (
             <View style={styles.bottomActions}>
@@ -334,9 +331,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, fontSize: 15, fontFamily: 'Montserrat_500Medium' },
-  actionRow: { paddingVertical: 16, flexDirection: 'row', justifyContent: 'flex-end' },
-  addButton: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 14 },
-  addButtonText: { color: 'white', fontFamily: 'Montserrat_600SemiBold', fontSize: 14, marginLeft: 8 },
   listContent: { flexGrow: 1, paddingHorizontal: 16, paddingBottom: 120 },
   breedCard: {
     flexDirection: 'row',
@@ -376,6 +370,18 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   deleteAction: { alignItems: 'center', justifyContent: 'center', flex: 1, height: '100%' },
   deleteText: { fontSize: 12, marginTop: 4, fontFamily: 'Montserrat_600SemiBold' },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    zIndex: 90,
+  },
 });
 
 export default BreedListScreen;
