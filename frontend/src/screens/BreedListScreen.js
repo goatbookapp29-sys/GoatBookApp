@@ -210,7 +210,7 @@ const BreedListScreen = ({ navigation }) => {
           rightIcon={
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity onPress={() => setIsSelectionMode(true)} style={{ marginRight: 15 }}>
-                    <CheckSquare color={theme.colors.white} size={22} />
+                    <Text style={{ color: theme.colors.white, fontFamily: 'Montserrat_600SemiBold', fontSize: 14 }}>Select</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setIsSearching(!isSearching); if(!isSearching) setSearchQuery(''); }}>
                     {isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
