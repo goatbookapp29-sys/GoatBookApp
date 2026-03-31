@@ -155,23 +155,29 @@ const BreedListScreen = ({ navigation }) => {
           <Text style={[styles.breedName, { color: theme.colors.text }]}>{item.name}</Text>
           <Text style={[styles.animalType, { color: theme.colors.textLight }]}>{item.animalType}</Text>
         </View>
-        {isSelectionMode ? (
-          <View style={styles.checkboxWrapper}>
-            {isCustom ? (
-              <View style={[
-                styles.checkbox, 
-                isSelected ? styles.checkboxSelected : styles.checkboxUnselected,
-                isSelected && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
-              ]}>
-                {isSelected && <Check size={14} color="white" strokeWidth={3} />}
-              </View>
-            ) : (
-              <Lock size={18} color={theme.colors.textMuted} />
-            )}
+        
+        <View style={styles.breedStats}>
+          <View style={[styles.countBadge, { backgroundColor: theme.colors.primary + '15' }]}>
+            <Text style={[styles.countText, { color: theme.colors.primary }]}>{item.animalCount || 0}</Text>
           </View>
-        ) : (
-          <ChevronRight size={20} color={theme.colors.textMuted} />
-        )}
+          {isSelectionMode ? (
+            <View style={styles.checkboxWrapper}>
+              {isCustom ? (
+                <View style={[
+                  styles.checkbox, 
+                  isSelected ? styles.checkboxSelected : styles.checkboxUnselected,
+                  isSelected && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
+                ]}>
+                  {isSelected && <Check size={14} color="white" strokeWidth={3} />}
+                </View>
+              ) : (
+                <Lock size={18} color={theme.colors.textMuted} />
+              )}
+            </View>
+          ) : (
+            <ChevronRight size={20} color={theme.colors.textMuted} />
+          )}
+        </View>
       </TouchableOpacity>
     );
   };
@@ -379,6 +385,20 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   breedInfo: { flex: 1 },
   breedName: { fontSize: 16, fontFamily: 'Montserrat_600SemiBold' },
   animalType: { fontSize: 14, marginTop: 4, fontFamily: 'Montserrat_500Medium' },
+  breedStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  countBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    marginRight: 8,
+  },
+  countText: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_700Bold',
+  },
   emptyContainer: { alignItems: 'center', paddingTop: 60 },
   noRecords: { fontSize: 18, fontFamily: 'Montserrat_500Medium', marginTop: 16 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },

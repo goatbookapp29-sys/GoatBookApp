@@ -19,6 +19,15 @@ exports.getBreeds = async (req, res) => {
           { is_default: true }
         ]
       },
+      include: {
+        _count: {
+          select: {
+            animals: {
+              where: { farm_id: req.farmId }
+            }
+          }
+        }
+      },
       orderBy: { name: 'asc' }
     });
 
@@ -30,6 +39,7 @@ exports.getBreeds = async (req, res) => {
       category: b.category,
       farmId: b.farm_id,
       isDefault: b.is_default,
+      animalCount: b._count?.animals || 0,
       createdAt: b.created_at,
       updatedAt: b.updated_at
     })));
