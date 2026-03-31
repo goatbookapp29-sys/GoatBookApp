@@ -26,6 +26,7 @@ exports.getProfile = async (req, res) => {
       name: user.name, 
       email: user.email, 
       phone: user.phone,
+      profilePhotoUrl: user.profile_photo_url || null,
       employeeProfile: ep ? { id: ep.id, employeeType: ep.employee_type, farms } : null
     });
   } catch (err) {
@@ -37,7 +38,7 @@ exports.getProfile = async (req, res) => {
 // @desc    Update personal contact information for the user
 // @route   PUT /api/users/profile
 exports.updateProfile = async (req, res) => {
-  const { name, email, phone } = req.body;
+  const { name, email, phone, profilePhotoUrl } = req.body;
   try {
     const user = await prisma.users.findUnique({ where: { id: req.user.id } });
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -52,12 +53,13 @@ exports.updateProfile = async (req, res) => {
         // Others cannot change their own sensitive info
         email: isOwner ? (email === "" ? null : (email || user.email)) : user.email,
         phone: isOwner ? (phone || user.phone) : user.phone,
+        profile_photo_url: profilePhotoUrl !== undefined ? profilePhotoUrl : user.profile_photo_url,
         updated_by_user_id: req.user.id, 
         updated_at: new Date()
       }
     });
 
-    res.json({ id: updated.id, name: updated.name, email: updated.email, phone: updated.phone });
+    res.json({ id: updated.id, name: updated.name, email: updated.email, phone: updated.phone, profilePhotoUrl: updated.profile_photo_url });
   } catch (err) {
     console.error('PROFILE UPDATE ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
@@ -147,7 +149,7 @@ exports.createEmployee = async (req, res) => {
 // @desc    Modify staff details (Owner only)
 // @route   PUT /api/users/employees/:id
 exports.updateEmployee = async (req, res) => {
-  const { name, role, email, phone } = req.body;
+  const { name, role, email, phone, profilePhotoUrl } = req.body;
   try {
     if (req.employee.employee_type !== 'OWNER') return res.status(403).json({ message: 'Permission denied' });
     
@@ -165,13 +167,14 @@ exports.updateEmployee = async (req, res) => {
     });
 
     // Update the human name and contact info if provided
-    if (name || email !== undefined || phone !== undefined) {
+    if (name || email !== undefined || phone !== undefined || profilePhotoUrl !== undefined) {
       await prisma.users.update({ 
         where: { id: employee.user_id }, 
         data: { 
           name: name || employee.users.name,
           email: email === "" ? null : (email || employee.users.email),
           phone: phone || employee.users.phone,
+          profile_photo_url: profilePhotoUrl !== undefined ? profilePhotoUrl : employee.users.profile_photo_url,
           updated_by_user_id: req.user.id, 
           updated_at: new Date() 
         } 
@@ -219,7 +222,7 @@ exports.getEmployees = async (req, res) => {
       include: { 
         employees: { 
           include: { 
-            users: { select: { id: true, name: true, email: true, phone: true } } 
+            users: { select: { id: true, name: true, email: true, phone: true, profile_photo_url: true } } 
           } 
         } 
       }
@@ -233,7 +236,8 @@ exports.getEmployees = async (req, res) => {
         email: fe.employees.users?.email || 'N/A', 
         phone: fe.employees.users?.phone || 'N/A', 
         role: fe.employees.employee_type,
-        state: fe.employees.state
+        state: fe.employees.state,
+        profilePhotoUrl: fe.employees.users?.profile_photo_url || null
       };
     }).filter(e => e !== null));
   } catch (err) {

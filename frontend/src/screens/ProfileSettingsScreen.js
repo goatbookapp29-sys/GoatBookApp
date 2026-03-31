@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Image, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
@@ -7,6 +7,8 @@ import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
 import api from '../api';
+import { User, Camera, ImageIcon, Trash2 } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 const ProfileSettingsScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -20,12 +22,14 @@ const ProfileSettingsScreen = ({ navigation }) => {
     city: '',
     state: '',
     country: 'India',
-    employeeType: ''
+    employeeType: '',
+    profilePhotoUrl: null
   });
   
   const [originalData, setOriginalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -42,7 +46,7 @@ const ProfileSettingsScreen = ({ navigation }) => {
         email: data.email || '',
         phone: data.phone || '',
         employeeType: data.employeeProfile?.employeeType || '',
-        // These fields would be in a separate Profile model in a real app
+        profilePhotoUrl: data.profilePhotoUrl || null,
         address: '',
         city: '',
         state: '',
@@ -58,6 +62,73 @@ const ProfileSettingsScreen = ({ navigation }) => {
     }
   };
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled) {
+      setFormData({ ...formData, profilePhotoUrl: result.assets[0].uri });
+    }
+  };
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera permissions to make this work!');
+      return;
+    }
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled) {
+      setFormData({ ...formData, profilePhotoUrl: result.assets[0].uri });
+    }
+  };
+
+  const uploadToCloudinary = async (imageUri) => {
+    if (!imageUri || imageUri.startsWith('http')) return imageUri;
+    try {
+      setUploading(true);
+      const data = new FormData();
+      data.append('upload_preset', 'goatbook_preset');
+      data.append('cloud_name', 'dvtfv9vvr');
+
+      if (Platform.OS === 'web') {
+        const blobResponse = await fetch(imageUri);
+        const blob = await blobResponse.blob();
+        data.append('file', blob, 'upload.jpg');
+      } else {
+        const fileName = imageUri.split('/').pop();
+        const fileType = fileName.split('.').pop();
+        data.append('file', {
+          uri: imageUri,
+          name: fileName || 'upload.jpg',
+          type: `image/${fileType === 'jpg' ? 'jpeg' : fileType}`,
+        });
+      }
+
+      const response = await fetch('https://api.cloudinary.com/v1_1/dvtfv9vvr/image/upload', {
+        method: 'POST',
+        body: data,
+      });
+
+      if (!response.ok) throw new Error('Cloudinary Upload Failed');
+      const resData = await response.json();
+      setUploading(false);
+      return resData.secure_url;
+    } catch (error) {
+      setUploading(false);
+      console.error('Upload error:', error);
+      Alert.alert('Upload Error', 'Failed to upload photo.');
+      throw error;
+    }
+  };
+
   const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
 
   const handleReset = () => {
@@ -67,12 +138,19 @@ const ProfileSettingsScreen = ({ navigation }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      let uploadedPhotoUrl = formData.profilePhotoUrl;
+      if (formData.profilePhotoUrl && !formData.profilePhotoUrl.startsWith('http')) {
+        uploadedPhotoUrl = await uploadToCloudinary(formData.profilePhotoUrl);
+      }
+
       await api.put('/users/profile', {
         name: formData.name,
         email: formData.email,
-        phone: formData.phone
+        phone: formData.phone,
+        profilePhotoUrl: uploadedPhotoUrl
       });
-      setOriginalData(formData);
+      setFormData({ ...formData, profilePhotoUrl: uploadedPhotoUrl });
+      setOriginalData({ ...formData, profilePhotoUrl: uploadedPhotoUrl });
       setSaving(false);
       Alert.alert('Success', 'Profile updated successfully');
     } catch (error) {
@@ -98,6 +176,34 @@ const ProfileSettingsScreen = ({ navigation }) => {
         style={styles.flex}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Profile Photo */}
+          <View style={styles.photoSection}>
+            <TouchableOpacity style={[styles.avatarCircle, { borderColor: theme.colors.primary }]} onPress={pickImage}>
+              {formData.profilePhotoUrl ? (
+                <Image source={{ uri: formData.profilePhotoUrl }} style={styles.avatarImage} />
+              ) : (
+                <View style={[styles.avatarPlaceholder, { backgroundColor: theme.colors.primary + '15' }]}>
+                  <User size={44} color={theme.colors.primary} />
+                </View>
+              )}
+            </TouchableOpacity>
+            <View style={styles.photoActions}>
+              <TouchableOpacity style={[styles.photoBtn, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} onPress={takePhoto}>
+                <Camera size={16} color={theme.colors.primary} />
+                <Text style={[styles.photoBtnText, { color: theme.colors.text }]}>Camera</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.photoBtn, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} onPress={pickImage}>
+                <ImageIcon size={16} color={theme.colors.primary} />
+                <Text style={[styles.photoBtnText, { color: theme.colors.text }]}>Gallery</Text>
+              </TouchableOpacity>
+              {formData.profilePhotoUrl && (
+                <TouchableOpacity style={[styles.photoBtn, { backgroundColor: theme.colors.error + '10', borderColor: theme.colors.error + '30' }]} onPress={() => setFormData({ ...formData, profilePhotoUrl: null })}>
+                  <Trash2 size={16} color={theme.colors.error} />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
           <View style={styles.formContainer}>
             <Text style={styles.sectionTitle}>Basic Information</Text>
             
@@ -178,9 +284,10 @@ const ProfileSettingsScreen = ({ navigation }) => {
               </View>
               <View style={styles.halfBtn}>
                 <GButton 
-                  title="Save Changes" 
+                  title={uploading ? "Uploading..." : "Save Changes"} 
                   onPress={handleSave}
                   loading={saving}
+                  disabled={uploading}
                 />
               </View>
             </View>
@@ -206,6 +313,46 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   scrollContent: {
     padding: SPACING.lg,
     paddingBottom: 40,
+  },
+  photoSection: {
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
+    paddingTop: 8,
+  },
+  avatarCircle: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 3,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarPlaceholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  photoBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 6,
+  },
+  photoBtnText: {
+    fontSize: 12,
+    fontFamily: 'Montserrat_500Medium',
   },
   formContainer: {
     marginBottom: SPACING.xl,

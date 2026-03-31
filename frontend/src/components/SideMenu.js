@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Platform } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Platform } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { 
   Home, PawPrint, GitBranch, Syringe, ClipboardList, 
@@ -14,6 +14,7 @@ const SideMenu = (props) => {
   const { navigation } = props;
   const [farmName, setFarmName] = useState('GoatBook');
   const [userName, setUserName] = useState('User');
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   useEffect(() => {
     fetchProfile();
@@ -23,6 +24,7 @@ const SideMenu = (props) => {
     try {
       const res = await api.get('/users/profile');
       setUserName(res.data.name || 'User');
+      setProfilePhoto(res.data.profilePhotoUrl || null);
       const currentFarmId = api.defaults.headers.common['X-Farm-ID'];
       const farm = res.data.employeeProfile?.farms?.find(f => f.id === currentFarmId);
       if (farm) setFarmName(farm.name);
@@ -54,7 +56,11 @@ const SideMenu = (props) => {
       {/* Drawer Header - Simple & Consistent */}
       <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
         <View style={styles.avatarContainer}>
-           <User color={theme.colors.primary} size={30} fill={theme.colors.white} />
+          {profilePhoto ? (
+            <Image source={{ uri: profilePhoto }} style={styles.avatarPhoto} />
+          ) : (
+            <User color={theme.colors.primary} size={30} fill={theme.colors.white} />
+          )}
         </View>
         <View style={styles.userInfo}>
           <Text style={styles.userName} numberOfLines={1}>{userName}</Text>
@@ -121,6 +127,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
+    overflow: 'hidden',
+  },
+  avatarPhoto: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
   },
   userInfo: {
     flex: 1,

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, Image, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
@@ -36,6 +36,15 @@ const EmployeeListScreen = ({ navigation }) => {
       style={styles.item}
       onPress={() => navigation.navigate('EditEmployee', { employee: item })}
     >
+      <View style={styles.avatarThumb}>
+        {item.profilePhotoUrl ? (
+          <Image source={{ uri: item.profilePhotoUrl }} style={styles.avatarThumbImage} />
+        ) : (
+          <Text style={[styles.avatarInitial, { color: theme.colors.primary }]}>
+            {(item.name || '?')[0].toUpperCase()}
+          </Text>
+        )}
+      </View>
       <View style={styles.info}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={[styles.name, { color: theme.colors.text }]}>{item.name}</Text>
@@ -130,6 +139,25 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderWidth: 1.5,
     borderColor: theme.colors.border,
+  },
+  avatarThumb: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.primary + '15',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    overflow: 'hidden',
+  },
+  avatarThumbImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  avatarInitial: {
+    fontSize: 18,
+    fontFamily: 'Montserrat_600SemiBold',
   },
   info: {
     flex: 1,
