@@ -279,6 +279,7 @@ const AnimalListScreen = ({ navigation, route }) => {
           title="Animals List" 
           onMenu={!navigation.canGoBack() ? () => navigation.openDrawer() : undefined} 
           onBack={navigation.canGoBack() ? () => navigation.goBack() : undefined} 
+          leftAlign={true}
           rightIcon={isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
           onRightPress={toggleSearch}
         />
@@ -305,18 +306,6 @@ const AnimalListScreen = ({ navigation, route }) => {
         </Animated.View>
       )}
       
-      {!isSearching && !isSelectionMode && (
-        <View style={styles.actionRow}>
-          <TouchableOpacity 
-            style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
-            onPress={() => navigation.navigate('AddAnimal')}
-          >
-            <Plus color={theme.colors.white} size={20} style={styles.plusIcon} />
-            <Text style={styles.addButtonText}>Add Animal</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -328,9 +317,23 @@ const AnimalListScreen = ({ navigation, route }) => {
             renderItem={renderItem}
             keyExtractor={item => item.id}
             ListEmptyComponent={EmptyState}
-            contentContainerStyle={[styles.listContent, isSearching && { paddingTop: 20 }, isSelectionMode && { paddingBottom: 120 }]}
+            contentContainerStyle={[
+              styles.listContent, 
+              isSearching && { paddingTop: 20 }, 
+              isSelectionMode && { paddingBottom: 120 }
+            ]}
             keyboardShouldPersistTaps="handled"
           />
+
+          {!isSelectionMode && (
+            <TouchableOpacity 
+              style={[styles.fab, { backgroundColor: theme.colors.primary, ...theme.shadow.lg }]}
+              onPress={() => navigation.navigate('AddAnimal')}
+              activeOpacity={0.8}
+            >
+              <Plus color={theme.colors.white} size={30} strokeWidth={2.5} />
+            </TouchableOpacity>
+          )}
 
           {isSelectionMode && (
             <View style={styles.bottomActions}>
@@ -339,8 +342,8 @@ const AnimalListScreen = ({ navigation, route }) => {
                 onPress={handleBulkDelete}
                 disabled={selectedIds.length === 0}
               >
-                <Trash2 color={selectedIds.length === 0 ? theme.colors.textMuted : theme.colors.error} size={24} />
-                <Text style={[styles.deleteText, { color: selectedIds.length === 0 ? theme.colors.textMuted : theme.colors.error }]}>Delete</Text>
+                <Trash2 color={selectedIds.length === 0 ? theme.colors.textMuted : theme.colors.primary} size={24} />
+                <Text style={[styles.deleteText, { color: selectedIds.length === 0 ? theme.colors.textMuted : theme.colors.primary }]}>Delete</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -452,11 +455,62 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontFamily: 'Montserrat_600SemiBold',
     fontSize: 14,
   },
+  listHeader: {
+    marginBottom: 20,
+    width: '100%',
+  },
+  infoCard: {
+    borderRadius: 16,
+    backgroundColor: theme.colors.surface,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 24,
+    borderWidth: 1.5,
+    borderColor: theme.colors.border,
+    ...theme.shadow.sm,
+  },
+  summaryTitle: {
+    fontSize: 22,
+    fontFamily: 'Montserrat_600SemiBold',
+    textAlign: 'center',
+  },
+  summarySubtitle: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_500Medium',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  divider: {
+    height: 1,
+    width: '100%',
+    marginVertical: 16,
+  },
+  statLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statValue: {
+    fontSize: 22,
+    fontFamily: 'Montserrat_700Bold',
+  },
+  statLabel: {
+    fontSize: 14,
+    fontFamily: 'Montserrat_400Regular',
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_600SemiBold',
+    marginBottom: 12,
+    marginLeft: 4,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
   listContent: {
     flexGrow: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 40,
+    paddingBottom: 100,
     maxWidth: 768,
     width: '100%',
     alignSelf: 'center',
@@ -464,28 +518,29 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   animalItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 12,
     marginBottom: 12,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 16,
+    borderWidth: 1.5,
     borderColor: theme.colors.border,
   },
   animalThumbnail: {
-    width: 50,
-    height: 50,
-    borderRadius: 8,
-    marginRight: 12,
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    marginRight: 14,
   },
   animalInfo: {
     flex: 1,
+    justifyContent: 'center',
   },
   tagNumber: {
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Montserrat_700Bold',
+    marginBottom: 2,
   },
   breedName: {
     fontSize: 14,
-    marginTop: 4,
     fontFamily: 'Montserrat_500Medium',
   },
   locationTag: {
@@ -494,7 +549,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginTop: 6,
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: 8,
   },
   locIcon: {
@@ -503,12 +558,22 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   locationName: {
     fontSize: 11,
     fontFamily: 'Montserrat_600SemiBold',
+    textTransform: 'uppercase',
+  },
+  footerInfo: {
+    paddingVertical: 30,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_400Regular',
+    textAlign: 'center',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 20,
+    paddingTop: 40,
     paddingBottom: 100,
     paddingHorizontal: 32,
   },
@@ -530,19 +595,31 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     alignItems: 'center',
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
     marginRight: 8,
   },
   statusText: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: 'Montserrat_600SemiBold',
     color: 'white',
   },
   statusLIVE: { backgroundColor: '#10B981' },
   statusSOLD: { backgroundColor: '#3B82F6' },
   statusDEAD: { backgroundColor: '#EF4444' },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    zIndex: 90,
+  },
   checkboxWrapper: { marginLeft: 12, width: 24, height: 24, justifyContent: 'center', alignItems: 'center' },
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, justifyContent: 'center', alignItems: 'center' },
   checkboxUnselected: { borderColor: theme.colors.border },

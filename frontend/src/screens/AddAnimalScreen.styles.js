@@ -120,10 +120,9 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginLeft: 4,
   },
   weightSection: {
-    marginTop: SPACING.xl,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 16,
+    marginBottom: 12,
     borderWidth: 1.5,
+    borderRadius: 16,
     borderColor: theme.colors.border,
     overflow: 'hidden',
   },

@@ -54,6 +54,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [locationId, setLocationId] = useState(existingAnimal.locationId || null);
   const [animalType, setAnimalType] = useState(existingAnimal.animalType || '');
   
+  const [identificationExpanded, setIdentificationExpanded] = useState(true);
+  const [growthExpanded, setGrowthExpanded] = useState(true);
   const [matingExpanded, setMatingExpanded] = useState(false);
   const [breedingExpanded, setBreedingExpanded] = useState(false);
   const [milkExpanded, setMilkExpanded] = useState(false);
@@ -88,6 +90,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [soldDate, setSoldDate] = useState(existingAnimal.soldAt || '');
   const [sellingPrice, setSellingPrice] = useState(existingAnimal.salePrice?.toString() || '');
   const [soldRemark, setSoldRemark] = useState(existingAnimal.soldRemark || '');
+  
+  // Insurance specific (UI only for now)
+  const [insuranceCompany, setInsuranceCompany] = useState('');
+  const [planName, setPlanName] = useState('');
+  const [policyNumber, setPolicyNumber] = useState('');
+  const [agentName, setAgentName] = useState('');
 
   // UI state
   const [allBreeds, setAllBreeds] = useState([]);
@@ -752,294 +760,272 @@ const AddAnimalScreen = ({ navigation, route }) => {
             </View>
           )}
 
-          <Text style={sectionHeaderStyle}>Identification</Text>
-
-          <View style={styles.formContainer}>
-            <View style={styles.row}>
-              <GInput 
-                containerStyle={styles.halfWidth}
-                label="Tag ID" 
-                value={tagNumber} 
-                onChangeText={setTagNumber} 
-                placeholder="2912"
-                required 
-                helpAction={() => setShowTagHelp(true)}
-              />
-              <GSelect 
-                containerStyle={styles.halfWidth}
-                label="Animal Type" 
-                value={animalType} 
-                onSelect={(val) => {
-                  setAnimalType(val);
-                  setBreedId(''); 
-                }}
-                options={[
-                  { label: 'Goat', value: 'Goat' },
-                  { label: 'Sheep', value: 'Sheep' }
-                ]}
-                required
-              />
-            </View>
-
-            <View style={styles.row}>
-              <GSelect 
-                containerStyle={styles.halfWidth}
-                label="Breed" 
-                value={breedId} 
-                onSelect={setBreedId}
-                options={filteredBreeds}
-                placeholder={animalType ? "Select Breed" : "Select Type First"}
-                disabled={!animalType}
-                required
-              />
-              <GSelect 
-                containerStyle={styles.halfWidth}
-                label="Gender" 
-                value={gender} 
-                onSelect={setGender}
-                options={[
-                  { label: 'Male', value: 'MALE' },
-                  { label: 'Female', value: 'FEMALE' }
-                ]}
-                required
-              />
-            </View>
-
-            {gender === 'MALE' && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 12, marginLeft: 16 }}>
-                <Text style={{ 
-                  fontSize: 14, 
-                  color: theme.colors.text, 
-                  fontFamily: 'Montserrat_600SemiBold',
-                  marginRight: 16,
-                }}>Male Options:</Text>
-                <CheckBox label="Breeder" value={isBreeder} onToggle={toggleBreeder} />
-                <View style={{ width: 16 }} />
-                <CheckBox label="Qurbani" value={isQurbani} onToggle={toggleQurbani} />
+          <View style={[styles.photoCard, { borderColor: theme.colors.border }]}>
+            <TouchableOpacity 
+              style={[styles.photoHeader, { borderBottomWidth: identificationExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]} 
+              activeOpacity={0.7}
+              onPress={() => setIdentificationExpanded(!identificationExpanded)}
+            >
+              <View style={styles.iconGroup}>
+                <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Identification</Text>
               </View>
-            )}
+              {identificationExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
+            </TouchableOpacity>
 
-            {/* ROW 3 */}
-            <View style={styles.row}>
-               <GInput 
-                containerStyle={styles.halfWidth}
-                label="Color" 
-                value={color}
-                onChangeText={setColor}
-                placeholder="e.g. Red"
-              />
-              <GInput 
-                containerStyle={styles.halfWidth}
-                label="Batch No" 
-                value={batchNo} 
-                onChangeText={setBatchNo} 
-                placeholder="e.g. 31"
-              />
-            </View>
-
-            {/* ROW 4 */}
-            <View style={styles.row}>
-              <GSelect 
-                containerStyle={styles.halfWidth}
-                label="Source" 
-                value={acquisitionMethod} 
-                onSelect={setAcquisitionMethod}
-                options={[
-                  { label: 'Born At Farm', value: 'BORN' },
-                  { label: 'Purchased', value: 'PURCHASED' }
-                ]}
-                required
-              />
-              <GSelect 
-                containerStyle={styles.halfWidth}
-                label="Location" 
-                value={locationId} 
-                onSelect={setLocationId}
-                options={locations}
-                placeholder="Select..."
-                helpAction={() => setShowShedHelp(true)}
-              />
-            </View>
-
-            {/* GROWTH SECTION: Only visible if Gender is Female OR acquisitionMethod is PURCHASED/BORN check images */}
-            {((gender === 'FEMALE') || (acquisitionMethod === 'PURCHASED') || (acquisitionMethod === 'BORN')) && (
-              <>
-                <Text style={sectionHeaderStyle}>Growth & Background</Text>
-                
-                {/* Born specific fields check image 3 */}
-                {acquisitionMethod === 'BORN' && (
+            {identificationExpanded && (
+              <View style={styles.photoContent}>
+                <View style={[styles.formContainer, { marginTop: 16 }]}>
                   <View style={styles.row}>
-                    <GDatePicker 
+                    <GInput 
                       containerStyle={styles.halfWidth}
-                      label="Birth Date" 
-                      value={birthDate} 
-                      onDateChange={setBirthDate}
-                      placeholder="Select Date"
+                      label="Tag ID" 
+                      value={tagNumber} 
+                      onChangeText={setTagNumber} 
+                      placeholder="e.g. 777"
+                      required 
+                      helpAction={() => setShowTagHelp(true)}
+                    />
+                    <GSelect 
+                      containerStyle={styles.halfWidth}
+                      label="Animal Type" 
+                      value={animalType} 
+                      onSelect={(val) => {
+                        setAnimalType(val);
+                        setBreedId(''); 
+                      }}
+                      options={[
+                        { label: 'Goat', value: 'Goat' },
+                        { label: 'Sheep', value: 'Sheep' }
+                      ]}
                       required
                     />
-                    <GInput 
-                      containerStyle={styles.halfWidth}
-                      label="Birth Wt." 
-                      value={birthWeight} 
-                      onChangeText={setBirthWeight} 
-                      keyboardType="decimal-pad"
-                      placeholder="e.g. 5.5"
-                    />
                   </View>
-                )}
 
-                {/* AGE and BIRTH TYPE: Visible if Female or Method is set */}
-                <View style={styles.row}>
-                  <GInput 
-                    containerStyle={styles.halfWidth}
-                    label="Age (Months)" 
-                    value={ageInMonths} 
-                    onChangeText={setAgeInMonths} 
-                    keyboardType="number-pad"
-                    placeholder="e.g. 12"
-                    required={(acquisitionMethod === 'PURCHASED' || gender === 'FEMALE')}
-                  />
-                  <GSelect 
-                    containerStyle={styles.halfWidth}
-                    label="Birth Type" 
-                    value={birthType} 
-                    onSelect={setBirthType}
-                    options={[
-                      { label: 'Single', value: 'SINGLE' },
-                      { label: 'Twin', value: 'TWIN' },
-                      { label: 'Triplet', value: 'TRIPLET' },
-                      { label: 'Quadruplet', value: 'QUADRUPLET' }
-                    ]}
-                    placeholder="Select Type"
-                  />
-                </View>
-
-                {/* PARENTS: Only if Born at farm */}
-                {acquisitionMethod === 'BORN' && (
-                  <View style={styles.row}>
-                    <GInput 
-                      containerStyle={styles.halfWidth}
-                      label="Mother Tag ID" 
-                      value={motherTagId}
-                      onChangeText={setMotherTagId}
-                      placeholder="e.g. 1974"
-                    />
-                    <GInput 
-                      containerStyle={styles.halfWidth}
-                      label="Father Tag ID" 
-                      value={fatherTagId}
-                      onChangeText={setFatherTagId}
-                      placeholder="e.g. 1974"
-                    />
-                  </View>
-                )}
-              </>
-            )}
-
-            {/* PURCHASE SECTION */}
-            {acquisitionMethod === 'PURCHASED' && (
-              <>
-                <View style={styles.row}>
-                  <GDatePicker 
-                    containerStyle={styles.halfWidth}
-                    label="Purchase Date" 
-                    value={purchaseDate} 
-                    onDateChange={setPurchaseDate}
-                    placeholder="Select Date"
-                    required
-                  />
-                  <GInput 
-                    containerStyle={styles.halfWidth}
-                    label="Purchase Price" 
-                    value={purchasePrice} 
-                    onChangeText={setPurchasePrice} 
-                    keyboardType="number-pad"
-                    placeholder="e.g. 5000"
-                    required
-                  />
-                </View>
-                {gender === 'FEMALE' && (
                   <View style={styles.row}>
                     <GSelect 
                       containerStyle={styles.halfWidth}
-                      label="Female Cond." 
-                      value={femaleCondition} 
-                      onSelect={setFemaleCondition}
-                      options={[
-                        { label: 'None', value: 'NONE' },
-                        { label: 'Mated', value: 'MATED' },
-                        { label: 'Pregnant', value: 'PREGNANT' }
-                      ]}
+                      label="Breed" 
+                      value={breedId} 
+                      onSelect={setBreedId}
+                      options={filteredBreeds}
+                      placeholder={animalType ? "Select Breed" : "Select Type First"}
+                      disabled={!animalType}
+                      required
                     />
-                    <View style={styles.halfWidth} />
+                    <GSelect 
+                      containerStyle={styles.halfWidth}
+                      label="Gender" 
+                      value={gender} 
+                      onSelect={setGender}
+                      options={[
+                        { label: 'Male', value: 'MALE' },
+                        { label: 'Female', value: 'FEMALE' }
+                      ]}
+                      required
+                    />
                   </View>
-                )}
-              </>
-            )}
 
-            <GInput 
-              label="Remark" 
-              value={remark} 
-              onChangeText={setRemark} 
-              placeholder="e.g. Good!"
-              multiline
-              style={{ minHeight: 80, paddingTop: 12, color: theme.colors.text }}
-            />
-          </View>
-
-          {isEditing && (
-            <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-              <TouchableOpacity 
-                style={[styles.weightHeader, { borderBottomWidth: weightExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]}
-                activeOpacity={0.7}
-                onPress={() => setWeightExpanded(!weightExpanded)}
-              >
-                <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                  <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0 }]}>Weight History</Text>
-                  <TouchableOpacity onPress={() => showHelp('What is Weight Record?', 'This section allows you to maintain weight of animal that you measure periodically. This will help you to analyze weight gain chart.')}>
-                    <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
-                  </TouchableOpacity>
-                </View>
-                {weightExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
-              </TouchableOpacity>
-              
-              {weightExpanded && (
-                <View style={styles.weightContent}>
-                    <TouchableOpacity 
-                      style={styles.addNewBtn}
-                      onPress={() => navigation.navigate('AddWeight', { tagNumber: existingAnimal.tagNumber })}
-                    >
-                      <Plus size={14} color="#FFF" />
-                      <Text style={styles.addNewText}>Add New Record</Text>
-                    </TouchableOpacity>
-
-                  {weightsLoading ? (
-                    <ActivityIndicator color={theme.colors.primary} style={{ marginVertical: 20 }} />
-                  ) : weights.length > 0 ? (
-                    <View style={styles.weightList}>
-                      {weights.map((w, idx) => (
-                        <View key={w.id} style={[styles.weightItem, { borderBottomColor: theme.colors.border }, idx === weights.length - 1 && { borderBottomWidth: 0 }]}>
-                          <View style={[styles.weightIconBox, { backgroundColor: isDarkMode ? theme.colors.surface : '#FFF1EA' }]}>
-                            <Calendar size={20} color={theme.colors.textMuted} />
-                          </View>
-                          <View style={styles.weightInfoBlock}>
-                            <Text style={[styles.weightKg, { color: theme.colors.text }]}>{w.weight} KG</Text>
-                            <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{w.date}</Text>
-                          </View>
-                          {w.height && (
-                            <View style={styles.heightInfoBlock}>
-                              <Text style={[styles.weightLabel, { color: theme.colors.textLight }]}>Height</Text>
-                              <Text style={[styles.weightValue, { color: theme.colors.text }]}>{w.height}</Text>
-                            </View>
-                          )}
-                        </View>
-                      ))}
-                    </View>
-                  ) : (
-                    <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-                      <Text style={[styles.noRecordsText, { color: theme.colors.textMuted }]}>No records found</Text>
+                  {gender === 'MALE' && (
+                    <View style={{ 
+                      flexDirection: 'row', 
+                      alignItems: 'center', 
+                      marginVertical: 12, 
+                      paddingHorizontal: 4,
+                      justifyContent: 'flex-start'
+                    }}>
+                      <Text style={{ 
+                        fontSize: 13, 
+                        color: theme.colors.text, 
+                        fontFamily: 'Montserrat_700Bold',
+                        marginRight: 12,
+                      }}>Male Options:</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <CheckBox label="Breeder" value={isBreeder} onToggle={toggleBreeder} />
+                        <View style={{ width: 12 }} />
+                        <CheckBox label="Qurbani" value={isQurbani} onToggle={toggleQurbani} />
+                      </View>
                     </View>
                   )}
+
+                  <View style={styles.row}>
+                    <GInput 
+                      containerStyle={styles.halfWidth}
+                      label="Color" 
+                      value={color}
+                      onChangeText={setColor}
+                      placeholder="Type"
+                    />
+                    <GInput 
+                      containerStyle={styles.halfWidth}
+                      label="Batch No" 
+                      value={batchNo} 
+                      onChangeText={setBatchNo} 
+                      placeholder="e.g. Gshs"
+                    />
+                  </View>
+
+                  <View style={styles.row}>
+                    <GSelect 
+                      containerStyle={styles.halfWidth}
+                      label="Source" 
+                      value={acquisitionMethod} 
+                      onSelect={setAcquisitionMethod}
+                      options={[
+                        { label: 'Born At Farm', value: 'BORN' },
+                        { label: 'Purchased', value: 'PURCHASED' }
+                      ]}
+                      required
+                    />
+                    <GSelect 
+                      containerStyle={styles.halfWidth}
+                      label="Location" 
+                      value={locationId} 
+                      onSelect={setLocationId}
+                      options={locations}
+                      placeholder="Select..."
+                      helpAction={() => setShowShedHelp(true)}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* GROWTH & BACKGROUND CARD */}
+          {((gender === 'FEMALE') || (acquisitionMethod === 'PURCHASED') || (acquisitionMethod === 'BORN')) && (
+            <View style={[styles.photoCard, { borderColor: theme.colors.border, marginTop: 8 }]}>
+              <TouchableOpacity 
+                style={[styles.photoHeader, { borderBottomWidth: growthExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]} 
+                activeOpacity={0.7}
+                onPress={() => setGrowthExpanded(!growthExpanded)}
+              >
+                <View style={styles.iconGroup}>
+                  <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Growth & Background</Text>
+                </View>
+                {growthExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
+              </TouchableOpacity>
+
+              {growthExpanded && (
+                <View style={styles.photoContent}>
+                  <View style={[styles.formContainer, { marginTop: 16 }]}>
+                    {/* Born specific fields */}
+                    {acquisitionMethod === 'BORN' && (
+                      <View style={styles.row}>
+                        <GDatePicker 
+                          containerStyle={styles.halfWidth}
+                          label="Birth Date" 
+                          value={birthDate} 
+                          onDateChange={setBirthDate}
+                          placeholder="Select Date"
+                          required
+                        />
+                        <GInput 
+                          containerStyle={styles.halfWidth}
+                          label="Birth Wt." 
+                          value={birthWeight} 
+                          onChangeText={setBirthWeight} 
+                          keyboardType="decimal-pad"
+                          placeholder="e.g. 5.5"
+                        />
+                      </View>
+                    )}
+
+                    {/* AGE and BIRTH TYPE */}
+                    <View style={styles.row}>
+                      <GInput 
+                        containerStyle={styles.halfWidth}
+                        label="Age (Months)" 
+                        value={ageInMonths} 
+                        onChangeText={setAgeInMonths} 
+                        keyboardType="number-pad"
+                        placeholder="e.g. 12"
+                        required={(acquisitionMethod === 'PURCHASED' || gender === 'FEMALE')}
+                      />
+                      <GSelect 
+                        containerStyle={styles.halfWidth}
+                        label="Birth Type" 
+                        value={birthType} 
+                        onSelect={setBirthType}
+                        options={[
+                          { label: 'Single', value: 'SINGLE' },
+                          { label: 'Twin', value: 'TWIN' },
+                          { label: 'Triplet', value: 'TRIPLET' },
+                          { label: 'Quadruplet', value: 'QUADRUPLET' }
+                        ]}
+                        placeholder="Select Type"
+                      />
+                    </View>
+
+                    {/* PARENTS: Only if Born at farm */}
+                    {acquisitionMethod === 'BORN' && (
+                      <View style={styles.row}>
+                        <GInput 
+                          containerStyle={styles.halfWidth}
+                          label="Mother Tag ID" 
+                          value={motherTagId}
+                          onChangeText={setMotherTagId}
+                          placeholder="e.g. 2001"
+                        />
+                        <GInput 
+                          containerStyle={styles.halfWidth}
+                          label="Father Tag ID" 
+                          value={fatherTagId}
+                          onChangeText={setFatherTagId}
+                          placeholder="e.g. 2002"
+                        />
+                      </View>
+                    )}
+
+                    {/* PURCHASE SECTION */}
+                    {acquisitionMethod === 'PURCHASED' && (
+                      <>
+                        <View style={styles.row}>
+                          <GDatePicker 
+                            containerStyle={styles.halfWidth}
+                            label="Purchase Date" 
+                            value={purchaseDate} 
+                            onDateChange={setPurchaseDate}
+                            placeholder="Select Date"
+                            required
+                          />
+                          <GInput 
+                            containerStyle={styles.halfWidth}
+                            label="Purchase Price" 
+                            value={purchasePrice} 
+                            onChangeText={setPurchasePrice} 
+                            keyboardType="number-pad"
+                            placeholder="e.g. 5000"
+                            required
+                          />
+                        </View>
+                        {gender === 'FEMALE' && (
+                          <View style={styles.row}>
+                            <GSelect 
+                              containerStyle={styles.halfWidth}
+                              label="Female Cond." 
+                              value={femaleCondition} 
+                              onSelect={setFemaleCondition}
+                              options={[
+                                { label: 'None', value: 'NONE' },
+                                { label: 'Mated', value: 'MATED' },
+                                { label: 'Pregnant', value: 'PREGNANT' }
+                              ]}
+                            />
+                            <View style={styles.halfWidth} />
+                          </View>
+                        )}
+                      </>
+                    )}
+
+                    <GInput 
+                      label="Remark" 
+                      value={remark} 
+                      onChangeText={setRemark} 
+                      placeholder="e.g. Sexy"
+                      multiline
+                      style={{ minHeight: 80, paddingTop: 12, color: theme.colors.text }}
+                    />
+                  </View>
                 </View>
               )}
             </View>
@@ -1047,6 +1033,63 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
           {isEditing && (
             <>
+              {/* WEIGHT HISTORY */}
+              <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <TouchableOpacity 
+                  style={[styles.weightHeader, { borderBottomWidth: weightExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]}
+                  activeOpacity={0.7}
+                  onPress={() => setWeightExpanded(!weightExpanded)}
+                >
+                  <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
+                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0 }]}>Weight History</Text>
+                    <TouchableOpacity onPress={() => showHelp('What is Weight Record?', 'This section allows you to maintain weight of animal that you measure periodically. This will help you to analyze weight gain chart.')}>
+                      <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
+                    </TouchableOpacity>
+                  </View>
+                  {weightExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
+                </TouchableOpacity>
+                
+                {weightExpanded && (
+                  <View style={styles.weightContent}>
+                      <TouchableOpacity 
+                        style={styles.addNewBtn}
+                        onPress={() => navigation.navigate('AddWeight', { tagNumber: existingAnimal.tagNumber })}
+                      >
+                        <Plus size={14} color="#FFF" />
+                        <Text style={styles.addNewText}>Add New Record</Text>
+                      </TouchableOpacity>
+
+                    {weightsLoading ? (
+                      <ActivityIndicator color={theme.colors.primary} style={{ marginVertical: 20 }} />
+                    ) : weights.length > 0 ? (
+                      <View style={styles.weightList}>
+                        {weights.map((w, idx) => (
+                          <View key={w.id} style={[styles.weightItem, { borderBottomColor: theme.colors.border }, idx === weights.length - 1 && { borderBottomWidth: 0 }]}>
+                            <View style={[styles.weightIconBox, { backgroundColor: isDarkMode ? theme.colors.surface : '#FFF1EA' }]}>
+                              <Calendar size={20} color={theme.colors.textMuted} />
+                            </View>
+                            <View style={styles.weightInfoBlock}>
+                              <Text style={[styles.weightKg, { color: theme.colors.text }]}>{w.weight} KG</Text>
+                              <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{w.date}</Text>
+                            </View>
+                            {w.height && (
+                              <View style={styles.heightInfoBlock}>
+                                <Text style={[styles.weightLabel, { color: theme.colors.textLight }]}>Height</Text>
+                                <Text style={[styles.weightValue, { color: theme.colors.text }]}>{w.height}</Text>
+                              </View>
+                            )}
+                          </View>
+                        ))}
+                      </View>
+                    ) : (
+                      <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+                        <Text style={[styles.noRecordsText, { color: theme.colors.textMuted }]}>No records found</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
+
               {/* VACCINATION RECORD */}
               <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                 <TouchableOpacity 
@@ -1202,37 +1245,78 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   )}
               </View>
 
-              {/* INSURANCE */}
-              <View style={[styles.weightSection, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              {/* COMPLETELY REBUILT INSURANCE CARD - FIXED AND LOCKED LAYOUT */}
+              <View style={{ 
+                borderRadius: 16, 
+                borderWidth: 1.5, 
+                borderColor: theme.colors.border, 
+                backgroundColor: theme.colors.surface, 
+                marginBottom: 12, 
+                overflow: 'hidden' 
+              }}>
                 <TouchableOpacity 
-                  style={[styles.weightHeader, { borderBottomWidth: insuranceExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]}
+                  style={{ 
+                    flexDirection: 'row', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between', 
+                    paddingVertical: 14,
+                    paddingHorizontal: 16,
+                    borderBottomWidth: insuranceExpanded ? 1 : 0, 
+                    borderBottomColor: theme.colors.border
+                  }} 
                   activeOpacity={0.7}
                   onPress={() => setInsuranceExpanded(!insuranceExpanded)}
                 >
-                  <View style={[styles.row, { marginBottom: 0, alignItems: 'center' }]}>
-                    <Text style={[sectionHeaderStyle, { marginBottom: 0, marginTop: 0, borderBottomWidth: 0, paddingBottom: 0 }]}>Insurance</Text>
-                    <TouchableOpacity onPress={() => showHelp('What is Insurance?', 'Store insurance details for your livestock, including company name, policy number, and coverage period, ensuring your farm assets are well-protected.')}>
-                      <HelpCircle size={14} color={theme.colors.textMuted} style={{ marginLeft: 6, marginTop: -1 }} strokeWidth={2} />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <Text style={{ 
+                      fontSize: 15, 
+                      color: theme.colors.primary, 
+                      fontFamily: 'Montserrat_600SemiBold'
+                    }}>Insurance</Text>
+                    <TouchableOpacity 
+                      onPress={() => showHelp('What is Insurance?', 'Store insurance details for your livestock, including company name, policy number, and coverage period, ensuring your farm assets are well-protected.')}
+                      style={{ marginLeft: 8 }}
+                    >
+                      <HelpCircle size={14} color={theme.colors.textMuted} strokeWidth={2} />
                     </TouchableOpacity>
                   </View>
                   {insuranceExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
                 </TouchableOpacity>
+
                 {insuranceExpanded && (
-                  <View style={[styles.weightContent, { paddingHorizontal: 4 }]}>
-                    <View style={styles.row}>
-                      <View style={styles.halfWidth}>
-                        <GInput label="Insurance Company" placeholder="Company Name" />
+                  <View style={{ padding: 12, paddingTop: 16 }}>
+                    <View style={styles.formContainer}>
+                      <View style={styles.row}>
+                        <GInput 
+                          containerStyle={styles.halfWidth}
+                          label="Insurance Company" 
+                          placeholder="Company Name" 
+                          value={insuranceCompany}
+                          onChangeText={setInsuranceCompany}
+                        />
+                        <GInput 
+                          containerStyle={styles.halfWidth}
+                          label="Plan Name" 
+                          placeholder="Plan Name" 
+                          value={planName}
+                          onChangeText={setPlanName}
+                        />
                       </View>
-                      <View style={styles.halfWidth}>
-                        <GInput label="Plan Name" placeholder="Plan Name" />
-                      </View>
-                    </View>
-                    <View style={styles.row}>
-                      <View style={styles.halfWidth}>
-                        <GInput label="Policy Number" placeholder="Policy No" />
-                      </View>
-                      <View style={styles.halfWidth}>
-                        <GInput label="Agent Name" placeholder="Agent Name" />
+                      <View style={styles.row}>
+                        <GInput 
+                          containerStyle={styles.halfWidth}
+                          label="Policy Number" 
+                          placeholder="Policy No" 
+                          value={policyNumber}
+                          onChangeText={setPolicyNumber}
+                        />
+                        <GInput 
+                          containerStyle={styles.halfWidth}
+                          label="Agent Name" 
+                          placeholder="Agent Name" 
+                          value={agentName}
+                          onChangeText={setAgentName}
+                        />
                       </View>
                     </View>
                   </View>

@@ -163,9 +163,10 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
-    height: '100%',
     textAlignVertical: 'center',
-    paddingTop: Platform.OS === 'ios' ? 0 : 0,
+    paddingTop: Platform.OS === 'android' ? 2 : 0,
+    paddingBottom: 0,
+    includeFontPadding: false,
     outlineWidth: 0,
   },
   errorText: {
