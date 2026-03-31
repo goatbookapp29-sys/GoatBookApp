@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Platform } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { 
@@ -8,6 +8,7 @@ import {
 import * as SecureStore from 'expo-secure-store';
 import { LinearGradient } from 'expo-linear-gradient';
 import api, { setAuthToken, setSelectedFarm } from '../api';
+import { useFocusEffect } from '@react-navigation/native';
 
 const SideMenu = (props) => {
   const { theme } = useTheme();
@@ -16,9 +17,11 @@ const SideMenu = (props) => {
   const [userName, setUserName] = useState('User');
   const [profilePhoto, setProfilePhoto] = useState(null);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [])
+  );
 
   const fetchProfile = async () => {
     try {
