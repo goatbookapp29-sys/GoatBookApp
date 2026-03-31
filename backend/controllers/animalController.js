@@ -324,7 +324,7 @@ exports.deleteAnimal = async (req, res) => {
     res.json({ message: 'Animal removed successfully' });
   } catch (err) {
     console.error('DELETE ANIMAL ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Animal API Error (Single)', error: err.message, code: err.code });
   }
 };
 // @desc    Check if a tag exists in the farm
@@ -351,7 +351,7 @@ exports.checkTagExists = async (req, res) => {
     res.json(animal);
   } catch (err) {
     console.error('CHECK TAG ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Animal API Error: Check Tag', error: err.message, code: err.code });
   }
 };
 
@@ -408,7 +408,7 @@ exports.replaceTag = async (req, res) => {
     res.json({ message: `Successfully replaced tag ${oldTagNumber} with ${newTagNumber}` });
   } catch (err) {
     console.error('REPLACE TAG ERROR:', err);
-    res.status(500).json({ message: 'Server Error', error: err.message });
+    res.status(500).json({ message: 'Animal API Error: Replace Tag', error: err.message, code: err.code });
   }
 };
 
@@ -450,7 +450,7 @@ exports.updateBulkLocation = async (req, res) => {
     });
   } catch (err) {
     console.error('BULK LOCATION UPDATE ERROR:', err);
-    res.status(500).json({ message: 'Server Error', error: err.message });
+    res.status(500).json({ message: 'Animal API Error (Bulk Location)', error: err.message, code: err.code });
   }
 };
 
@@ -518,9 +518,8 @@ exports.deleteAnimalsBulk = async (req, res) => {
     });
   } catch (err) {
     console.error('BULK DELETE ANIMALS ERROR:', err);
-    // Provide full error details to help frontend/developer troubleshoot 500 errors
     res.status(500).json({ 
-      message: 'Internal Server Error', 
+      message: 'Animal API Error (Bulk Delete)', 
       error: err.message,
       code: err.code 
     });
