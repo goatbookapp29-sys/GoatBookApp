@@ -484,6 +484,12 @@ exports.deleteAnimalsBulk = async (req, res) => {
     const manageableIds = animalsToDelete.map(a => a.id);
     const tagNumbers = animalsToDelete.map(a => a.tag_number);
 
+    console.log('DEBUG: Parent Check Diagnostics', {
+      farmId: req.farmId,
+      farmIdType: typeof req.farmId,
+      tagNumbers: tagNumbers
+    });
+
     // 2. Integrity Check: Ensure none of these animals are parents to other livestock
     const parentCheck = await prisma.animals.findFirst({
       where: {
