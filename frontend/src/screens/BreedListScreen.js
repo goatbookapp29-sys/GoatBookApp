@@ -127,9 +127,9 @@ const BreedListScreen = ({ navigation }) => {
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = (source = 'unknown') => {
     // DIAGNOSTIC ALERT
-    Alert.alert('Debug', 'Delete button was actually pressed!');
+    Alert.alert('Action Triggered', `Delete requested from: ${source}\nSelected items: ${selectedIds.length}`);
     
     if (selectedIds.length === 0) {
         Alert.alert('Selection', 'Please select at least one custom breed to delete.');
@@ -152,10 +152,13 @@ const BreedListScreen = ({ navigation }) => {
           onPress: async () => {
             try {
               setLoading(true);
-              await api.delete('/breeds/bulk', { data: { ids: selectedIds } });
+              console.log('Sending delete request for:', selectedIds);
+              const response = await api.delete('/breeds/bulk', { data: { ids: selectedIds } });
+              console.log('Delete success:', response.data);
               await fetchBreeds();
               exitSelectionMode();
             } catch (error) {
+              console.error('Delete error:', error);
               const msg = error.response?.data?.message || 'Delete failed';
               Alert.alert('Error', msg);
               setLoading(false);
@@ -214,14 +217,21 @@ const BreedListScreen = ({ navigation }) => {
             <TouchableOpacity onPress={exitSelectionMode} style={styles.headerButton}>
                 <Text style={[styles.headerButtonText, { color: '#007AFF' }]}>Cancel</Text>
             </TouchableOpacity>
-            <Text style={[styles.selectionTitle, { color: theme.colors.text }]}>
-                {selectedIds.length === 0 ? 'Select items' : `${selectedIds.length} selected`}
-            </Text>
-            <TouchableOpacity onPress={handleSelectAll} style={styles.headerButton}>
-                <Text style={[styles.headerButtonText, { color: '#007AFF' }]}>
-                    {isAllSelected ? 'Deselect all' : 'Select all'}
+            <View style={{ flex: 1, alignItems: 'center' }}>
+                <Text style={[styles.selectionTitle, { color: theme.colors.text }]}>
+                    {selectedIds.length === 0 ? 'Select items' : `${selectedIds.length} selected`}
                 </Text>
-            </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => handleBulkDelete('Header')} style={[styles.headerButton, { marginRight: 10 }]} disabled={selectedIds.length === 0}>
+                    <Trash2 color={selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted} size={22} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSelectAll} style={styles.headerButton}>
+                    <Text style={[styles.headerButtonText, { color: '#007AFF' }]}>
+                        {isAllSelected ? 'None' : 'All'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
         </View>
       ) : (
         <GHeader 
@@ -300,9 +310,9 @@ const BreedListScreen = ({ navigation }) => {
             <View style={styles.bottomActions}>
                 <Pressable 
                     style={({ pressed }) => [styles.deleteAction, { opacity: pressed ? 0.6 : 1 }]}
-                    onPress={handleBulkDelete}
+                    onPress={() => handleBulkDelete('BottomBar')}
                     disabled={selectedIds.length === 0}
-                    hitSlop={{ top: 10, bottom: 20, left: 20, right: 20 }}
+                    hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                 >
                     <Trash2 size={24} color={selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted} />
                     <Text style={[styles.deleteActionText, { color: selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted }]}>
@@ -477,11 +487,11 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingBottom: 20, // Increased for system navigation clearance
+    paddingBottom: 20, 
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
-    zIndex: 1000,
-    elevation: 20, // Higher elevation for Android
+    zIndex: 9999, // Maximum priority
+    elevation: 100, // Maximum visibility for Android
     ...theme.shadow.lg,
   },
   deleteAction: {
