@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, Alert } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, Alert, SafeAreaView } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, X, SearchX, Square, CheckSquare, Trash2, CheckCircle2, Lock } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, X, SearchX, Square, CheckSquare, Trash2, CheckCircle2, Lock, Check } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
@@ -122,7 +122,6 @@ const BreedListScreen = ({ navigation }) => {
     
     if (selectedIds.length === selectable.length) {
       setSelectedIds([]);
-      setIsSelectionMode(false);
     } else {
       setSelectedIds(selectable);
     }
@@ -167,44 +166,55 @@ const BreedListScreen = ({ navigation }) => {
       <TouchableOpacity 
         style={[
           styles.breedCard, 
-          isSelected && { borderColor: theme.colors.primary, backgroundColor: isDarkMode ? '#2A1A0A' : '#FFF5EB' }
+          isSelected && { borderColor: theme.colors.primary, backgroundColor: isDarkMode ? '#1E1E1E' : '#fafafa' }
         ]}
         onPress={() => isSelectionMode ? (isCustom ? toggleSelection(item.id) : null) : navigation.navigate('BreedDetails', { breedId: item.id })}
         onLongPress={() => handleLongPress(item)}
         activeOpacity={0.7}
       >
-        {isSelectionMode && (
-          <View style={styles.checkboxContainer}>
-            {isCustom ? (
-              isSelected ? (
-                <CheckSquare size={22} color={theme.colors.primary} />
-              ) : (
-                <Square size={22} color={theme.colors.textMuted} />
-              )
-            ) : (
-              <Lock size={20} color={theme.colors.textMuted} />
-            )}
-          </View>
-        )}
         <View style={styles.breedInfo}>
           <Text style={[styles.breedName, { color: theme.colors.text }]}>{item.name}</Text>
           <Text style={[styles.animalType, { color: theme.colors.textLight }]}>{item.animalType}</Text>
         </View>
-        {!isSelectionMode && <ChevronRight size={20} color={theme.colors.textMuted} />}
+        {isSelectionMode ? (
+          <View style={styles.checkboxWrapper}>
+            {isCustom ? (
+              <View style={[
+                styles.checkbox, 
+                isSelected ? styles.checkboxSelected : styles.checkboxUnselected,
+                isSelected && { backgroundColor: '#007AFF', borderColor: '#007AFF' }
+              ]}>
+                {isSelected && <Check size={14} color="white" strokeWidth={3} />}
+              </View>
+            ) : (
+              <Lock size={18} color={theme.colors.textMuted} />
+            )}
+          </View>
+        ) : (
+          <ChevronRight size={20} color={theme.colors.textMuted} />
+        )}
       </TouchableOpacity>
     );
   };
 
+  const isAllSelected = selectedIds.length > 0 && selectedIds.length === filteredBreeds.filter(b => !b.isDefault).length;
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {isSelectionMode ? (
-        <GHeader 
-          title={`${selectedIds.length} Selected`} 
-          onBack={exitSelectionMode}
-          backIcon={<X color={theme.colors.white} size={24} />}
-          rightIcon={<Trash2 color={theme.colors.white} size={24} />}
-          onRightPress={handleBulkDelete}
-        />
+        <View style={styles.selectionHeader}>
+            <TouchableOpacity onPress={exitSelectionMode} style={styles.headerButton}>
+                <Text style={[styles.headerButtonText, { color: '#007AFF' }]}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={[styles.selectionTitle, { color: theme.colors.text }]}>
+                {selectedIds.length === 0 ? 'Select items' : `${selectedIds.length} selected`}
+            </Text>
+            <TouchableOpacity onPress={handleSelectAll} style={styles.headerButton}>
+                <Text style={[styles.headerButtonText, { color: '#007AFF' }]}>
+                    {isAllSelected ? 'Deselect all' : 'Select all'}
+                </Text>
+            </TouchableOpacity>
+        </View>
       ) : (
         <GHeader 
           title="Breeds List" 
@@ -244,49 +254,59 @@ const BreedListScreen = ({ navigation }) => {
         </Animated.View>
       )}
 
-      {!isSearching && (
-        <View style={styles.actionRow}>
-          {isSelectionMode ? (
-            <TouchableOpacity 
-              style={[styles.selectAllButton, { borderColor: theme.colors.primary }]}
-              onPress={handleSelectAll}
-            >
-              <CheckCircle2 size={18} color={theme.colors.primary} style={{ marginRight: 6 }} />
-              <Text style={[styles.selectAllText, { color: theme.colors.primary }]}>
-                {selectedIds.length > 0 && selectedIds.length === filteredBreeds.filter(b => !b.isDefault).length ? 'Deselect All' : 'Select All'}
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity 
-              style={[styles.addButton, { backgroundColor: theme.colors.primary, ...theme.shadow.sm }]}
-              onPress={() => navigation.navigate('AddBreed')}
-            >
-              <Plus color={theme.colors.white} size={20} style={styles.plusIcon} />
-              <Text style={styles.addButtonText}>Add New Breed</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
-
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       ) : (
-        <FlatList
-          data={filteredBreeds}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-                <SearchX size={64} color={theme.colors.border} />
-                <Text style={[styles.noRecords, { color: theme.colors.text }]}>No Breeds Found</Text>
-                <Text style={[styles.emptyDesc, { color: theme.colors.textLight }]}>Register different breeds to categorize your livestock.</Text>
-            </View>
-          }
-          contentContainerStyle={[styles.listContent, isSearching && { paddingTop: 20 }]}
-          keyboardShouldPersistTaps="handled"
-        />
+        <>
+          <FlatList
+            data={filteredBreeds}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+            ListHeaderComponent={
+              !isSearching && !isSelectionMode ? (
+                <View style={styles.actionRow}>
+                  <TouchableOpacity 
+                    style={[styles.addButton, { backgroundColor: theme.colors.primary, ...theme.shadow.sm }]}
+                    onPress={() => navigation.navigate('AddBreed')}
+                  >
+                    <Plus color={theme.colors.white} size={20} style={styles.plusIcon} />
+                    <Text style={styles.addButtonText}>Add New Breed</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : null
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                  <SearchX size={64} color={theme.colors.border} />
+                  <Text style={[styles.noRecords, { color: theme.colors.text }]}>No Breeds Found</Text>
+                  <Text style={[styles.emptyDesc, { color: theme.colors.textLight }]}>Register different breeds to categorize your livestock.</Text>
+              </View>
+            }
+            contentContainerStyle={[styles.listContent, isSearching && { paddingTop: 20 }]}
+            keyboardShouldPersistTaps="handled"
+          />
+          
+          {isSelectionMode && (
+            <SafeAreaView style={styles.bottomActions}>
+                <TouchableOpacity 
+                    style={styles.deleteAction}
+                    onPress={handleBulkDelete}
+                    disabled={selectedIds.length === 0}
+                >
+                    <Trash2 size={24} color={selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted} />
+                    <Text style={[styles.deleteActionText, { color: selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted }]}>
+                        Delete
+                    </Text>
+                </TouchableOpacity>
+                <View style={[styles.actionPlaceholder, { opacity: 0.5 }]}>
+                    <Plus size={24} color={theme.colors.textMuted} />
+                    <Text style={[styles.deleteActionText, { color: theme.colors.textMuted }]}>More</Text>
+                </View>
+            </SafeAreaView>
+          )}
+        </>
       )}
     </View>
   );
@@ -295,6 +315,29 @@ const BreedListScreen = ({ navigation }) => {
 const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
+  },
+  selectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 15,
+    height: Platform.OS === 'ios' ? 100 : 70,
+    backgroundColor: theme.colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    paddingTop: Platform.OS === 'ios' ? 40 : 0,
+  },
+  headerButton: {
+    paddingVertical: 10,
+    minWidth: 70,
+  },
+  headerButtonText: {
+    fontSize: 16,
+    fontFamily: 'Montserrat_600SemiBold',
+  },
+  selectionTitle: {
+    fontSize: 18,
+    fontFamily: 'Montserrat_700Bold',
   },
   searchBarContainer: {
     paddingHorizontal: 16,
@@ -320,13 +363,10 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontFamily: 'Montserrat_500Medium',
   },
   actionRow: {
-    padding: 16,
-    paddingBottom: 8,
+    paddingVertical: 16,
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    maxWidth: 768,
     width: '100%',
-    alignSelf: 'center',
   },
   addButton: {
     flexDirection: 'row',
@@ -334,18 +374,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 14,
-  },
-  selectAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  selectAllText: {
-    fontFamily: 'Montserrat_600SemiBold',
-    fontSize: 13,
   },
   plusIcon: {
     marginRight: 8,
@@ -358,8 +386,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   listContent: {
     flexGrow: 1,
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingBottom: 100,
     maxWidth: 768,
     width: '100%',
     alignSelf: 'center',
@@ -374,8 +401,28 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderWidth: 1.5,
     borderColor: theme.colors.border,
   },
-  checkboxContainer: {
-    marginRight: 12,
+  checkboxWrapper: {
+    marginLeft: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxUnselected: {
+    borderColor: theme.colors.border,
+    backgroundColor: 'transparent',
+  },
+  checkboxSelected: {
+    borderColor: '#007AFF',
+    backgroundColor: '#007AFF',
   },
   breedInfo: {
     flex: 1,
@@ -406,6 +453,34 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginTop: 8,
     lineHeight: 20,
     fontFamily: 'Montserrat_400Regular',
+  },
+  bottomActions: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: theme.colors.surface,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    ...theme.shadow.lg,
+  },
+  deleteAction: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  actionPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  deleteActionText: {
+    fontSize: 12,
+    marginTop: 4,
+    fontFamily: 'Montserrat_600SemiBold',
   },
   center: {
     flex: 1,
