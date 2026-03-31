@@ -64,19 +64,7 @@ const BreedListScreen = ({ navigation }) => {
     }
   };
 
-  const handleMoreOptions = () => {
-    safeAlert(
-      'Options',
-      'Choose an action',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Select for Delete', 
-          onPress: () => setIsSelectionMode(true) 
-        }
-      ]
-    );
-  };
+
 
   const exitSelectionMode = () => {
     setIsSelectionMode(false);
@@ -209,7 +197,7 @@ const BreedListScreen = ({ navigation }) => {
                     {selectedIds.length === 0 ? 'Select items' : `${selectedIds.length} selected`}
                 </Text>
             </View>
-            <TouchableOpacity onPress={handleSelectAll} style={styles.headerButton}>
+            <TouchableOpacity onPress={handleSelectAll} style={[styles.headerButton, { alignItems: 'flex-end' }]}>
                 <Text style={[styles.headerButtonText, { color: theme.colors.primary }]}>
                     {isAllSelected ? 'None' : 'All'}
                 </Text>
@@ -222,12 +210,9 @@ const BreedListScreen = ({ navigation }) => {
           onBack={() => navigation.goBack()}
           leftAlign={true}
           rightIcon={
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity onPress={() => { setIsSearching(!isSearching); if(!isSearching) setSearchQuery(''); }} style={{ marginRight: 18 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 12, justifyContent: 'flex-end' }}>
+                <TouchableOpacity onPress={() => { setIsSearching(!isSearching); if(!isSearching) setSearchQuery(''); }}>
                     {isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleMoreOptions}>
-                    <MoreVertical color={theme.colors.white} size={24} />
                 </TouchableOpacity>
             </View>
           }
@@ -287,8 +272,8 @@ const BreedListScreen = ({ navigation }) => {
                     onPress={handleBulkDelete}
                     disabled={isDeleting || selectedIds.length === 0}
                 >
-                    <Trash2 size={26} color="#FF3B30" />
-                    <Text style={[styles.deleteText, { color: "#FF3B30" }]}>Delete</Text>
+                    <Trash2 size={26} color={theme.colors.primary} />
+                    <Text style={[styles.deleteText, { color: theme.colors.primary }]}>Delete</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.deleteAction} onPress={exitSelectionMode}>
@@ -309,7 +294,7 @@ const BreedListScreen = ({ navigation }) => {
               <View style={styles.modalContent}>
                 <View style={styles.modalIconContainer}>
                   <View style={styles.iconCircle}>
-                    <Trash2 size={32} color="#FF3B30" />
+                    <Trash2 size={32} color={theme.colors.primary} />
                   </View>
                 </View>
                 
@@ -449,7 +434,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#FFE5E5',
+    backgroundColor: '#FFF3E0', // Light Orange
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -478,7 +463,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     height: 48,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: '#FF3B30',
+    borderColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -486,13 +471,13 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   modalCancelText: {
     fontSize: 15,
     fontFamily: 'Montserrat_600SemiBold',
-    color: '#FF3B30',
+    color: theme.colors.primary,
   },
   modalDeleteButton: {
     flex: 1,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#FF3B30',
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },

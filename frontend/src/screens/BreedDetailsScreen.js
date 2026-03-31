@@ -48,8 +48,8 @@ const BreedDetailsScreen = ({ navigation, route }) => {
       <GHeader 
         title="Breed Record" 
         onBack={() => navigation.goBack()}
-        rightIcon={<Edit color={theme.colors.white} size={22} />}
-        onRightPress={() => navigation.navigate('EditBreed', { breed })}
+        rightIcon={!breed.isDefault && <Edit color={theme.colors.white} size={22} />}
+        onRightPress={() => !breed.isDefault && navigation.navigate('EditBreed', { breed })}
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>

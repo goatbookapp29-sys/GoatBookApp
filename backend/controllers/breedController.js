@@ -80,13 +80,21 @@ exports.addBreed = async (req, res) => {
 exports.updateBreed = async (req, res) => {
   const { name, animalType } = req.body;
   try {
-    // 1. Ensure the breed exists and belongs to the current farm (cannot edit defaults)
+    // 1. Ensure the breed exists and is not a protected system breed
     const breed = await prisma.breeds.findFirst({
-      where: { id: req.params.id, farm_id: req.farmId }
+      where: { id: req.params.id }
     });
 
     if (!breed) {
-      return res.status(404).json({ message: 'Breed not found in this farm' });
+      return res.status(404).json({ message: 'Breed not found' });
+    }
+
+    if (breed.is_default) {
+      return res.status(403).json({ message: 'System breeds cannot be modified. Please create a custom breed for your farm.' });
+    }
+
+    if (breed.farm_id !== req.farmId) {
+      return res.status(404).json({ message: 'Breed does not belong to your farm' });
     }
 
     const updated = await prisma.breeds.update({
@@ -112,11 +120,19 @@ exports.updateBreed = async (req, res) => {
 exports.deleteBreed = async (req, res) => {
   try {
     const breed = await prisma.breeds.findFirst({
-      where: { id: req.params.id, farm_id: req.farmId }
+      where: { id: req.params.id }
     });
 
     if (!breed) {
-      return res.status(404).json({ message: 'Breed not found in this farm' });
+      return res.status(404).json({ message: 'Breed not found' });
+    }
+
+    if (breed.is_default) {
+      return res.status(403).json({ message: 'System breeds cannot be deleted.' });
+    }
+
+    if (breed.farm_id !== req.farmId) {
+      return res.status(404).json({ message: 'Breed does not belong to your farm' });
     }
 
     // Integrity Check: Do not delete if any animals are currently assigned to this breed

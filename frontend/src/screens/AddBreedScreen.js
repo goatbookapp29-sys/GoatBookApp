@@ -18,6 +18,7 @@ const AddBreedScreen = ({ navigation, route }) => {
   const [animalType, setAnimalType] = useState(isEditing ? existingBreed.animalType : 'Goat');
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const isSystemBreed = isEditing && existingBreed.isDefault;
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -76,6 +77,7 @@ const AddBreedScreen = ({ navigation, route }) => {
                 { label: 'Sheep', value: 'Sheep' }
               ]}
               required
+              disabled={isSystemBreed}
             />
             
             <View style={styles.gap} />
@@ -86,8 +88,17 @@ const AddBreedScreen = ({ navigation, route }) => {
               onChangeText={setName} 
               placeholder="e.g. Boer, Sirohi, Khassi"
               required 
+              editable={!isSystemBreed}
             />
           </View>
+
+          {isSystemBreed && (
+            <View style={[styles.warningContainer, { backgroundColor: '#FEF2F2', borderColor: '#FEE2E2' }]}>
+               <Text style={[styles.warningText, { color: '#B91C1C' }]}>
+                  This is a standard system breed and cannot be modified.
+               </Text>
+            </View>
+          )}
 
           <View style={[styles.noteContainer, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}>
             <Text style={[styles.note, { color: theme.colors.textMuted }]}>
@@ -98,23 +109,25 @@ const AddBreedScreen = ({ navigation, route }) => {
 
           <View style={styles.footer}>
             {isEditing ? (
-              <View style={styles.buttonRow}>
-                <View style={[styles.halfWidth, { marginRight: 8 }]}>
-                  <GButton 
-                    title="Delete" 
-                    onPress={handleDelete} 
-                    variant="outline"
-                    loading={deleting}
-                  />
+              !isSystemBreed && (
+                <View style={styles.buttonRow}>
+                  <View style={[styles.halfWidth, { marginRight: 8 }]}>
+                    <GButton 
+                      title="Delete" 
+                      onPress={handleDelete} 
+                      variant="outline"
+                      loading={deleting}
+                    />
+                  </View>
+                  <View style={styles.halfWidth}>
+                    <GButton 
+                      title="Save Changes" 
+                      onPress={handleSubmit} 
+                      loading={loading}
+                    />
+                  </View>
                 </View>
-                <View style={styles.halfWidth}>
-                  <GButton 
-                    title="Save Changes" 
-                    onPress={handleSubmit} 
-                    loading={loading}
-                  />
-                </View>
-              </View>
+              )
             ) : (
               <GButton 
                 title="Create Breed" 
@@ -175,6 +188,18 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   halfWidth: {
     flex: 1,
+  },
+  warningContainer: {
+    padding: SPACING.md,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  warningText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat_500Medium',
+    textAlign: 'center',
   },
 });
 
