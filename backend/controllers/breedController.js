@@ -247,7 +247,7 @@ exports.getBreedStats = async (req, res) => {
     });
 
     res.json({
-      breed: { id: breed.id, name: breed.name, animalType: breed.animal_type },
+      breed: { id: breed.id, name: breed.name, animalType: breed.animal_type, isDefault: breed.is_default },
       totalAnimals: animals.length,
       distribution: Object.values(distribution)
     });
