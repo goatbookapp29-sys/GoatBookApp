@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, X, SearchX, Square, CheckSquare, Trash2, CheckCircle2 } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, X, SearchX, Square, CheckSquare, Trash2, CheckCircle2, Lock } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
@@ -92,10 +92,14 @@ const BreedListScreen = ({ navigation }) => {
     setSelectedIds([]);
   };
 
-  const handleLongPress = (id) => {
-    if (!isSelectionMode) {
-      setIsSelectionMode(true);
-      setSelectedIds([id]);
+  const handleLongPress = (item) => {
+    if (!item.isDefault) {
+      if (!isSelectionMode) {
+        setIsSelectionMode(true);
+        setSelectedIds([item.id]);
+      }
+    } else {
+      Alert.alert('System Breed', 'This is a default breed provided by GoatBook and cannot be deleted.');
     }
   };
 
@@ -111,6 +115,11 @@ const BreedListScreen = ({ navigation }) => {
 
   const handleSelectAll = () => {
     const selectable = filteredBreeds.filter(b => !b.isDefault).map(b => b.id);
+    if (selectable.length === 0) {
+      Alert.alert('Selection', 'No custom breeds available to select.');
+      return;
+    }
+    
     if (selectedIds.length === selectable.length) {
       setSelectedIds([]);
       setIsSelectionMode(false);
@@ -120,7 +129,10 @@ const BreedListScreen = ({ navigation }) => {
   };
 
   const handleBulkDelete = () => {
-    if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0) {
+        Alert.alert('Selection', 'Please select at least one custom breed to delete.');
+        return;
+    }
 
     Alert.alert(
       'Delete Breeds',
@@ -158,15 +170,19 @@ const BreedListScreen = ({ navigation }) => {
           isSelected && { borderColor: theme.colors.primary, backgroundColor: isDarkMode ? '#2A1A0A' : '#FFF5EB' }
         ]}
         onPress={() => isSelectionMode ? (isCustom ? toggleSelection(item.id) : null) : navigation.navigate('BreedDetails', { breedId: item.id })}
-        onLongPress={() => isCustom && handleLongPress(item.id)}
+        onLongPress={() => handleLongPress(item)}
         activeOpacity={0.7}
       >
-        {isSelectionMode && isCustom && (
+        {isSelectionMode && (
           <View style={styles.checkboxContainer}>
-            {isSelected ? (
-              <CheckSquare size={22} color={theme.colors.primary} />
+            {isCustom ? (
+              isSelected ? (
+                <CheckSquare size={22} color={theme.colors.primary} />
+              ) : (
+                <Square size={22} color={theme.colors.textMuted} />
+              )
             ) : (
-              <Square size={22} color={theme.colors.textMuted} />
+              <Lock size={20} color={theme.colors.textMuted} />
             )}
           </View>
         )}
@@ -194,8 +210,16 @@ const BreedListScreen = ({ navigation }) => {
           title="Breeds List" 
           onMenu={() => navigation.openDrawer()} 
           onBack={() => navigation.goBack()}
-          rightIcon={isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
-          onRightPress={toggleSearch}
+          rightIcon={
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => setIsSelectionMode(true)} style={{ marginRight: 15 }}>
+                    <CheckSquare color={theme.colors.white} size={22} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={toggleSearch}>
+                    {isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
+                </TouchableOpacity>
+            </View>
+          }
         />
       )}
       
@@ -229,7 +253,7 @@ const BreedListScreen = ({ navigation }) => {
             >
               <CheckCircle2 size={18} color={theme.colors.primary} style={{ marginRight: 6 }} />
               <Text style={[styles.selectAllText, { color: theme.colors.primary }]}>
-                {selectedIds.length === filteredBreeds.filter(b => !b.isDefault).length ? 'Deselect All' : 'Select All'}
+                {selectedIds.length > 0 && selectedIds.length === filteredBreeds.filter(b => !b.isDefault).length ? 'Deselect All' : 'Select All'}
               </Text>
             </TouchableOpacity>
           ) : (
