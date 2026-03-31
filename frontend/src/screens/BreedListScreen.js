@@ -334,7 +334,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, fontSize: 15, fontFamily: 'Montserrat_500Medium' },
-  actionRow: { padding: 16, flexDirection: 'row', justifyContent: 'flex-end' },
+  actionRow: { paddingVertical: 16, flexDirection: 'row', justifyContent: 'flex-end' },
   addButton: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 14 },
   addButtonText: { color: 'white', fontFamily: 'Montserrat_600SemiBold', fontSize: 14, marginLeft: 8 },
   listContent: { flexGrow: 1, paddingHorizontal: 16, paddingBottom: 120 },
