@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, Alert, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, Alert, SafeAreaView, Pressable } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
@@ -128,7 +128,9 @@ const BreedListScreen = ({ navigation }) => {
   };
 
   const handleBulkDelete = () => {
-    console.log('Bulk delete button pressed. Selected IDs:', selectedIds);
+    // DIAGNOSTIC ALERT
+    Alert.alert('Debug', 'Delete button was actually pressed!');
+    
     if (selectedIds.length === 0) {
         Alert.alert('Selection', 'Please select at least one custom breed to delete.');
         return;
@@ -296,21 +298,25 @@ const BreedListScreen = ({ navigation }) => {
           
           {isSelectionMode && (
             <View style={styles.bottomActions}>
-                <TouchableOpacity 
-                    style={styles.deleteAction}
+                <Pressable 
+                    style={({ pressed }) => [styles.deleteAction, { opacity: pressed ? 0.6 : 1 }]}
                     onPress={handleBulkDelete}
                     disabled={selectedIds.length === 0}
-                    activeOpacity={0.6}
+                    hitSlop={{ top: 10, bottom: 20, left: 20, right: 20 }}
                 >
                     <Trash2 size={24} color={selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted} />
                     <Text style={[styles.deleteActionText, { color: selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted }]}>
                         Delete
                     </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionPlaceholder} onPress={exitSelectionMode}>
+                </Pressable>
+                <Pressable 
+                    style={({ pressed }) => [styles.actionPlaceholder, { opacity: pressed ? 0.6 : 1 }]} 
+                    onPress={exitSelectionMode}
+                    hitSlop={{ top: 10, bottom: 20, left: 20, right: 20 }}
+                >
                     <X size={24} color={theme.colors.textMuted} />
                     <Text style={[styles.deleteActionText, { color: theme.colors.textMuted }]}>Cancel</Text>
-                </TouchableOpacity>
+                </Pressable>
             </View>
           )}
         </>
@@ -466,16 +472,16 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 80,
+    height: 90,
     backgroundColor: theme.colors.surface,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingBottom: Platform.OS === 'ios' ? 20 : 0,
+    paddingBottom: 20, // Increased for system navigation clearance
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
     zIndex: 1000,
-    elevation: 10,
+    elevation: 20, // Higher elevation for Android
     ...theme.shadow.lg,
   },
   deleteAction: {
