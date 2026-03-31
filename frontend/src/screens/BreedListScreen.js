@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, Alert } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { Search, Plus, ChevronRight, X, SearchX } from 'lucide-react-native';
+import { Search, Plus, ChevronRight, X, SearchX, Square, CheckSquare, Trash2, CheckCircle2 } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
@@ -17,11 +17,16 @@ const BreedListScreen = ({ navigation }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Selection State
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
+  
   const searchBarTranslateY = useRef(new Animated.Value(-100)).current;
 
   useFocusEffect(
     useCallback(() => {
       fetchBreeds();
+      exitSelectionMode();
     }, [])
   );
 
@@ -82,29 +87,117 @@ const BreedListScreen = ({ navigation }) => {
     }
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.breedCard}
-      onPress={() => navigation.navigate('BreedDetails', { breedId: item.id })}
-      activeOpacity={0.7}
-    >
-      <View style={styles.breedInfo}>
-        <Text style={[styles.breedName, { color: theme.colors.text }]}>{item.name}</Text>
-        <Text style={[styles.animalType, { color: theme.colors.textLight }]}>{item.animalType}</Text>
-      </View>
-      <ChevronRight size={20} color={theme.colors.textMuted} />
-    </TouchableOpacity>
-  );
+  const exitSelectionMode = () => {
+    setIsSelectionMode(false);
+    setSelectedIds([]);
+  };
+
+  const handleLongPress = (id) => {
+    if (!isSelectionMode) {
+      setIsSelectionMode(true);
+      setSelectedIds([id]);
+    }
+  };
+
+  const toggleSelection = (id) => {
+    if (selectedIds.includes(id)) {
+      const next = selectedIds.filter(idx => idx !== id);
+      setSelectedIds(next);
+      if (next.length === 0) setIsSelectionMode(false);
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    const selectable = filteredBreeds.filter(b => !b.isDefault).map(b => b.id);
+    if (selectedIds.length === selectable.length) {
+      setSelectedIds([]);
+      setIsSelectionMode(false);
+    } else {
+      setSelectedIds(selectable);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+
+    Alert.alert(
+      'Delete Breeds',
+      `Are you sure you want to delete ${selectedIds.length} selected breed(s)? This action cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await api.delete('/breeds/bulk', { data: { ids: selectedIds } });
+              await fetchBreeds();
+              exitSelectionMode();
+            } catch (error) {
+              const msg = error.response?.data?.message || 'Delete failed';
+              Alert.alert('Error', msg);
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const renderItem = ({ item }) => {
+    const isSelected = selectedIds.includes(item.id);
+    const isCustom = !item.isDefault;
+
+    return (
+      <TouchableOpacity 
+        style={[
+          styles.breedCard, 
+          isSelected && { borderColor: theme.colors.primary, backgroundColor: isDarkMode ? '#2A1A0A' : '#FFF5EB' }
+        ]}
+        onPress={() => isSelectionMode ? (isCustom ? toggleSelection(item.id) : null) : navigation.navigate('BreedDetails', { breedId: item.id })}
+        onLongPress={() => isCustom && handleLongPress(item.id)}
+        activeOpacity={0.7}
+      >
+        {isSelectionMode && isCustom && (
+          <View style={styles.checkboxContainer}>
+            {isSelected ? (
+              <CheckSquare size={22} color={theme.colors.primary} />
+            ) : (
+              <Square size={22} color={theme.colors.textMuted} />
+            )}
+          </View>
+        )}
+        <View style={styles.breedInfo}>
+          <Text style={[styles.breedName, { color: theme.colors.text }]}>{item.name}</Text>
+          <Text style={[styles.animalType, { color: theme.colors.textLight }]}>{item.animalType}</Text>
+        </View>
+        {!isSelectionMode && <ChevronRight size={20} color={theme.colors.textMuted} />}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader 
-        title="Breeds List" 
-        onMenu={() => navigation.openDrawer()} 
-        onBack={() => navigation.goBack()}
-        rightIcon={isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
-        onRightPress={toggleSearch}
-      />
+      {isSelectionMode ? (
+        <GHeader 
+          title={`${selectedIds.length} Selected`} 
+          onBack={exitSelectionMode}
+          backIcon={<X color={theme.colors.white} size={24} />}
+          rightIcon={<Trash2 color={theme.colors.white} size={24} />}
+          onRightPress={handleBulkDelete}
+        />
+      ) : (
+        <GHeader 
+          title="Breeds List" 
+          onMenu={() => navigation.openDrawer()} 
+          onBack={() => navigation.goBack()}
+          rightIcon={isSearching ? <X color={theme.colors.white} size={24} /> : <Search color={theme.colors.white} size={24} />}
+          onRightPress={toggleSearch}
+        />
+      )}
       
       {isSearching && (
         <Animated.View style={[styles.searchBarContainer, { transform: [{ translateY: searchBarTranslateY }] }]}>
@@ -129,13 +222,25 @@ const BreedListScreen = ({ navigation }) => {
 
       {!isSearching && (
         <View style={styles.actionRow}>
-          <TouchableOpacity 
-            style={[styles.addButton, { backgroundColor: theme.colors.primary, ...theme.shadow.sm }]}
-            onPress={() => navigation.navigate('AddBreed')}
-          >
-            <Plus color={theme.colors.white} size={20} style={styles.plusIcon} />
-            <Text style={styles.addButtonText}>Add New Breed</Text>
-          </TouchableOpacity>
+          {isSelectionMode ? (
+            <TouchableOpacity 
+              style={[styles.selectAllButton, { borderColor: theme.colors.primary }]}
+              onPress={handleSelectAll}
+            >
+              <CheckCircle2 size={18} color={theme.colors.primary} style={{ marginRight: 6 }} />
+              <Text style={[styles.selectAllText, { color: theme.colors.primary }]}>
+                {selectedIds.length === filteredBreeds.filter(b => !b.isDefault).length ? 'Deselect All' : 'Select All'}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity 
+              style={[styles.addButton, { backgroundColor: theme.colors.primary, ...theme.shadow.sm }]}
+              onPress={() => navigation.navigate('AddBreed')}
+            >
+              <Plus color={theme.colors.white} size={20} style={styles.plusIcon} />
+              <Text style={styles.addButtonText}>Add New Breed</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
@@ -193,7 +298,8 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   actionRow: {
     padding: 16,
     paddingBottom: 8,
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
     maxWidth: 768,
     width: '100%',
     alignSelf: 'center',
@@ -204,6 +310,18 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 14,
+  },
+  selectAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  selectAllText: {
+    fontFamily: 'Montserrat_600SemiBold',
+    fontSize: 13,
   },
   plusIcon: {
     marginRight: 8,
@@ -231,6 +349,9 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1.5,
     borderColor: theme.colors.border,
+  },
+  checkboxContainer: {
+    marginRight: 12,
   },
   breedInfo: {
     flex: 1,
