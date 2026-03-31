@@ -133,9 +133,14 @@ const BreedListScreen = ({ navigation }) => {
         return;
     }
 
+    const isMultiple = selectedIds.length > 1;
+    const message = isMultiple 
+        ? `Do you want to delete these breeds? Are you sure?`
+        : `Do you want to delete this breed? Are you sure?`;
+
     Alert.alert(
-      'Delete Breeds',
-      `Are you sure you want to delete ${selectedIds.length} selected breed(s)? This action cannot be undone.`,
+      isMultiple ? 'Delete Breeds' : 'Delete Breed',
+      message,
       [
         { text: 'Cancel', style: 'cancel' },
         { 
