@@ -128,6 +128,7 @@ const BreedListScreen = ({ navigation }) => {
   };
 
   const handleBulkDelete = () => {
+    console.log('Bulk delete button pressed. Selected IDs:', selectedIds);
     if (selectedIds.length === 0) {
         Alert.alert('Selection', 'Please select at least one custom breed to delete.');
         return;
@@ -294,22 +295,23 @@ const BreedListScreen = ({ navigation }) => {
           />
           
           {isSelectionMode && (
-            <SafeAreaView style={styles.bottomActions}>
+            <View style={styles.bottomActions}>
                 <TouchableOpacity 
                     style={styles.deleteAction}
                     onPress={handleBulkDelete}
                     disabled={selectedIds.length === 0}
+                    activeOpacity={0.6}
                 >
                     <Trash2 size={24} color={selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted} />
                     <Text style={[styles.deleteActionText, { color: selectedIds.length > 0 ? theme.colors.primary : theme.colors.textMuted }]}>
                         Delete
                     </Text>
                 </TouchableOpacity>
-                <View style={[styles.actionPlaceholder, { opacity: 0.5 }]}>
-                    <Plus size={24} color={theme.colors.textMuted} />
-                    <Text style={[styles.deleteActionText, { color: theme.colors.textMuted }]}>More</Text>
-                </View>
-            </SafeAreaView>
+                <TouchableOpacity style={styles.actionPlaceholder} onPress={exitSelectionMode}>
+                    <X size={24} color={theme.colors.textMuted} />
+                    <Text style={[styles.deleteActionText, { color: theme.colors.textMuted }]}>Cancel</Text>
+                </TouchableOpacity>
+            </View>
           )}
         </>
       )}
@@ -464,12 +466,16 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    height: 80,
     backgroundColor: theme.colors.surface,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 12,
+    alignItems: 'center',
+    paddingBottom: Platform.OS === 'ios' ? 20 : 0,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
+    zIndex: 1000,
+    elevation: 10,
     ...theme.shadow.lg,
   },
   deleteAction: {
