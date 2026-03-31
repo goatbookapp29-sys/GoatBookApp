@@ -66,7 +66,7 @@ const BreedDetailsScreen = ({ navigation, route }) => {
           </View>
         </View>
 
-        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>HERD LIST</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Herd List</Text>
         
         {data.distribution && data.distribution.length > 0 ? (
           data.distribution.map((loc, idx) => (
