@@ -30,6 +30,8 @@ model animals {
   purchase_price                          Decimal?                        @db.Decimal(10, 2)
   age_in_months                           Int?
   female_condition                        enum_animals_female_condition?
+  mating_date                             DateTime?                       @db.Date
+  expected_delivery_date                  DateTime?                       @db.Date
   birth_type                              enum_animals_birth_type?
   status                                  enum_animals_status             @default(LIVE)
   is_ready_for_sale                       Boolean?                        @default(false)
