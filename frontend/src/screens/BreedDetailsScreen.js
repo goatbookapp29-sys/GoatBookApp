@@ -37,6 +37,14 @@ const BreedDetailsScreen = ({ navigation, route }) => {
     }
   };
 
+  const { breed, totalAnimals, distribution } = data || {};
+  const allAnimals = useMemo(() => {
+    if (!distribution) return [];
+    return distribution.flatMap(loc => 
+      loc.animals.map(a => ({ ...a, locationName: loc.locationName }))
+    );
+  }, [distribution]);
+
   if (loading || !data) {
     return (
       <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
@@ -44,8 +52,6 @@ const BreedDetailsScreen = ({ navigation, route }) => {
       </View>
     );
   }
-
-  const { breed, totalAnimals } = data;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -84,51 +90,46 @@ const BreedDetailsScreen = ({ navigation, route }) => {
 
         <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Herd List</Text>
 
-        {data.distribution && data.distribution.length > 0 ? (
-          data.distribution.map((loc, idx) => (
-            <View key={loc.locationName + idx} style={styles.locationSection}>
-              <Text style={[styles.locationName, { color: theme.colors.textLight }]}>{loc.locationName}</Text>
-              {loc.animals.map((animal) => (
-                <TouchableOpacity
-                  key={animal.id}
-                  style={[styles.animalCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
-                  onPress={() => navigation.navigate('EditAnimal', { animal })}
-                  activeOpacity={0.7}
-                >
-                  {/* Thumbnail */}
-                  {animal.imageUrl ? (
-                    <Image source={{ uri: animal.imageUrl }} style={styles.animalThumbnail} />
-                  ) : (
-                    <View style={[styles.animalThumbnail, { backgroundColor: isDarkMode ? '#1E293B' : '#F1F5F9', justifyContent: 'center', alignItems: 'center' }]}>
-                      <Text style={{ fontSize: 10, color: theme.colors.textMuted, textAlign: 'center' }}>No Image</Text>
-                    </View>
-                  )}
+        {allAnimals && allAnimals.length > 0 ? (
+          allAnimals.map((animal) => (
+            <TouchableOpacity
+              key={animal.id}
+              style={[styles.animalCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+              onPress={() => navigation.navigate('EditAnimal', { animal })}
+              activeOpacity={0.7}
+            >
+              {/* Thumbnail */}
+              {animal.imageUrl ? (
+                <Image source={{ uri: animal.imageUrl }} style={styles.animalThumbnail} />
+              ) : (
+                <View style={[styles.animalThumbnail, { backgroundColor: isDarkMode ? '#1E293B' : '#F1F5F9', justifyContent: 'center', alignItems: 'center' }]}>
+                  <Text style={{ fontSize: 10, color: theme.colors.textMuted, textAlign: 'center' }}>No Image</Text>
+                </View>
+              )}
 
-                  {/* Main Info */}
-                  <View style={styles.animalInfo}>
-                    <View style={styles.tagWrapper}>
-                      <Tag size={16} color={theme.colors.textLight} style={{ marginRight: 6 }} />
-                      <Text style={[styles.tagNumber, { color: theme.colors.text }]}>{animal.tagNumber}</Text>
-                    </View>
-                    <Text style={[styles.breedGenderText, { color: theme.colors.textLight }]}>
-                      {breed.name} • {animal.gender ? animal.gender.charAt(0).toUpperCase() + animal.gender.slice(1).toLowerCase() : ''}
-                    </Text>
-                    <View style={[styles.locationTag, { backgroundColor: isDarkMode ? '#1E293B' : '#F1F5F9' }]}>
-                      <MapPin size={12} color={theme.colors.textLight} style={styles.locIcon} />
-                      <Text style={[styles.locationName, { color: theme.colors.textLight }]}>{loc.locationName}</Text>
-                    </View>
-                  </View>
+              {/* Main Info */}
+              <View style={styles.animalInfo}>
+                <View style={styles.tagWrapper}>
+                  <Tag size={16} color={theme.colors.textLight} style={{ marginRight: 6 }} />
+                  <Text style={[styles.tagNumber, { color: theme.colors.text }]}>{animal.tagNumber}</Text>
+                </View>
+                <Text style={[styles.breedGenderText, { color: theme.colors.textLight }]}>
+                  {breed.name} • {animal.gender ? animal.gender.charAt(0).toUpperCase() + animal.gender.slice(1).toLowerCase() : ''}
+                </Text>
+                <View style={[styles.locationTag, { backgroundColor: isDarkMode ? '#1E293B' : '#F1F5F9' }]}>
+                  <MapPin size={12} color={theme.colors.textLight} style={styles.locIcon} />
+                  <Text style={[styles.locationNameTag, { color: theme.colors.textLight }]}>{animal.locationName}</Text>
+                </View>
+              </View>
 
-                  {/* Status & Action */}
-                  <View style={[styles.statusBadge, styles[`status${animal.status?.toUpperCase() || 'LIVE'}`]]}>
-                    <Text style={styles.statusText}>
-                      {animal.status ? animal.status.charAt(0).toUpperCase() + animal.status.slice(1).toLowerCase() : 'Live'}
-                    </Text>
-                  </View>
-                  <ChevronRight size={18} color={theme.colors.textMuted} />
-                </TouchableOpacity>
-              ))}
-            </View>
+              {/* Status & Action */}
+              <View style={[styles.statusBadge, styles[`status${animal.status?.toUpperCase() || 'LIVE'}`]]}>
+                <Text style={styles.statusText}>
+                  {animal.status ? animal.status.charAt(0).toUpperCase() + animal.status.slice(1).toLowerCase() : 'Live'}
+                </Text>
+              </View>
+              <ChevronRight size={20} color={theme.colors.textMuted} />
+            </TouchableOpacity>
           ))
         ) : (
           <View style={styles.emptyState}>
@@ -202,16 +203,22 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginLeft: 4,
     letterSpacing: 0.5,
   },
-  locationSection: {
-    marginBottom: 16,
+  locationTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
-  locationName: {
+  locIcon: {
+    marginRight: 4,
+  },
+  locationNameTag: {
     fontSize: 11,
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'Inter_600SemiBold',
     textTransform: 'uppercase',
-    marginBottom: 8,
-    marginLeft: 4,
-    letterSpacing: 1,
   },
   animalCard: {
     flexDirection: 'row',
@@ -245,18 +252,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   breedGenderText: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-  },
-  locationTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  locIcon: {
-    marginRight: 4,
   },
   statusBadge: {
     paddingHorizontal: 10,

@@ -187,7 +187,7 @@ const BreedListScreen = ({ navigation }) => {
   const isAllSelected = selectedIds.length > 0 && selectedIds.length === filteredBreeds.filter(b => !b.isDefault).length;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]} pointerEvents="box-none">
+    <View style={[styles.container, { backgroundColor: theme.colors.background, pointerEvents: 'box-none' }]}>
       <GAlert 
         visible={alertConfig.visible}
         title={alertConfig.title}

@@ -74,6 +74,7 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
     zIndex: 1,
     fontWeight: (value || show) ? '600' : '500',
     maxWidth: '90%',
+    pointerEvents: 'none',
   };
 
   return (
@@ -92,7 +93,6 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
       >
         <Animated.Text 
           style={labelStyle} 
-          pointerEvents="none"
           numberOfLines={1}
           ellipsizeMode="tail"
         >

@@ -2,6 +2,7 @@ const prisma = require('../config/prisma');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
+const { deleteImage } = require('../utils/cloudinary');
 
 // Utility to log errors to a temporary file for debugging
 const logError = (error, context) => {
@@ -297,6 +298,14 @@ exports.updateAnimal = async (req, res) => {
       }
     });
 
+    // Cleanup Cloudinary image if it was replaced or removed
+    if (imageUrl !== undefined && imageUrl !== animal.image_url) {
+        if (animal.image_url) {
+            // Don't await to avoid slowing down the response, but log errors
+            deleteImage(animal.image_url).catch(err => console.error('Cloudinary Update Cleanup Error:', err));
+        }
+    }
+
     res.json({ id: updated.id, status: updated.status });
   } catch (err) {
     console.error('UPDATE ANIMAL ERROR:', err);
@@ -332,6 +341,12 @@ exports.deleteAnimal = async (req, res) => {
     }
 
     await prisma.animals.delete({ where: { id: req.params.id } });
+    
+    // Cleanup Cloudinary image if exists
+    if (animal.image_url) {
+        deleteImage(animal.image_url).catch(err => console.error('Cloudinary Delete Cleanup Error:', err));
+    }
+
     res.json({ message: 'Animal removed successfully' });
   } catch (err) {
     console.error('DELETE ANIMAL ERROR:', err);
@@ -498,7 +513,7 @@ exports.deleteAnimalsBulk = async (req, res) => {
         id: { in: validIds },
         farm_id: req.farmId
       },
-      select: { id: true, tag_number: true }
+      select: { id: true, tag_number: true, image_url: true }
     });
 
     if (animalsToDelete.length === 0) {
@@ -531,6 +546,13 @@ exports.deleteAnimalsBulk = async (req, res) => {
       where: {
         id: { in: manageableIds }
       }
+    });
+
+    // Bulk cleanup Cloudinary images
+    animalsToDelete.forEach(a => {
+        if (a.image_url) {
+            deleteImage(a.image_url).catch(err => console.error('Cloudinary Bulk Cleanup Error:', err));
+        }
     });
 
     res.json({ 

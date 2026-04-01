@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Image, FlatList, TouchableOpacity, ActivityIndi
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { UserPlus, ChevronRight, User } from 'lucide-react-native';
+import { Plus, ChevronRight, User } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -72,16 +72,6 @@ const EmployeeListScreen = ({ navigation }) => {
         title="Employee List" 
         onBack={() => navigation.goBack()} 
       />
-      
-      <View style={styles.actionRow}>
-        <TouchableOpacity 
-          style={[styles.addButton, { backgroundColor: theme.colors.primary, ...theme.shadow.sm }]}
-          onPress={() => navigation.navigate('AddEmployee')}
-        >
-          <UserPlus color={theme.colors.white} size={20} style={styles.plusIcon} />
-          <Text style={styles.addButtonText}>Add Employee</Text>
-        </TouchableOpacity>
-      </View>
 
       {loading ? (
         <View style={styles.center}>
@@ -100,6 +90,14 @@ const EmployeeListScreen = ({ navigation }) => {
           }
         />
       )}
+
+      <TouchableOpacity 
+        style={[styles.fab, { backgroundColor: theme.colors.primary, ...theme.shadow.lg }]}
+        onPress={() => navigation.navigate('AddEmployee')}
+        activeOpacity={0.8}
+      >
+        <Plus color={theme.colors.white} size={30} strokeWidth={2.5} />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -108,27 +106,22 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
   },
-  actionRow: {
-    padding: 16,
-    alignItems: 'flex-end',
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 14,
-  },
-  addButtonText: {
-    color: 'white',
-    fontFamily: 'Inter_600SemiBold',
-    marginLeft: 8,
-    fontSize: 14,
-  },
   listContent: {
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 40,
+    paddingTop: 16,
+    paddingBottom: 100,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    zIndex: 90,
   },
   item: {
     flexDirection: 'row',

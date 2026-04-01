@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, Modal, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, Modal, TouchableOpacity, Dimensions, Keyboard, Platform } from 'react-native';
 import { AlertCircle, CheckCircle2, Info, XCircle } from 'lucide-react-native';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -14,6 +14,17 @@ const GAlert = ({
   confirmText = 'OK' 
 }) => {
   const { theme } = useTheme();
+  const styles = getStyles(theme);
+
+  // On Web, ensure we blur current focus when modal opens to avoid ARIA warnings
+  React.useEffect(() => {
+    if (visible && typeof document !== 'undefined') {
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement instanceof HTMLElement) {
+        activeElement.blur();
+      }
+    }
+  }, [visible]);
 
   const getIcon = () => {
     const size = 32;
@@ -50,10 +61,15 @@ const GAlert = ({
       visible={visible}
       animationType="fade"
       onRequestClose={onClose}
+      aria-modal="true"
+      accessibilityRole="alertdialog"
     >
-      <View style={styles.overlay}>
+      <View style={styles.overlay} accessibilityLabelledBy="alert-title">
         <View style={[styles.content, { backgroundColor: theme.colors.surface }]}>
-          <View style={[styles.iconContainer, { backgroundColor: getIconBg() }]}>
+          <View 
+            style={[styles.iconContainer, { backgroundColor: getIconBg() }]}
+            importantForAccessibility="no-hide-descendants"
+          >
             {getIcon()}
           </View>
 
@@ -78,7 +94,7 @@ const GAlert = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -92,11 +108,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 24,
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
+    ...theme.shadow.lg,
   },
   iconContainer: {
     width: 64,

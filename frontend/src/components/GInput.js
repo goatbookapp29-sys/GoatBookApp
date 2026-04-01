@@ -76,7 +76,7 @@ const GInput = ({
           isMultiline && { height: 'auto', minHeight: 80, alignItems: 'flex-start', paddingTop: 16 }
         ]}
       >
-        <Animated.View style={labelContainerStyle} pointerEvents="box-none">
+        <Animated.View style={labelContainerStyle}>
           <Animated.Text style={labelTextStyle} numberOfLines={1}>
             {label}{required && '*'}
           </Animated.Text>

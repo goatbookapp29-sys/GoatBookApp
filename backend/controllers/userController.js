@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { v4: uuidv4 } = require('uuid');
+const { deleteImage } = require('../utils/cloudinary');
 
 // @desc    Get complete identity overview for the logged-in user
 // @route   GET /api/users/profile
@@ -58,6 +59,13 @@ exports.updateProfile = async (req, res) => {
         updated_at: new Date()
       }
     });
+
+    // Cleanup Cloudinary profile photo if it was replaced or removed
+    if (profilePhotoUrl !== undefined && profilePhotoUrl !== user.profile_photo_url) {
+        if (user.profile_photo_url) {
+            deleteImage(user.profile_photo_url).catch(err => console.error('Cloudinary Profile Cleanup Error:', err));
+        }
+    }
 
     res.json({ id: updated.id, name: updated.name, email: updated.email, phone: updated.phone, profilePhotoUrl: updated.profile_photo_url });
   } catch (err) {
@@ -179,6 +187,13 @@ exports.updateEmployee = async (req, res) => {
           updated_at: new Date() 
         } 
       });
+
+      // Cleanup Cloudinary profile photo if it was replaced or removed by owner
+      if (profilePhotoUrl !== undefined && profilePhotoUrl !== employee.users.profile_photo_url) {
+          if (employee.users.profile_photo_url) {
+              deleteImage(employee.users.profile_photo_url).catch(err => console.error('Cloudinary Employee Cleanup Error:', err));
+          }
+      }
     }
 
     res.json({ message: 'Staff profile updated' });

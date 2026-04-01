@@ -73,7 +73,7 @@ const GSelect = ({
           disabled && { opacity: 0.6, backgroundColor: isDarkMode ? '#111' : '#F3F4F6' }
         ]}
       >
-        <Animated.View style={labelContainerStyle} pointerEvents="box-none">
+        <Animated.View style={labelContainerStyle}>
           <Animated.Text 
             style={labelTextStyle} 
             numberOfLines={1} 
@@ -143,7 +143,7 @@ const GSelect = ({
           activeOpacity={1} 
           onPress={() => setModalVisible(false)}
         >
-          <SafeAreaView style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+          <SafeAreaView style={[styles.modalContent, { backgroundColor: theme.colors.surface, pointerEvents: 'box-none' }]}>
             <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
               <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Choose {label}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
