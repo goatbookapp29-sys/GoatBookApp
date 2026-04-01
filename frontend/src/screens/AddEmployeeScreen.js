@@ -542,7 +542,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
-    ...SHADOW.sm,
   },
   resetTrigger: {
     flexDirection: 'row',

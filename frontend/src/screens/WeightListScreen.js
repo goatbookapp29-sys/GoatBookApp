@@ -3,11 +3,12 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput, Activity
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GConfirmModal from '../components/GConfirmModal';
-import { Search, Plus, Scale, Trash2, Tag, ChevronRight, X } from 'lucide-react-native';
+import { Search, Plus, Scale, Trash2, Tag, ChevronRight, X, SearchX } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
 import { COLORS, SPACING, SHADOW } from '../theme';
+import { Animated } from 'react-native';
 
 const WeightListScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
@@ -18,6 +19,8 @@ const WeightListScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState(null);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchBarTranslateY = React.useRef(new Animated.Value(-100)).current;
   
   // Custom Delete Modal State
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -50,16 +53,30 @@ const WeightListScreen = ({ navigation }) => {
 
   // Unique tags for the main list, filtered by search query
   const tagList = useMemo(() => {
-    const tags = Object.keys(groupedWeights).map(tag => ({
-      tagNumber: tag,
-      latestWeight: groupedWeights[tag][0].weight,
-      latestDate: groupedWeights[tag][0].date,
-      count: groupedWeights[tag].length,
-      history: groupedWeights[tag]
-    }));
+    const tags = Object.keys(groupedWeights).map(tag => {
+      const latestRecord = groupedWeights[tag][0];
+      const animal = latestRecord?.animals;
+      
+      return {
+        tagNumber: tag,
+        latestWeight: latestRecord.weight,
+        latestDate: latestRecord.date,
+        count: groupedWeights[tag].length,
+        history: groupedWeights[tag],
+        // Animal details for the new card style
+        breedName: animal?.Breeds?.name || 'N/A',
+        gender: animal?.gender || '',
+        imageUrl: animal?.imageUrl || null,
+        locationName: animal?.Locations?.name || null
+      };
+    });
 
     if (!searchQuery) return tags;
-    return tags.filter(t => t.tagNumber.toLowerCase().includes(searchQuery.toLowerCase()));
+    const q = searchQuery.toLowerCase();
+    return tags.filter(t => 
+      t.tagNumber.toLowerCase().includes(q) || 
+      t.breedName.toLowerCase().includes(q)
+    );
   }, [groupedWeights, searchQuery]);
 
   const openHistory = (tagData) => {
@@ -80,6 +97,24 @@ const WeightListScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const toggleSearch = () => {
+    if (isSearching) {
+      setSearchQuery('');
+      Animated.timing(searchBarTranslateY, {
+        toValue: -100,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setIsSearching(false));
+    } else {
+      setIsSearching(true);
+      Animated.timing(searchBarTranslateY, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     }
   };
 
@@ -137,7 +172,9 @@ const WeightListScreen = ({ navigation }) => {
         </View>
         <View style={{ alignItems: 'flex-end' }}>
           <Text style={[styles.latestLabel, { color: theme.colors.textLight }]}>Last Recorded</Text>
-          <Text style={[styles.latestDate, { color: theme.colors.text }]}>{new Date(item.latestDate).toLocaleDateString()}</Text>
+          <Text style={[styles.latestDate, { color: theme.colors.text }]}>
+            {new Date(item.latestDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+          </Text>
         </View>
       </View>
       <View style={styles.cardAction}>
@@ -149,19 +186,42 @@ const WeightListScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Weight Records" onBack={() => navigation.goBack()} leftAlign />
+      <GHeader 
+        title="Weight Records" 
+        onBack={() => navigation.goBack()} 
+        leftAlign 
+        rightIcon={isSearching ? <X color="#FFFFFF" size={26} /> : <Search color="#FFFFFF" size={26} />}
+        onRightPress={toggleSearch}
+      />
       
+      {isSearching && (
+        <Animated.View style={[
+          styles.animatedSearchContainer, 
+          { 
+            backgroundColor: theme.colors.surface,
+            transform: [{ translateY: searchBarTranslateY }] 
+          }
+        ]}>
+          <View style={[styles.searchInner, { backgroundColor: isDarkMode ? '#000' : '#F9FAFB' }]}>
+            <Search size={20} color={theme.colors.textLight} style={styles.searchIcon} />
+            <TextInput
+              style={[styles.searchInput, { color: theme.colors.text }]}
+              placeholder="Search tag or breed..."
+              placeholderTextColor={theme.colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <X size={18} color={theme.colors.textLight} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </Animated.View>
+      )}
+
       <View style={styles.content}>
-        <View style={styles.searchContainer}>
-          <Search size={20} color={theme.colors.textLight} />
-          <TextInput
-            style={[styles.searchInput, { color: theme.colors.text }]}
-            placeholder="Search Tag Number..."
-            placeholderTextColor={theme.colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
 
         {loading && !refreshing ? (
           <View style={styles.center}>
@@ -215,19 +275,20 @@ const WeightListScreen = ({ navigation }) => {
                   </View>
                   
                   <View style={[styles.historyCard, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}>
-                    <View style={styles.historyCardMain}>
-                      <View>
+                    <View style={styles.historyCardContent}>
+                      <View style={styles.historyCardLeft}>
                         <Text style={[styles.historyDate, { color: theme.colors.text }]}>{new Date(record.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</Text>
-                        <View style={{ flexDirection: 'row', gap: 12 }}>
-                          {record.height ? <Text style={[styles.historyHeight, { color: theme.colors.textLight }]}>Height: {record.height} cm</Text> : null}
-                          {record.remark ? <Text style={[styles.historyRemark, { color: theme.colors.textLight }]} numberOfLines={1}>• {record.remark}</Text> : null}
-                        </View>
+                        {record.height ? <Text style={[styles.historyHeight, { color: theme.colors.textLight }]}>Height: {record.height} cm</Text> : null}
+                        {record.remark ? <Text style={[styles.historyRemark, { color: theme.colors.textLight }]} numberOfLines={2}>{record.remark}</Text> : null}
                       </View>
-                      <Text style={[styles.historyWeight, { color: theme.colors.primary }]}>{record.weight} KG</Text>
+                      
+                      <View style={styles.historyCardRight}>
+                        <Text style={[styles.historyWeight, { color: theme.colors.primary }]}>{record.weight} KG</Text>
+                        <TouchableOpacity onPress={() => handleDeletePress(record)} style={styles.deleteHistoryBtn}>
+                          <Trash2 size={16} color={theme.colors.error + '70'} />
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                    <TouchableOpacity onPress={() => handleDeletePress(record)} style={styles.deleteHistoryBtn}>
-                      <Trash2 size={18} color={theme.colors.error + '90'} />
-                    </TouchableOpacity>
                   </View>
                 </View>
               ))}
@@ -265,32 +326,37 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     padding: SPACING.md,
     flex: 1,
   },
-  searchContainer: {
+  animatedSearchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    zIndex: 5,
+  },
+  searchInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    height: 54,
-    borderRadius: 16,
-    marginBottom: SPACING.md,
-    borderWidth: 1.5,
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 48,
+  },
+  searchIcon: {
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 12,
-    fontSize: 16,
-    fontFamily: 'Inter_400Regular',
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
   },
   list: {
     paddingBottom: 80,
   },
   tagCard: {
-    borderRadius: 20,
+    borderRadius: 16,
     backgroundColor: theme.colors.surface,
     padding: 16,
     marginBottom: 16,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: theme.colors.border,
     ...theme.shadow.sm,
   },
@@ -298,23 +364,23 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   tagBadge: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   tagNumberText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Inter_700Bold',
   },
   countBadge: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   countText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
   },
   tagCardFooter: {
@@ -322,32 +388,33 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border + '50',
+    borderTopColor: '#00000008',
   },
   latestLabel: {
-    fontSize: 11,
-    fontFamily: 'Inter_500Medium',
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: 0.5,
     marginBottom: 2,
-    textTransform: 'uppercase',
   },
   latestValue: {
-    fontSize: 18,
+    fontSize: 15,
     fontFamily: 'Inter_700Bold',
   },
   latestDate: {
-    fontSize: 14,
-    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    textAlign: 'right',
   },
   cardAction: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    marginTop: 12,
+    marginTop: 10,
     gap: 4,
   },
   viewAllText: {
-    fontSize: 13,
-    fontFamily: 'Inter_600SemiBold',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
   },
   modalOverlay: {
     flex: 1,
@@ -368,77 +435,84 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginBottom: 24,
   },
   modalTitle: {
-    fontSize: 24,
+    fontSize: 18,
     fontFamily: 'Inter_700Bold',
   },
   modalSubtitle: {
-    fontSize: 15,
-    fontFamily: 'Inter_500Medium',
+    fontSize: 12,
     marginTop: 2,
   },
   closeBtn: {
-    padding: 8,
+    padding: 4,
   },
   historyList: {
     paddingBottom: 40,
   },
   historyItem: {
     flexDirection: 'row',
-    gap: 16,
+    marginBottom: 0,
   },
   timeline: {
-    width: 20,
+    width: 40,
     alignItems: 'center',
+    position: 'relative',
   },
   dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    zIndex: 1,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 16,
+    zIndex: 2,
   },
   line: {
+    position: 'absolute',
+    top: 24, // Starts below the first dot's center
+    bottom: -16, // Connects to the next item
     width: 2,
-    flex: 1,
-    marginVertical: -2,
+    zIndex: 1,
   },
   historyCard: {
     flex: 1,
-    borderRadius: 16,
-    borderWidth: 1.2,
-    padding: 16,
-    marginBottom: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    ...theme.shadow.sm,
   },
-  historyCardMain: {
+  historyCardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    flex: 1,
-    marginRight: 16,
     alignItems: 'center',
+  },
+  historyCardLeft: {
+    flex: 1,
+    gap: 2,
+  },
+  historyCardRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingLeft: 10,
   },
   historyDate: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
   },
   historyHeight: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Inter_400Regular',
-    marginTop: 2,
   },
   historyRemark: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Inter_400Regular',
-    marginTop: 2,
-    flexShrink: 1,
+    marginTop: 0,
   },
   historyWeight: {
-    fontSize: 18,
+    fontSize: 15,
     fontFamily: 'Inter_700Bold',
   },
   deleteHistoryBtn: {
-    padding: 8,
+    padding: 6,
   },
   center: {
     flex: 1,

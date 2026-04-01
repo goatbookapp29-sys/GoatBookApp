@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { StyleSheet, View, Text, Image, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, Image, FlatList, TouchableOpacity, ActivityIndicator, Animated, TextInput } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
-import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { Plus, ChevronRight, User, Briefcase, Mail, Phone } from 'lucide-react-native';
+import { Plus, ChevronRight, User, Briefcase, Mail, Phone, Search, X, SearchX } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -12,6 +11,9 @@ const EmployeeListScreen = ({ navigation }) => {
   const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const searchBarTranslateY = React.useRef(new Animated.Value(-100)).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -25,9 +27,36 @@ const EmployeeListScreen = ({ navigation }) => {
       const response = await api.get('/users/employees');
       setEmployees(response.data);
       setLoading(false);
-    } catch (error) {
-      console.error('Fetch employees error:', error);
+    } finally {
       setLoading(false);
+    }
+  };
+
+  const filteredEmployees = useMemo(() => {
+    if (!searchQuery) return employees;
+    const q = searchQuery.toLowerCase();
+    return employees.filter(e => 
+      e.name.toLowerCase().includes(q) || 
+      e.email.toLowerCase().includes(q) ||
+      (e.role && e.role.toLowerCase().includes(q))
+    );
+  }, [employees, searchQuery]);
+
+  const toggleSearch = () => {
+    if (isSearching) {
+      setSearchQuery('');
+      Animated.timing(searchBarTranslateY, {
+        toValue: -100,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setIsSearching(false));
+    } else {
+      setIsSearching(true);
+      Animated.timing(searchBarTranslateY, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     }
   };
 
@@ -51,14 +80,14 @@ const EmployeeListScreen = ({ navigation }) => {
           {item.role !== 'OWNER' && (
             <View style={[
               styles.stateBadge, 
-              { backgroundColor: item.state === 'Terminated' ? theme.colors.error + '15' : theme.colors.success + '15' }
+              { backgroundColor: (item.state === 'Terminated') ? theme.colors.error + '15' : theme.colors.success + '15' }
             ]}>
-              <View style={[styles.stateDot, { backgroundColor: item.state === 'Terminated' ? theme.colors.error : theme.colors.success }]} />
+              <View style={[styles.stateDot, { backgroundColor: (item.state === 'Terminated') ? theme.colors.error : theme.colors.success }]} />
               <Text style={[
                 styles.stateText, 
-                { color: item.state === 'Terminated' ? theme.colors.error : theme.colors.success }
+                { color: (item.state === 'Terminated') ? theme.colors.error : theme.colors.success }
               ]}>
-                {item.state.charAt(0).toUpperCase() + item.state.slice(1).toLowerCase()}
+                {((item.state || 'Active').charAt(0).toUpperCase() + (item.state || 'Active').slice(1).toLowerCase())}
               </Text>
             </View>
           )}
@@ -99,7 +128,36 @@ const EmployeeListScreen = ({ navigation }) => {
         title="Employee List" 
         onBack={() => navigation.goBack()} 
         leftAlign
+        rightIcon={isSearching ? <X color="#FFFFFF" size={26} /> : <Search color="#FFFFFF" size={26} />}
+        onRightPress={toggleSearch}
       />
+
+      {isSearching && (
+        <Animated.View style={[
+          styles.animatedSearchContainer, 
+          { 
+            backgroundColor: theme.colors.surface,
+            transform: [{ translateY: searchBarTranslateY }] 
+          }
+        ]}>
+          <View style={[styles.searchInner, { backgroundColor: isDarkMode ? '#000' : '#F9FAFB' }]}>
+            <Search size={20} color={theme.colors.textLight} style={styles.searchIcon} />
+            <TextInput
+              style={[styles.searchInput, { color: theme.colors.text }]}
+              placeholder="Search by name, email or role..."
+              placeholderTextColor={theme.colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <X size={18} color={theme.colors.textLight} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </Animated.View>
+      )}
 
       {loading ? (
         <View style={styles.center}>
@@ -107,7 +165,7 @@ const EmployeeListScreen = ({ navigation }) => {
         </View>
       ) : (
         <FlatList
-          data={employees}
+          data={filteredEmployees}
           renderItem={renderItem}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listContent}
@@ -225,6 +283,28 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  animatedSearchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    zIndex: 5,
+  },
+  searchInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 48,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
   },
   center: {
     flex: 1,
