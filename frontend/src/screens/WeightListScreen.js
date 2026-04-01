@@ -358,7 +358,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: theme.colors.border,
-    ...theme.shadow.sm,
   },
   tagCardHeader: {
     flexDirection: 'row',
@@ -477,7 +476,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
-    ...theme.shadow.sm,
   },
   historyCardContent: {
     flexDirection: 'row',

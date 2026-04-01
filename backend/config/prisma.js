@@ -8,7 +8,7 @@ if (process.env.NODE_ENV === 'production') {
   prisma = new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DIRECT_URL || process.env.DATABASE_URL
+        url: process.env.DATABASE_URL + "&connect_timeout=60" // Extended timeout for cold starts
       }
     }
   });
@@ -18,7 +18,7 @@ if (process.env.NODE_ENV === 'production') {
       log: ['warn', 'error'],
       datasources: {
         db: {
-          url: process.env.DIRECT_URL || process.env.DATABASE_URL
+          url: process.env.DATABASE_URL + "&connect_timeout=30" // Local dev timeout
         }
       }
     });

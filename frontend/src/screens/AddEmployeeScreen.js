@@ -8,7 +8,7 @@ import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
 import GConfirmModal from '../components/GConfirmModal';
 import api from '../api';
-import { KeyRound, Mail, User, Camera, ImageIcon, Trash2, X, AlertTriangle } from 'lucide-react-native';
+import { KeyRound, Mail, UserRound, Camera, ImageIcon, Trash2, X, AlertTriangle } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 const AddEmployeeScreen = ({ navigation, route }) => {
@@ -203,18 +203,20 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               {profilePhoto ? (
                 <Image source={{ uri: profilePhoto }} style={styles.avatarImage} />
               ) : (
-                <View style={[styles.avatarPlaceholder, { backgroundColor: theme.colors.primary + '15' }]}>
+                <View style={[styles.avatarPlaceholder, { backgroundColor: theme.colors.primary }]}>
                   {firstName ? (
-                    <Text style={[styles.avatarInitial, { color: theme.colors.primary }]}>
+                    <Text style={[styles.avatarInitial, { color: 'white' }]}>
                       {firstName[0].toUpperCase()}
                     </Text>
                   ) : (
-                    <User size={60} color={theme.colors.primary} />
+                    <View style={styles.placeholderLabelContainer}>
+                      <Text style={[styles.placeholderLabelText, { color: 'white' }]}>EE</Text>
+                    </View>
                   )}
                 </View>
               )}
               <View style={[styles.editBadge, { backgroundColor: theme.colors.primary }]}>
-                <Camera size={18} color="white" />
+                <Camera size={15} color="white" />
               </View>
             </TouchableOpacity>
 
@@ -293,7 +295,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
             <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Work Role</Text>
             {existingEmployee?.role === 'OWNER' ? (
               <View style={[styles.readOnlyRole, { backgroundColor: theme.colors.surface }]}>
-                <User size={20} color={theme.colors.textLight} />
+                <UserRound size={20} color={theme.colors.textLight} />
                 <Text style={[styles.readOnlyRoleText, { color: theme.colors.text }]}>Owner (Primary Access)</Text>
               </View>
             ) : (
@@ -483,9 +485,9 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     borderWidth: 2,
     borderColor: 'white',
     justifyContent: 'center',
@@ -625,6 +627,15 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   optionText: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
+  },
+  placeholderLabelContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderLabelText: {
+    fontSize: 34,
+    fontFamily: 'Inter_800ExtraBold',
+    letterSpacing: -1,
   }
 });
 

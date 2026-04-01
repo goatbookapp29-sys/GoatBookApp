@@ -31,7 +31,7 @@ const storage = {
 
 // For Production: Replace with your Render URL
 // For Development: Use your PC's IP address
-const BASE_URL = 'https://goatbookapp.onrender.com/api'; 
+const BASE_URL = 'http://localhost:5001/api'; // Local Development (Avoids macOS AirPlay conflict)
 
 const api = axios.create({
   baseURL: BASE_URL,

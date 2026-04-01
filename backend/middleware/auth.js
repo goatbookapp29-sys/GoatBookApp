@@ -46,6 +46,17 @@ module.exports = async (req, res, next) => {
 
     next();
   } catch (err) {
-    res.status(401).json({ message: 'Token is not valid' });
+    console.error('AUTH MIDDLEWARE ERROR:', err);
+    
+    // Distinguish between JWT errors and Database/Internal errors
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Session expired or invalid, please login again' });
+    }
+    
+    // If it's a Prisma connection error or other internal issue, return 500
+    res.status(500).json({ 
+      message: 'Server connectivity issue, please try again in a moment', 
+      error: err.message 
+    });
   }
 };

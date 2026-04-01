@@ -280,15 +280,18 @@ exports.getEmployees = async (req, res) => {
     });
 
     res.json(farmEmployees.map(fe => {
-      if (!fe.employees) return null;
+      const emp = fe.employees;
+      if (!emp) return null;
+      
+      const user = emp.users;
       return { 
-        id: fe.employees.id, 
-        name: fe.employees.users?.name || 'Unknown', 
-        email: fe.employees.users?.email || 'N/A', 
-        phone: fe.employees.users?.phone || 'N/A', 
-        role: fe.employees.employee_type,
-        state: fe.employees.state,
-        profilePhotoUrl: fe.employees.users?.profile_photo_url || null
+        id: emp.id, 
+        name: user?.name || 'Staff Member', 
+        email: user?.email || 'N/A', 
+        phone: user?.phone || 'N/A', 
+        role: emp.employee_type,
+        state: emp.state,
+        profilePhotoUrl: user?.profile_photo_url || null
       };
     }).filter(e => e !== null));
   } catch (err) {
