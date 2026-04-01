@@ -97,9 +97,10 @@ const AddWeightScreen = ({ route, navigation }) => {
       <GHeader 
         title="Add Weight" 
         onBack={() => navigation.goBack()} 
+        leftAlign={true}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.formCard}>
           <View style={styles.row}>
             <View style={styles.flex}>
@@ -170,18 +171,19 @@ const AddWeightScreen = ({ route, navigation }) => {
             style={{ color: theme.colors.text }}
           />
         </View>
+      </ScrollView>
 
+      <View style={styles.footer}>
         <GButton 
-          title="SUBMIT RECORD" 
+          title="Submit Record" 
           onPress={handleSubmit} 
           loading={loading}
-          containerStyle={styles.submitBtn}
         />
-      </ScrollView>
+      </View>
 
       <GAlert 
         visible={successVisible}
-        title="Success! 🎉"
+        title="Success!"
         message={`Weight record for Tag ${tagNumber} has been saved successfully.`}
         type="success"
         confirmText="Excellent"
@@ -200,14 +202,14 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.lg,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   formCard: {
-    paddingBottom: SPACING.md,
+    paddingBottom: 10,
   },
   row: {
     flexDirection: 'row',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   flex: {
     flex: 1,
@@ -221,7 +223,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: theme.typography.regular,
   },
   animalDetailCard: {
     padding: 16,
@@ -238,15 +240,19 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: theme.typography.medium,
     marginLeft: 10,
   },
   detailValue: {
     fontSize: 14,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: theme.typography.semiBold,
   },
-  submitBtn: {
-    marginTop: 10,
+  footer: {
+    padding: SPACING.lg,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
+    paddingBottom: Platform.OS === 'ios' ? 30 : SPACING.lg,
   },
 });
 export default AddWeightScreen;

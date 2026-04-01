@@ -53,28 +53,34 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
     });
   };
 
-  const labelStyle = {
+  const labelContainerStyle = {
     position: 'absolute',
     left: 12,
-    right: 30,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [14, -10],
     }),
+    zIndex: 10,
+    backgroundColor: (value || show) ? theme.colors.background : 'transparent',
+    paddingHorizontal: (value || show) ? 10 : 0,
+    maxWidth: (value || show) ? '92%' : '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    pointerEvents: 'none',
+    height: (value || show) ? 20 : 'auto',
+  };
+
+  const labelTextStyle = {
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [15, 11],
+      outputRange: [15, 12],
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [theme.colors.textLight, error ? theme.colors.error : theme.colors.primary],
+      outputRange: [theme.colors.textLight, error ? theme.colors.error : (show ? theme.colors.primary : theme.colors.textLight)],
     }),
-    backgroundColor: (value || show) ? theme.colors.surface : 'transparent',
-    paddingHorizontal: (value || show) ? 4 : 0,
-    zIndex: 1,
-    fontWeight: (value || show) ? '600' : '500',
-    maxWidth: '90%',
-    pointerEvents: 'none',
+    fontFamily: (value || show) ? theme.typography.semiBold : theme.typography.medium,
+    letterSpacing: 0.3,
   };
 
   return (
@@ -83,33 +89,33 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
         style={[
           styles.inputWrapper,
           { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-          error && { borderColor: theme.colors.error, borderWidth: 2 },
-          show && { borderColor: theme.colors.primary, borderWidth: 2 }
+          error && { borderColor: theme.colors.error, borderWidth: 1.5 },
+          show && { borderColor: theme.colors.primary, borderWidth: 1.5 }
         ]} 
         onPress={() => {
           setShow(true);
         }}
         activeOpacity={0.7}
       >
-        <Animated.Text 
-          style={labelStyle} 
+        <Text 
+          style={[
+            styles.valueText, 
+            { color: (value || show) ? theme.colors.text : 'transparent' }, 
+            (show && !value) && { color: theme.colors.textMuted }
+          ]}
           numberOfLines={1}
-          ellipsizeMode="tail"
         >
-          {label}{required && '*'}
-        </Animated.Text>
-
-        {value || show ? (
-          <Text 
-            style={[styles.valueText, { color: theme.colors.text }, !value && { color: theme.colors.textMuted }]}
-            numberOfLines={1}
-          >
-            {value ? formatDate(value) : placeholder}
-          </Text>
-        ) : <View style={{ flex: 1 }} />}
+          {value ? formatDate(value) : placeholder}
+        </Text>
 
         <Calendar size={20} color={theme.colors.textMuted} />
       </TouchableOpacity>
+
+      <Animated.View style={labelContainerStyle}>
+        <Animated.Text style={labelTextStyle} numberOfLines={1} ellipsizeMode="tail">
+          {label}{required && '*'}
+        </Animated.Text>
+      </Animated.View>
 
       {error ? (
         <View style={styles.errorContainer}>

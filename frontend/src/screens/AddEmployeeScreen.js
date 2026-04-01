@@ -294,9 +294,14 @@ const AddEmployeeScreen = ({ navigation, route }) => {
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Work Role</Text>
             {existingEmployee?.role === 'OWNER' ? (
-              <View style={[styles.readOnlyRole, { backgroundColor: theme.colors.surface }]}>
-                <UserRound size={20} color={theme.colors.textLight} />
-                <Text style={[styles.readOnlyRoleText, { color: theme.colors.text }]}>Owner (Primary Access)</Text>
+              <View style={[styles.readOnlyRole, { backgroundColor: theme.colors.primary + '10', borderColor: theme.colors.primary + '30' }]}>
+                <View style={[styles.roleIconCircle, { backgroundColor: theme.colors.primary + '20' }]}>
+                  <KeyRound size={18} color={theme.colors.primary} />
+                </View>
+                <View style={styles.roleTextContainer}>
+                  <Text style={[styles.readOnlyRoleText, { color: theme.colors.text }]}>Owner (Primary Access)</Text>
+                  <Text style={[styles.roleSubtext, { color: theme.colors.textLight }]}>This account has full farm management control</Text>
+                </View>
               </View>
             ) : (
               <GSelect 
@@ -324,7 +329,9 @@ const AddEmployeeScreen = ({ navigation, route }) => {
                   onPress={() => setShowPasswordReset(true)}
                 >
                   <KeyRound size={20} color={theme.colors.primary} />
-                  <Text style={[styles.resetTriggerText, { color: theme.colors.primary }]}>Reset Employee Password</Text>
+                  <Text style={[styles.resetTriggerText, { color: theme.colors.primary }]}>
+                    {existingEmployee?.role === 'OWNER' ? "Reset Account Password" : "Reset Employee Password"}
+                  </Text>
                 </TouchableOpacity>
               ) : (
                 <View style={styles.resetBox}>
@@ -636,6 +643,33 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontSize: 34,
     fontFamily: 'Inter_800ExtraBold',
     letterSpacing: -1,
+  },
+  readOnlyRole: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  roleIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  roleTextContainer: {
+    flex: 1,
+  },
+  readOnlyRoleText: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  roleSubtext: {
+    fontSize: 12,
+    marginTop: 2,
+    fontFamily: 'Inter_400Regular',
   }
 });
 
