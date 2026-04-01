@@ -34,30 +34,31 @@ const GInput = ({
   const labelContainerStyle = {
     position: 'absolute',
     left: 12,
-    right: 32,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [14, -10],
     }),
-    zIndex: 2,
-    backgroundColor: (isFocused || value) ? theme.colors.surface : 'transparent',
-    paddingHorizontal: (isFocused || value) ? 4 : 0,
-    maxWidth: (isFocused || value) ? '88%' : '90%',
+    zIndex: 10,
+    backgroundColor: (isFocused || value) ? theme.colors.background : 'transparent',
+    paddingHorizontal: (isFocused || value) ? 10 : 0,
+    maxWidth: (isFocused || value) ? '92%' : '90%',
     flexDirection: 'row',
     alignItems: 'center',
     pointerEvents: 'box-none',
+    height: (isFocused || value) ? 20 : 'auto',
   };
-
+  
   const labelTextStyle = {
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [15, 11],
+      outputRange: [15, 12],
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [theme.colors.textLight, isFocused ? theme.colors.primary : theme.colors.textLight],
+      outputRange: [theme.colors.textLight, error ? theme.colors.error : (isFocused ? theme.colors.primary : theme.colors.textLight)],
     }),
     fontFamily: (isFocused || value) ? theme.typography.semiBold : theme.typography.medium,
+    letterSpacing: 0.3,
   };
 
   const inputRef = useRef(null);
@@ -76,36 +77,6 @@ const GInput = ({
           isMultiline && { height: 'auto', minHeight: 80, alignItems: 'flex-start', paddingTop: 16 }
         ]}
       >
-        <Animated.View style={labelContainerStyle}>
-          <Animated.Text style={labelTextStyle} numberOfLines={1}>
-            {label}{required && '*'}
-          </Animated.Text>
-          {helpAction && (
-            <Animated.View style={{
-              marginLeft: animatedValue.interpolate({
-                inputRange: [0, 1],
-                outputRange: [8, 3],
-              }),
-              transform: [{
-                scale: animatedValue.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [1.1, 0.85],
-                })
-              }],
-              marginTop: animatedValue.interpolate({
-                inputRange: [0, 1],
-                outputRange: [2, 1],
-              }),
-            }}>
-              <TouchableOpacity 
-                onPress={helpAction}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={1.5} />
-              </TouchableOpacity>
-            </Animated.View>
-          )}
-        </Animated.View>
         <TextInput
           ref={inputRef}
           style={StyleSheet.flatten([
@@ -143,6 +114,37 @@ const GInput = ({
           </TouchableOpacity>
         )}
       </TouchableOpacity>
+
+      <Animated.View style={labelContainerStyle}>
+        <Animated.Text style={labelTextStyle} numberOfLines={1} ellipsizeMode="tail">
+          {label}{required && '*'}
+        </Animated.Text>
+        {helpAction && (
+          <Animated.View style={{
+            marginLeft: animatedValue.interpolate({
+              inputRange: [0, 1],
+              outputRange: [8, 3],
+            }),
+            transform: [{
+              scale: animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1.1, 0.85],
+              })
+            }],
+            marginTop: animatedValue.interpolate({
+              inputRange: [0, 1],
+              outputRange: [2, 1],
+            }),
+          }}>
+            <TouchableOpacity 
+              onPress={helpAction}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={1.5} />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+      </Animated.View>
       {error && <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>}
     </View>
   );

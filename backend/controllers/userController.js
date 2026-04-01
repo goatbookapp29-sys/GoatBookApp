@@ -225,6 +225,42 @@ exports.resetEmployeePassword = async (req, res) => {
   }
 };
 
+// @desc    Toggle Employee Status (Terminate/Re-activate)
+// @route   PUT /api/users/employees/:id/status
+exports.updateEmployeeStatus = async (req, res) => {
+  const { state } = req.body;
+  try {
+    if (req.employee.employee_type !== 'OWNER') return res.status(403).json({ message: 'Permission denied' });
+    
+    if (!['Working', 'Terminated'].includes(state)) {
+      return res.status(400).json({ message: 'Invalid state. Must be Working or Terminated.' });
+    }
+
+    const employee = await prisma.employees.findUnique({ where: { id: req.params.id } });
+    if (!employee) return res.status(404).json({ message: 'Employee not found' });
+
+    // Business Rule: Primary owner cannot be terminated via this screen
+    const ownedFarm = await prisma.farms.findFirst({ where: { owner_employee_id: employee.id } });
+    if (ownedFarm && state === 'Terminated') {
+      return res.status(403).json({ message: 'The primary owner cannot be terminated from their own farm.' });
+    }
+
+    await prisma.employees.update({
+      where: { id: req.params.id },
+      data: { 
+        state,
+        updated_by_user_id: req.user.id,
+        updated_at: new Date()
+      }
+    });
+
+    res.json({ message: `Employee status updated to ${state}` });
+  } catch (err) {
+    console.error('UPDATE STATUS ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 // @desc    List all staff members currently working on this farm
 // @route   GET /api/users/employees
 exports.getEmployees = async (req, res) => {

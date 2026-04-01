@@ -273,27 +273,30 @@ const ProfileSettingsScreen = ({ navigation }) => {
             />
           </View>
 
-          {hasChanges && (
-            <View style={styles.buttonRow}>
-              <View style={styles.halfBtn}>
-                <GButton 
-                  title="Reset" 
-                  variant="outline" 
-                  onPress={handleReset}
-                />
-              </View>
-              <View style={styles.halfBtn}>
-                <GButton 
-                  title={uploading ? "Uploading..." : "Save Changes"} 
-                  onPress={handleSave}
-                  loading={saving}
-                  disabled={uploading}
-                />
-              </View>
-            </View>
-          )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {hasChanges && (
+        <View style={[styles.footerContainer, { paddingBottom: Platform.OS === 'ios' ? 30 : 20 }]}>
+          <View style={styles.buttonRow}>
+            <View style={styles.halfBtn}>
+              <GButton 
+                title="Reset" 
+                variant="outline" 
+                onPress={handleReset}
+              />
+            </View>
+            <View style={styles.halfBtn}>
+              <GButton 
+                title={uploading ? "Uploading..." : "Save Changes"} 
+                onPress={handleSave}
+                loading={saving}
+                disabled={uploading}
+              />
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -312,7 +315,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.lg,
-    paddingBottom: 40,
+    paddingBottom: 120, // Increased to clear fixed footer
   },
   photoSection: {
     alignItems: 'center',
@@ -368,10 +371,18 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   gap: {
     height: 14,
   },
+  footerContainer: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    backgroundColor: theme.colors.background,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    ...SHADOW.lg, // Added for that boxy shadow look
+  },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: SPACING.md,
+    paddingBottom: 8,
   },
   halfBtn: {
     width: '48%',

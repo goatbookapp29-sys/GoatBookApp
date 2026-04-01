@@ -23,6 +23,9 @@ router.post('/employees', auth, userController.createEmployee);
 // @route   PUT api/users/employees/:id
 router.put('/employees/:id', auth, userController.updateEmployee);
 
+// @route   PUT api/users/employees/:id/status
+router.put('/employees/:id/status', auth, userController.updateEmployeeStatus);
+
 // @route   POST api/users/employees/:id/reset-password
 router.post('/employees/:id/reset-password', auth, userController.resetEmployeePassword);
 

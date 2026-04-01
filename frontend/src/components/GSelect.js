@@ -31,31 +31,31 @@ const GSelect = ({
   const labelContainerStyle = {
     position: 'absolute',
     left: 12,
-    right: 32,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [14, -10],
     }),
-    zIndex: 2,
-    backgroundColor: (value || modalVisible) ? theme.colors.surface : 'transparent',
-    paddingHorizontal: (value || modalVisible) ? 4 : 0,
+    zIndex: 10,
+    backgroundColor: (value || modalVisible) ? theme.colors.background : 'transparent',
+    paddingHorizontal: (value || modalVisible) ? 10 : 0,
+    maxWidth: (value || modalVisible) ? '92%' : '90%',
     flexDirection: 'row',
     alignItems: 'center',
     pointerEvents: 'box-none',
-    maxWidth: '72%',
-    paddingRight: 4,
+    height: (value || modalVisible) ? 20 : 'auto',
   };
 
   const labelTextStyle = {
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [15, 11],
+      outputRange: [15, 12],
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [theme.colors.textLight, error ? theme.colors.error : theme.colors.primary],
+      outputRange: [theme.colors.textLight, error ? theme.colors.error : (modalVisible ? theme.colors.primary : theme.colors.textLight)],
     }),
     fontFamily: (value || modalVisible) ? theme.typography.semiBold : (theme.typography.medium || 'System'),
+    letterSpacing: 0.3,
   };
 
   const selectedOption = options.find(opt => opt.value === value);
@@ -68,46 +68,11 @@ const GSelect = ({
         style={[
           styles.inputWrapper, 
           { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-          error && { borderColor: theme.colors.error, borderWidth: 2 },
-          modalVisible && { borderColor: theme.colors.primary, borderWidth: 2 },
+          error && { borderColor: theme.colors.error },
+          modalVisible && { borderColor: theme.colors.primary },
           disabled && { opacity: 0.6, backgroundColor: isDarkMode ? '#111' : '#F3F4F6' }
         ]}
       >
-        <Animated.View style={labelContainerStyle}>
-          <Animated.Text 
-            style={labelTextStyle} 
-            numberOfLines={1} 
-            ellipsizeMode="tail"
-          >
-            {label}{required && '*'}
-          </Animated.Text>
-          {helpAction && (
-            <Animated.View style={{
-              marginLeft: animatedValue.interpolate({
-                inputRange: [0, 1],
-                outputRange: [5, 2],
-              }),
-              transform: [{
-                scale: animatedValue.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [1.1, 0.85],
-                })
-              }],
-              marginTop: animatedValue.interpolate({
-                inputRange: [0, 1],
-                outputRange: [2, 1],
-              }),
-            }}>
-              <TouchableOpacity 
-                onPress={helpAction}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={1.5} />
-              </TouchableOpacity>
-            </Animated.View>
-          )}
-        </Animated.View>
-        
         {value || modalVisible ? (
           <Text 
             style={[styles.valueText, { color: theme.colors.text }, !value && { color: theme.colors.textMuted }]} 
@@ -125,6 +90,41 @@ const GSelect = ({
           )}
         </View>
       </TouchableOpacity>
+
+      <Animated.View style={labelContainerStyle}>
+        <Animated.Text 
+          style={labelTextStyle} 
+          numberOfLines={1} 
+          ellipsizeMode="tail"
+        >
+          {label}{required && '*'}
+        </Animated.Text>
+        {helpAction && (
+          <Animated.View style={{
+            marginLeft: animatedValue.interpolate({
+              inputRange: [0, 1],
+              outputRange: [5, 2],
+            }),
+            transform: [{
+              scale: animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1.1, 0.85],
+              })
+            }],
+            marginTop: animatedValue.interpolate({
+              inputRange: [0, 1],
+              outputRange: [2, 1],
+            }),
+          }}>
+            <TouchableOpacity 
+              onPress={helpAction}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={1.5} />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+      </Animated.View>
 
       {error ? (
         <View style={styles.errorContainer}>

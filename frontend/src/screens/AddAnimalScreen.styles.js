@@ -34,7 +34,7 @@ export const getStyles = (theme, isDarkMode, insets) => StyleSheet.create({
   scrollContent: {
     padding: SPACING.lg,
     flexGrow: 1,
-    paddingBottom: 40,
+    paddingBottom: 140, // Increased to clear fixed footer
   },
   sectionTitle: {
     fontSize: 15,
@@ -56,8 +56,12 @@ export const getStyles = (theme, isDarkMode, insets) => StyleSheet.create({
     marginHorizontal: 4,
   },
   footer: {
-    marginTop: SPACING.xl,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    backgroundColor: theme.colors.background,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    ...theme.shadow.lg, // Added shadow for floating effect
   },
   buttonRow: {
     flexDirection: 'row',

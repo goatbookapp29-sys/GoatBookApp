@@ -1346,35 +1346,36 @@ const AddAnimalScreen = ({ navigation, route }) => {
             </>
           )}
 
-          <View style={styles.footer}>
-            {isEditing ? (
-              <View style={styles.buttonRow}>
-                <View style={[styles.halfBtn, { marginRight: 8 }]}>
-                  <GButton 
-                    title="Delete" 
-                    variant="outline" 
-                    onPress={handleDelete}
-                    loading={deleting}
-                  />
-                </View>
-                <View style={styles.halfBtn}>
-                  <GButton 
-                    title="Save Changes" 
-                    onPress={handleSave}
-                    loading={loading}
-                  />
-                </View>
-              </View>
-            ) : (
-              <GButton 
-                title="Create Animal Record" 
-                onPress={handleSave} 
-                loading={loading}
-              />
-            )}
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <View style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
+        {isEditing ? (
+          <View style={styles.buttonRow}>
+            <View style={[styles.halfBtn, { marginRight: 8 }]}>
+              <GButton 
+                title="Delete" 
+                variant="outline" 
+                onPress={handleDelete}
+                loading={deleting}
+              />
+            </View>
+            <View style={styles.halfBtn}>
+              <GButton 
+                title="Save Changes" 
+                onPress={handleSave}
+                loading={loading}
+              />
+            </View>
+          </View>
+        ) : (
+          <GButton 
+            title="Create Animal Record" 
+            onPress={handleSave} 
+            loading={loading}
+          />
+        )}
+      </View>
     </View>
   );
 };

@@ -24,6 +24,11 @@ module.exports = async (req, res, next) => {
       return res.status(401).json({ message: 'User or Employee profile not found' });
     }
 
+    // Security Check: Block terminated employees immediately
+    if (employeeProfile.state === 'Terminated') {
+      return res.status(403).json({ message: 'Access Revoked: Your account has been terminated by the Farm Owner.' });
+    }
+
     req.user = user;
     req.employee = employeeProfile;
 

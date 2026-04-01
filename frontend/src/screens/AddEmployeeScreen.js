@@ -16,7 +16,8 @@ const AddEmployeeScreen = ({ navigation, route }) => {
   const isEditing = !!route.params?.employee;
   const existingEmployee = route.params?.employee;
 
-  const [name, setName] = useState(isEditing ? existingEmployee.name : '');
+  const [firstName, setFirstName] = useState(isEditing ? (existingEmployee.name || '').split(' ')[0] : '');
+  const [lastName, setLastName] = useState(isEditing ? (existingEmployee.name || '').split(' ').slice(1).join(' ') : '');
   const [email, setEmail] = useState(isEditing ? existingEmployee.email : '');
   const [password, setPassword] = useState(''); // Only used for registration or reset
   const [phone, setPhone] = useState(isEditing ? existingEmployee.phone : '');
@@ -96,10 +97,12 @@ const AddEmployeeScreen = ({ navigation, route }) => {
   };
 
   const handleSave = async () => {
-    if (!name || !email || (!isEditing && !password)) {
+    if (!firstName || !email || (!isEditing && !password)) {
       Alert.alert('Validation Error', 'Please fill in Name, Email, and Password');
       return;
     }
+
+    const fullName = `${firstName} ${lastName}`.trim();
 
     setLoading(true);
     try {
@@ -109,10 +112,10 @@ const AddEmployeeScreen = ({ navigation, route }) => {
       }
 
       if (isEditing) {
-        await api.put(`/users/employees/${existingEmployee.id}`, { name, role, email, phone, state, profilePhotoUrl: uploadedPhotoUrl });
+        await api.put(`/users/employees/${existingEmployee.id}`, { name: fullName, role, email, phone, state, profilePhotoUrl: uploadedPhotoUrl });
         Alert.alert('Success', 'Employee updated successfully');
       } else {
-        await api.post('/users/employees', { name, email, password, role, phone, state });
+        await api.post('/users/employees', { name: fullName, email, password, role, phone, state });
         // Photo can only be added when editing (after creation)
         Alert.alert('Success', 'Employee created successfully');
       }
@@ -145,6 +148,40 @@ const AddEmployeeScreen = ({ navigation, route }) => {
     }
   };
 
+  const handleStatusToggle = async () => {
+    const isTerminating = state === 'Working';
+    const nextState = isTerminating ? 'Terminated' : 'Working';
+    
+    const title = isTerminating ? 'Terminate Employee?' : 'Re-activate Employee?';
+    const message = isTerminating 
+      ? 'Are you sure you want to terminate this employee? They will lose all access immediately and cannot log in, but all historical records and changes they made will be safely preserved in the farm logs.'
+      : 'This will restore the employee\'s access to the farm. They will be able to log in with their existing credentials.';
+
+    Alert.alert(
+      title,
+      message,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: isTerminating ? 'Terminate' : 'Re-activate', 
+          style: isTerminating ? 'destructive' : 'default',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await api.put(`/users/employees/${existingEmployee.id}/status`, { state: nextState });
+              setState(nextState);
+              Alert.alert('Success', `Employee ${isTerminating ? 'terminated' : 're-activated'} successfully.`);
+            } catch (error) {
+              Alert.alert('Error', error.response?.data?.message || 'Failed to update status');
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
@@ -154,7 +191,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
           <View style={{ 
             backgroundColor: state === 'Terminated' ? theme.colors.error : (theme.colors.success || '#10B981'), 
             paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, opacity: 0.9,
-            width: 75, alignItems: 'center'
+            minWidth: 75, alignItems: 'center'
           }}>
             <Text style={{ color: 'white', fontSize: 9, fontFamily: 'Inter_700Bold' }}>
               {state === 'Terminated' ? 'TERMINATED' : 'WORKING'}
@@ -195,39 +232,54 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               )}
             </View>
           </View>
-
+ 
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Identity Details</Text>
             
-            <GInput 
-              label="Full Name" 
-              value={name} 
-              onChangeText={setName} 
-              placeholder="Deepak Kumar"
-              required 
-            />
+            <View style={styles.inputRow}>
+              <View style={styles.rowItem}>
+                <GInput 
+                  label="First Name" 
+                  value={firstName} 
+                  onChangeText={setFirstName} 
+                  placeholder="Deepak"
+                  required 
+                />
+              </View>
+              <View style={styles.rowItem}>
+                <GInput 
+                  label="Last Name" 
+                  value={lastName} 
+                  onChangeText={setLastName} 
+                  placeholder="Kumar"
+                />
+              </View>
+            </View>
             
             <View style={styles.gap} />
             
-            <GInput 
-              label="Email Address" 
-              value={email} 
-              onChangeText={setEmail} 
-              keyboardType="email-address"
-              autoCapitalize="none"
-              required 
-            />
-
-            <View style={styles.gap} />
-
-            <GInput 
-              label="Phone Number" 
-              value={phone} 
-              onChangeText={setPhone} 
-              keyboardType="phone-pad"
-              required 
-            />
-
+            <View style={styles.inputRow}>
+              <View style={styles.rowItem}>
+                <GInput 
+                  label="Phone Number" 
+                  value={phone} 
+                  onChangeText={setPhone} 
+                  keyboardType="phone-pad"
+                  required 
+                />
+              </View>
+              <View style={styles.rowItem}>
+                <GInput 
+                  label="Email Address" 
+                  value={email} 
+                  onChangeText={setEmail} 
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  required 
+                />
+              </View>
+            </View>
+ 
             {!isEditing && (
               <>
                 <View style={styles.gap} />
@@ -242,7 +294,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               </>
             )}
           </View>
-
+ 
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Work Role</Text>
             <GSelect 
@@ -259,19 +311,8 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               ]}
               required
             />
-            <View style={styles.gap} />
-            <GSelect 
-              label="Employment State" 
-              value={state} 
-              onSelect={setState}
-              options={[
-                { label: 'Working', value: 'Working' },
-                { label: 'Terminated', value: 'Terminated' }
-              ]}
-              required
-            />
           </View>
-
+ 
           {isEditing && (
             <View style={[styles.resetSection, { backgroundColor: theme.colors.surface }]}>
               {!showPasswordReset ? (
@@ -303,8 +344,22 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               )}
             </View>
           )}
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-          <View style={styles.footer}>
+      <View style={[styles.footerContainer, { paddingBottom: Platform.OS === 'ios' ? 30 : 20 }]}>
+        <View style={styles.buttonRow}>
+          {isEditing && (
+            <View style={styles.halfBtn}>
+              <GButton 
+                title={state === 'Working' ? "Terminate" : "Re-activate"} 
+                variant="outline" 
+                onPress={handleStatusToggle}
+                loading={loading}
+              />
+            </View>
+          )}
+          <View style={isEditing ? styles.halfBtn : { flex: 1 }}>
             <GButton 
               title={uploading ? "Uploading photo..." : (isEditing ? "Save changes" : "Create employee")} 
               onPress={handleSave}
@@ -312,8 +367,8 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               disabled={uploading}
             />
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </View>
     </View>
   );
 };
@@ -386,6 +441,14 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   gap: {
     height: 16,
   },
+  inputRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  rowItem: {
+    flex: 1,
+  },
   resetSection: {
     marginTop: SPACING.md,
     padding: SPACING.lg,
@@ -418,9 +481,21 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   confirmText: {
     fontFamily: 'Inter_600SemiBold',
   },
-  footer: {
-    paddingVertical: SPACING.xl,
-    marginTop: 'auto',
+  footerContainer: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    backgroundColor: theme.colors.background,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    ...SHADOW.lg,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 8,
+  },
+  halfBtn: {
+    width: '48%',
   }
 });
 

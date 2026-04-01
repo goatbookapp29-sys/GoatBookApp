@@ -165,6 +165,10 @@ exports.login = async (req, res) => {
 
     const employeeProfile = user.employees?.[0];
 
+    if (employeeProfile?.state === 'Terminated') {
+      return res.status(403).json({ message: 'Access Denied: Your account has been terminated.' });
+    }
+
     // Create session token
     const token = jwt.sign(
       { id: user.id },
