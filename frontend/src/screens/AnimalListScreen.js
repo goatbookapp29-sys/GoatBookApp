@@ -212,7 +212,9 @@ const AnimalListScreen = ({ navigation, route }) => {
           {item.Location && (
             <View style={[styles.locationTag, { backgroundColor: isDarkMode ? '#222' : '#F3F4F6' }]}>
               <MapPin size={12} color={theme.colors.textLight} style={styles.locIcon} />
-              <Text style={[styles.locationName, { color: theme.colors.textLight }]}>{item.Location.name}</Text>
+              <Text style={[styles.locationName, { color: theme.colors.textLight }]}>
+                {item.Location.name ? (item.Location.name.charAt(0).toUpperCase() + item.Location.name.slice(1).toLowerCase()) : ''}
+              </Text>
             </View>
           )}
         </View>
@@ -568,7 +570,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   locationName: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    textTransform: 'uppercase',
   },
   footerInfo: {
     paddingVertical: 30,

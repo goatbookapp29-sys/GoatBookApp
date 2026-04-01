@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, View, Text, ScrollView, Image, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Image, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, Modal } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
+import GConfirmModal from '../components/GConfirmModal';
 import api from '../api';
-import { KeyRound, Mail, User, Camera, ImageIcon, Trash2 } from 'lucide-react-native';
+import { KeyRound, Mail, User, Camera, ImageIcon, Trash2, X, AlertTriangle } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 const AddEmployeeScreen = ({ navigation, route }) => {
@@ -28,8 +29,11 @@ const AddEmployeeScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const pickImage = async () => {
+    setShowImagePicker(false);
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -42,6 +46,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
   };
 
   const takePhoto = async () => {
+    setShowImagePicker(false);
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       alert('Sorry, we need camera permissions to make this work!');
@@ -148,38 +153,31 @@ const AddEmployeeScreen = ({ navigation, route }) => {
     }
   };
 
-  const handleStatusToggle = async () => {
+  const handleStatusToggle = () => {
+    setShowConfirmModal(true);
+  };
+
+  const performToggle = async () => {
     const isTerminating = state === 'Working';
     const nextState = isTerminating ? 'Terminated' : 'Working';
     
-    const title = isTerminating ? 'Terminate Employee?' : 'Re-activate Employee?';
-    const message = isTerminating 
-      ? 'Are you sure you want to terminate this employee? They will lose all access immediately and cannot log in, but all historical records and changes they made will be safely preserved in the farm logs.'
-      : 'This will restore the employee\'s access to the farm. They will be able to log in with their existing credentials.';
-
-    Alert.alert(
-      title,
-      message,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: isTerminating ? 'Terminate' : 'Re-activate', 
-          style: isTerminating ? 'destructive' : 'default',
-          onPress: async () => {
-            setLoading(true);
-            try {
-              await api.put(`/users/employees/${existingEmployee.id}/status`, { state: nextState });
-              setState(nextState);
-              Alert.alert('Success', `Employee ${isTerminating ? 'terminated' : 're-activated'} successfully.`);
-            } catch (error) {
-              Alert.alert('Error', error.response?.data?.message || 'Failed to update status');
-            } finally {
-              setLoading(false);
-            }
-          }
-        }
-      ]
-    );
+    setShowConfirmModal(false);
+    setLoading(true);
+    try {
+      await api.put(`/users/employees/${existingEmployee.id}/status`, { state: nextState });
+      setState(nextState);
+      if (Platform.OS === 'web') {
+        alert(`Employee ${isTerminating ? 'terminated' : 're-activated'} successfully.`);
+      } else {
+        Alert.alert('Success', `Employee ${isTerminating ? 'terminated' : 're-activated'} successfully.`);
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || 'Failed to update status';
+      if (Platform.OS === 'web') alert(errorMsg);
+      else Alert.alert('Error', errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -187,17 +185,7 @@ const AddEmployeeScreen = ({ navigation, route }) => {
       <GHeader 
         title={isEditing ? "Edit employee" : "Add employee"} 
         onBack={() => navigation.goBack()} 
-        rightIcon={
-          <View style={{ 
-            backgroundColor: state === 'Terminated' ? theme.colors.error : (theme.colors.success || '#10B981'), 
-            paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, opacity: 0.9,
-            minWidth: 75, alignItems: 'center'
-          }}>
-            <Text style={{ color: 'white', fontSize: 9, fontFamily: 'Inter_700Bold' }}>
-              {state === 'Terminated' ? 'TERMINATED' : 'WORKING'}
-            </Text>
-          </View>
-        }
+        leftAlign
       />
       
       <KeyboardAvoidingView 
@@ -205,80 +193,86 @@ const AddEmployeeScreen = ({ navigation, route }) => {
         style={styles.flex}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Profile Photo Section */}
+          {/* Enhanced Profile Photo Section */}
           <View style={styles.photoSection}>
-            <TouchableOpacity style={[styles.avatarCircle, { borderColor: theme.colors.primary }]} onPress={pickImage}>
+            <TouchableOpacity 
+              style={[styles.avatarCircle, { borderColor: theme.colors.primary }]} 
+              onPress={() => setShowImagePicker(true)}
+              activeOpacity={0.8}
+            >
               {profilePhoto ? (
                 <Image source={{ uri: profilePhoto }} style={styles.avatarImage} />
               ) : (
                 <View style={[styles.avatarPlaceholder, { backgroundColor: theme.colors.primary + '15' }]}>
-                  <User size={40} color={theme.colors.primary} />
+                  {firstName ? (
+                    <Text style={[styles.avatarInitial, { color: theme.colors.primary }]}>
+                      {firstName[0].toUpperCase()}
+                    </Text>
+                  ) : (
+                    <User size={60} color={theme.colors.primary} />
+                  )}
                 </View>
               )}
+              <View style={[styles.editBadge, { backgroundColor: theme.colors.primary }]}>
+                <Camera size={18} color="white" />
+              </View>
             </TouchableOpacity>
-            <View style={styles.photoActions}>
-              <TouchableOpacity style={[styles.photoBtn, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} onPress={takePhoto}>
-                <Camera size={16} color={theme.colors.primary} />
-                <Text style={[styles.photoBtnText, { color: theme.colors.text }]}>Camera</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.photoBtn, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} onPress={pickImage}>
-                <ImageIcon size={16} color={theme.colors.primary} />
-                <Text style={[styles.photoBtnText, { color: theme.colors.text }]}>Gallery</Text>
-              </TouchableOpacity>
-              {profilePhoto && (
-                <TouchableOpacity style={[styles.photoBtn, { backgroundColor: theme.colors.error + '10', borderColor: theme.colors.error + '30' }]} onPress={() => setProfilePhoto(null)}>
-                  <Trash2 size={16} color={theme.colors.error} />
-                </TouchableOpacity>
-              )}
-            </View>
+
+            {/* Status Badge below photo */}
+            {isEditing && existingEmployee?.role !== 'OWNER' && (
+              <View style={[
+                styles.statusBadge, 
+                { backgroundColor: state === 'Terminated' ? theme.colors.error + '15' : theme.colors.success + '15',
+                  borderColor: state === 'Terminated' ? theme.colors.error + '30' : theme.colors.success + '30' }
+              ]}>
+                <View style={[styles.statusDot, { backgroundColor: state === 'Terminated' ? theme.colors.error : theme.colors.success }]} />
+                <Text style={[styles.statusText, { color: state === 'Terminated' ? theme.colors.error : theme.colors.success }]}>
+                  {state.charAt(0).toUpperCase() + state.slice(1).toLowerCase()}
+                </Text>
+              </View>
+            )}
           </View>
  
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Identity Details</Text>
             
-            <View style={styles.inputRow}>
-              <View style={styles.rowItem}>
-                <GInput 
-                  label="First Name" 
-                  value={firstName} 
-                  onChangeText={setFirstName} 
-                  placeholder="Deepak"
-                  required 
-                />
-              </View>
-              <View style={styles.rowItem}>
-                <GInput 
-                  label="Last Name" 
-                  value={lastName} 
-                  onChangeText={setLastName} 
-                  placeholder="Kumar"
-                />
-              </View>
-            </View>
+            <GInput 
+              label="First Name" 
+              value={firstName} 
+              onChangeText={setFirstName} 
+              placeholder="Deepak"
+              required 
+            />
             
             <View style={styles.gap} />
             
-            <View style={styles.inputRow}>
-              <View style={styles.rowItem}>
-                <GInput 
-                  label="Phone Number" 
-                  value={phone} 
-                  onChangeText={setPhone} 
-                  keyboardType="phone-pad"
-                  required 
-                />
-              </View>
-              <View style={styles.rowItem}>
-                <GInput 
-                  label="Email Address" 
-                  value={email} 
-                  onChangeText={setEmail} 
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  required 
-                />
-              </View>
-            </View>
+            <GInput 
+              label="Last Name" 
+              value={lastName} 
+              onChangeText={setLastName} 
+              placeholder="Kumar"
+            />
+            
+            <View style={styles.gap} />
+            
+            <GInput 
+              label="Phone Number" 
+              value={phone} 
+              onChangeText={setPhone} 
+              keyboardType="phone-pad"
+              required 
+            />
+            
+            <View style={styles.gap} />
+            
+            <GInput 
+              label="Email Address" 
+              value={email} 
+              onChangeText={setEmail} 
+              keyboardType="email-address"
+              autoCapitalize="none"
+              required 
+            />
  
             {!isEditing && (
               <>
@@ -297,20 +291,27 @@ const AddEmployeeScreen = ({ navigation, route }) => {
  
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Work Role</Text>
-            <GSelect 
-              label="Assigned Role" 
-              value={role} 
-              onSelect={setRole}
-              options={[
-                { label: 'Manager', value: 'MANAGER' },
-                { label: 'Supervisor', value: 'SUPERVISOR' },
-                { label: 'Veterinarian', value: 'VETERINARIAN' },
-                { label: 'Farm Worker', value: 'EMPLOYEE' },
-                { label: 'Butcher', value: 'BUTCHER' },
-                { label: 'Agent', value: 'AGENT' }
-              ]}
-              required
-            />
+            {existingEmployee?.role === 'OWNER' ? (
+              <View style={[styles.readOnlyRole, { backgroundColor: theme.colors.surface }]}>
+                <User size={20} color={theme.colors.textLight} />
+                <Text style={[styles.readOnlyRoleText, { color: theme.colors.text }]}>Owner (Primary Access)</Text>
+              </View>
+            ) : (
+              <GSelect 
+                label="Assigned Role" 
+                value={role} 
+                onSelect={setRole}
+                options={[
+                  { label: 'Manager', value: 'MANAGER' },
+                  { label: 'Supervisor', value: 'SUPERVISOR' },
+                  { label: 'Veterinarian', value: 'VETERINARIAN' },
+                  { label: 'Farm Worker', value: 'EMPLOYEE' },
+                  { label: 'Butcher', value: 'BUTCHER' },
+                  { label: 'Agent', value: 'AGENT' }
+                ]}
+                required
+              />
+            )}
           </View>
  
           {isEditing && (
@@ -344,31 +345,95 @@ const AddEmployeeScreen = ({ navigation, route }) => {
               )}
             </View>
           )}
+          
+          {/* Bottom padding for better scroll feel */}
+          <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <View style={[styles.footerContainer, { paddingBottom: Platform.OS === 'ios' ? 30 : 20 }]}>
-        <View style={styles.buttonRow}>
-          {isEditing && (
-            <View style={styles.halfBtn}>
-              <GButton 
-                title={state === 'Working' ? "Terminate" : "Re-activate"} 
-                variant="outline" 
-                onPress={handleStatusToggle}
-                loading={loading}
-              />
-            </View>
-          )}
-          <View style={isEditing ? styles.halfBtn : { flex: 1 }}>
-            <GButton 
-              title={uploading ? "Uploading photo..." : (isEditing ? "Save changes" : "Create employee")} 
-              onPress={handleSave}
-              loading={loading && !showPasswordReset}
-              disabled={uploading}
-            />
-          </View>
-        </View>
+      {/* Modern Fixed Footer */}
+      <View style={[styles.footerContainer, { paddingBottom: Platform.OS === 'ios' ? 34 : 24 }]}>
+        <GButton 
+          title={uploading ? "Uploading photo..." : (isEditing ? "Save changes" : "Create employee")} 
+          onPress={handleSave}
+          loading={loading && !showPasswordReset}
+          disabled={uploading}
+        />
+        
+        {isEditing && existingEmployee?.role !== 'OWNER' && (
+          <TouchableOpacity 
+            style={styles.terminateBtn} 
+            onPress={handleStatusToggle}
+            activeOpacity={0.6}
+          >
+            <Text style={[styles.terminateBtnText, { color: state === 'Working' ? theme.colors.error : theme.colors.primary }]}>
+              {state === 'Working' ? "Terminate Employee Access" : "Re-activate Employee Access"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
+
+      {/* Premium Image Picker Modal */}
+      <Modal
+        visible={showImagePicker}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowImagePicker(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowImagePicker(false)}
+        >
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Upload Photo</Text>
+              <TouchableOpacity onPress={() => setShowImagePicker(false)}>
+                <X size={24} color={theme.colors.textLight} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.modalOptions}>
+              <TouchableOpacity style={styles.modalOption} onPress={takePhoto}>
+                <View style={[styles.iconCircle, { backgroundColor: theme.colors.primary + '15' }]}>
+                  <Camera size={24} color={theme.colors.primary} />
+                </View>
+                <Text style={[styles.optionText, { color: theme.colors.text }]}>Take Photo</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.modalOption} onPress={pickImage}>
+                <View style={[styles.iconCircle, { backgroundColor: theme.colors.primary + '15' }]}>
+                  <ImageIcon size={24} color={theme.colors.primary} />
+                </View>
+                <Text style={[styles.optionText, { color: theme.colors.text }]}>Choose From Gallery</Text>
+              </TouchableOpacity>
+
+              {profilePhoto && (
+                <TouchableOpacity style={styles.modalOption} onPress={() => { setProfilePhoto(null); setShowImagePicker(false); }}>
+                  <View style={[styles.iconCircle, { backgroundColor: theme.colors.error + '15' }]}>
+                    <Trash2 size={24} color={theme.colors.error} />
+                  </View>
+                  <Text style={[styles.optionText, { color: theme.colors.error }]}>Remove Photo</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <GConfirmModal
+        visible={showConfirmModal}
+        title={state === 'Working' ? "Terminate Employee?" : "Re-activate Employee?"}
+        message={state === 'Working' 
+          ? 'Are you sure you want to terminate this employee? They will lose all access immediately and cannot log in, but all historical records and changes they made will be safely preserved in the farm logs.'
+          : 'This will restore the employee\'s access to the farm. They will be able to log in with their existing credentials.'
+        }
+        confirmText={state === 'Working' ? "Yes, Terminate" : "Yes, Re-activate"}
+        onConfirm={performToggle}
+        onCancel={() => setShowConfirmModal(false)}
+        variant={state === 'Working' ? "destructive" : "primary"}
+        loading={loading}
+      />
     </View>
   );
 };
@@ -383,59 +448,81 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   scrollContent: {
     padding: SPACING.lg,
     flexGrow: 1,
-    paddingBottom: 40,
   },
   photoSection: {
     alignItems: 'center',
     marginBottom: SPACING.xl,
-    paddingTop: 8,
+    paddingTop: 12,
   },
   avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3,
-    overflow: 'hidden',
-    marginBottom: 12,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 2,
+    overflow: 'visible', // Allow badge to show outside
+    marginBottom: 16,
+    position: 'relative',
   },
   avatarImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 55,
+  },
+  avatarInitial: {
+    fontSize: 44,
+    fontFamily: 'Inter_600SemiBold',
   },
   avatarPlaceholder: {
     width: '100%',
     height: '100%',
+    borderRadius: 55,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  photoActions: {
-    flexDirection: 'row',
-    gap: 8,
+  editBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...SHADOW.md,
+    elevation: 4, // For Android pop-out
   },
-  photoBtn: {
+  statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
     paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    gap: 6,
+    marginTop: 4,
   },
-  photoBtnText: {
-    fontSize: 12,
-    fontFamily: 'Inter_500Medium',
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.5,
   },
   section: {
     marginBottom: SPACING.xl,
-    paddingTop: 8,
   },
   sectionTitle: {
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
     marginBottom: SPACING.md,
     letterSpacing: 0.5,
-    borderBottomWidth: 1.5,
-    borderBottomColor: theme.colors.border,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border + '50',
     paddingBottom: 8,
   },
   gap: {
@@ -444,23 +531,22 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     gap: 12,
-    alignItems: 'flex-start',
   },
   rowItem: {
     flex: 1,
   },
   resetSection: {
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
     padding: SPACING.lg,
     borderRadius: 16,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
+    ...SHADOW.sm,
   },
   resetTrigger: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SPACING.xs,
   },
   resetTriggerText: {
     marginLeft: 12,
@@ -473,29 +559,73 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: SPACING.md,
-    gap: 24,
+    gap: 20,
   },
   cancelText: {
     fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
   },
   confirmText: {
     fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
   },
   footerContainer: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
     backgroundColor: theme.colors.background,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
+    borderTopColor: theme.colors.border + '30',
     ...SHADOW.lg,
   },
-  buttonRow: {
+  terminateBtn: {
+    alignItems: 'center',
+    paddingVertical: 14,
+    marginTop: 4,
+  },
+  terminateBtnText: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    textDecorationLine: 'underline',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: SPACING.xl,
+    paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
+  },
+  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingBottom: 8,
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
   },
-  halfBtn: {
-    width: '48%',
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+  },
+  modalOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  modalOption: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionText: {
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
   }
 });
 

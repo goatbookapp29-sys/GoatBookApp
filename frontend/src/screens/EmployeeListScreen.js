@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Image, FlatList, TouchableOpacity, ActivityIndi
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
-import { Plus, ChevronRight, User } from 'lucide-react-native';
+import { Plus, ChevronRight, User, Briefcase, Mail, Phone } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -46,21 +46,48 @@ const EmployeeListScreen = ({ navigation }) => {
         )}
       </View>
       <View style={styles.info}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={[styles.name, { color: theme.colors.text }]}>{item.name}</Text>
-          <View style={{ 
-            backgroundColor: item.state === 'Terminated' ? theme.colors.error : (theme.colors.success || '#10B981'), 
-            paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, marginLeft: 8 
-          }}>
-            <Text style={{ color: 'white', fontSize: 10, fontFamily: 'Inter_700Bold' }}>
-              {item.state === 'Terminated' ? 'TERMINATED' : 'WORKING'}
+        <View style={styles.nameRow}>
+          <Text style={[styles.name, { color: theme.colors.text }]} numberOfLines={1}>{item.name}</Text>
+          {item.role !== 'OWNER' && (
+            <View style={[
+              styles.stateBadge, 
+              { backgroundColor: item.state === 'Terminated' ? theme.colors.error + '15' : theme.colors.success + '15' }
+            ]}>
+              <View style={[styles.stateDot, { backgroundColor: item.state === 'Terminated' ? theme.colors.error : theme.colors.success }]} />
+              <Text style={[
+                styles.stateText, 
+                { color: item.state === 'Terminated' ? theme.colors.error : theme.colors.success }
+              ]}>
+                {item.state.charAt(0).toUpperCase() + item.state.slice(1).toLowerCase()}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.detailsContainer}>
+          <View style={styles.detailRow}>
+            <Briefcase size={14} color={theme.colors.textMuted} />
+            <Text style={[styles.subInfo, { color: theme.colors.textLight }]} numberOfLines={1}>
+              {item.role ? (item.role.charAt(0).toUpperCase() + item.role.slice(1).toLowerCase()) : 'Employee'}
             </Text>
           </View>
+
+          <View style={styles.detailRow}>
+            <Mail size={14} color={theme.colors.textMuted} />
+            <Text style={[styles.subInfo, { color: theme.colors.textLight }]} numberOfLines={1}>
+              {item.email}
+            </Text>
+          </View>
+
+          {item.phone && item.phone !== 'N/A' && (
+            <View style={styles.detailRow}>
+              <Phone size={14} color={theme.colors.textMuted} />
+              <Text style={[styles.subInfo, { color: theme.colors.textLight }]}>
+                {item.phone}
+              </Text>
+            </View>
+          )}
         </View>
-        <Text style={[styles.role, { color: theme.colors.textLight }]}>
-          {item.role} • {item.email}
-          {item.phone !== 'N/A' && `\n${item.phone}`}
-        </Text>
       </View>
       <ChevronRight size={20} color={theme.colors.textMuted} />
     </TouchableOpacity>
@@ -71,6 +98,7 @@ const EmployeeListScreen = ({ navigation }) => {
       <GHeader 
         title="Employee List" 
         onBack={() => navigation.goBack()} 
+        leftAlign
       />
 
       {loading ? (
@@ -158,11 +186,45 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   name: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
+    maxWidth: '65%',
   },
-  role: {
-    fontSize: 14,
-    marginTop: 4,
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  stateBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  stateDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 6,
+  },
+  stateText: {
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.2,
+  },
+  subInfo: {
+    fontSize: 13,
     fontFamily: 'Inter_500Medium',
+    lineHeight: 18,
+    marginLeft: 10,
+  },
+  detailsContainer: {
+    marginTop: 4,
+    gap: 6,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   center: {
     flex: 1,

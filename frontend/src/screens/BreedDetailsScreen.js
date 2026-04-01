@@ -118,7 +118,9 @@ const BreedDetailsScreen = ({ navigation, route }) => {
                 </Text>
                 <View style={[styles.locationTag, { backgroundColor: isDarkMode ? '#1E293B' : '#F1F5F9' }]}>
                   <MapPin size={12} color={theme.colors.textLight} style={styles.locIcon} />
-                  <Text style={[styles.locationNameTag, { color: theme.colors.textLight }]}>{animal.locationName}</Text>
+                  <Text style={[styles.locationNameTag, { color: theme.colors.textLight }]}>
+                    {animal.locationName ? (animal.locationName.charAt(0).toUpperCase() + animal.locationName.slice(1).toLowerCase()) : ''}
+                  </Text>
                 </View>
               </View>
 
@@ -218,7 +220,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   locationNameTag: {
     fontSize: 11,
     fontFamily: 'Inter_600SemiBold',
-    textTransform: 'uppercase',
   },
   animalCard: {
     flexDirection: 'row',
