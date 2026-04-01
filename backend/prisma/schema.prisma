@@ -4,9 +4,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model animals {
@@ -30,8 +29,6 @@ model animals {
   purchase_price                          Decimal?                        @db.Decimal(10, 2)
   age_in_months                           Int?
   female_condition                        enum_animals_female_condition?
-  mating_date                             DateTime?                       @db.Date
-  expected_delivery_date                  DateTime?                       @db.Date
   birth_type                              enum_animals_birth_type?
   status                                  enum_animals_status             @default(LIVE)
   is_ready_for_sale                       Boolean?                        @default(false)
@@ -47,6 +44,8 @@ model animals {
   death_reason                            String?
   sold_at                                 DateTime?                       @db.Date
   sold_remark                             String?
+  expected_delivery_date                  DateTime?                       @db.Date
+  mating_date                             DateTime?                       @db.Date
   animal_transactions                     animal_transactions[]
   breeds                                  breeds                          @relation(fields: [breed_id], references: [id], onDelete: Cascade)
   users_animals_created_by_user_idTousers users?                          @relation("animals_created_by_user_idTousers", fields: [created_by_user_id], references: [id])
@@ -78,11 +77,11 @@ model employees {
   id                 String                       @id @db.Uuid
   user_id            String                       @db.Uuid
   employee_type      enum_employees_employee_type @default(EMPLOYEE)
-  state              String                       @default("Working") @db.VarChar(50)
   created_by_user_id String?                      @db.Uuid
   updated_by_user_id String?                      @db.Uuid
   created_at         DateTime                     @default(now()) @db.Timestamptz(6)
   updated_at         DateTime                     @updatedAt @db.Timestamptz(6)
+  state              String                       @default("Working") @db.VarChar(50)
   users              users                        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   farm_employees     farm_employees[]
   farms              farms[]
