@@ -156,7 +156,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   daysLabel: {
     fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginRight: 10,
   },
   daysInputBox: {
@@ -165,14 +165,14 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   daysSuffix: {
     fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginLeft: 10,
   },
   helperText: {
     fontSize: 13,
     lineHeight: 18,
     marginBottom: SPACING.lg,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   footer: {
     marginTop: SPACING.md,
@@ -186,7 +186,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginBottom: 20,
     letterSpacing: -0.5,
   },
@@ -211,18 +211,18 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   vaccineLabel: {
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   vaccineDays: {
     fontSize: 13,
     marginTop: 2,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   emptyText: {
     textAlign: 'center',
     marginTop: 24,
     fontStyle: 'italic',
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
 });
 

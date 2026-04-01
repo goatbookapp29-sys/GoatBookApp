@@ -108,13 +108,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Inter_700Bold',
     textAlign: 'center',
     marginBottom: 12,
   },
   message: {
     fontSize: 14,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 28,
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
 });
 

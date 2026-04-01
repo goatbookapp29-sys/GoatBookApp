@@ -60,7 +60,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   addBtnText: {
     color: '#FFF',
-    fontFamily: theme.typography.semiBold || 'Montserrat_600SemiBold',
+    fontFamily: theme.typography.semiBold || 'Inter_600SemiBold',
     fontSize: 15,
   },
   animalPreview: {
@@ -93,12 +93,12 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   animalTag: {
     fontSize: 17,
-    fontFamily: theme.typography.semiBold || 'Montserrat_600SemiBold',
+    fontFamily: theme.typography.semiBold || 'Inter_600SemiBold',
     color: theme.colors.text,
   },
   animalSubInfo: {
     fontSize: 13,
-    fontFamily: theme.typography.medium || 'Montserrat_500Medium',
+    fontFamily: theme.typography.medium || 'Inter_500Medium',
     color: theme.colors.textMuted || '#94A3B8',
     marginTop: 2,
   },

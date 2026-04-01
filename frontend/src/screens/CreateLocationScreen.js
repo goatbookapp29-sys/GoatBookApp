@@ -142,7 +142,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionInfo: {
     fontSize: 14,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     lineHeight: 22,
     marginBottom: 8,
   },

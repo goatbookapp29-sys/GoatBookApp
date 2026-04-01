@@ -135,14 +135,14 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   locationTitle: {
     fontSize: 20,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     flex: 1,
   },
   locationSubtitle: {
     fontSize: 14,
     marginTop: 4,
     marginLeft: 36,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   divider: {
     height: 1,
@@ -158,11 +158,11 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   statNum: {
     fontSize: 22,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   statLabel: {
     fontSize: 11,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   verticalDivider: {
     width: 1.5,
@@ -170,7 +170,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 13,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginBottom: 16,
     marginLeft: 4,
     letterSpacing: 0.5,
@@ -195,19 +195,19 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   indicatorText: {
     fontSize: 18,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   breedInfo: {
     flex: 1,
   },
   breedName: {
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   animalCount: {
     fontSize: 14,
     marginTop: 4,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   emptyContainer: {
     padding: 40,
@@ -221,7 +221,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   emptyText: {
     marginTop: 12,
     textAlign: 'center',
-    fontFamily: 'Montserrat_400Regular',
+    fontFamily: 'Inter_400Regular',
   },
   center: {
     flex: 1,

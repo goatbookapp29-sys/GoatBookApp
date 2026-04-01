@@ -342,7 +342,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   breedText: {
     fontSize: 14,
     color: theme.colors.textMuted,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   subTextRow: {
     flexDirection: 'row',

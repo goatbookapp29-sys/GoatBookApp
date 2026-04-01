@@ -90,7 +90,7 @@ const RegisterScreen = ({ navigation }) => {
         <View style={styles.titleContainer}>
             <Text style={styles.mainTitle}>Register</Text>
             <Text style={styles.subTitle}>Register as an owner to set up and manage your farm.</Text>
-            <Text style={[styles.subTitle, { fontSize: 13, marginTop: 8, color: theme.colors.textLight, fontFamily: 'Montserrat_500Medium' }]}>
+            <Text style={[styles.subTitle, { fontSize: 13, marginTop: 8, color: theme.colors.textLight, fontFamily: 'Inter_500Medium' }]}>
                 This will be the primary administrative account for your farm.
             </Text>
         </View>
@@ -202,14 +202,14 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   mainTitle: {
     fontSize: 32,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.primary,
     letterSpacing: -1,
   },
   subTitle: {
     fontSize: 16,
     marginTop: 8,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     color: theme.colors.textLight,
   },
   form: {
@@ -217,7 +217,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.primary,
     marginBottom: 16,
     letterSpacing: 0.5,
@@ -242,12 +242,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   footerText: {
     fontSize: 15,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     color: theme.colors.textLight,
   },
   link: {
     fontSize: 15,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.primary,
     textDecorationLine: 'underline',
   }

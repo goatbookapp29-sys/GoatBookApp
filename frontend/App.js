@@ -8,12 +8,12 @@ import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
 import * as Font from 'expo-font';
 import { 
-  Montserrat_400Regular, 
-  Montserrat_500Medium, 
-  Montserrat_600SemiBold, 
-  Montserrat_700Bold, 
-  Montserrat_800ExtraBold 
-} from '@expo-google-fonts/montserrat';
+  Inter_400Regular, 
+  Inter_500Medium, 
+  Inter_600SemiBold, 
+  Inter_700Bold, 
+  Inter_800ExtraBold 
+} from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 
 import LoginScreen from './src/screens/LoginScreen';
@@ -90,11 +90,11 @@ function AppContent() {
   const loadResources = async () => {
     try {
       await Font.loadAsync({
-        Montserrat_400Regular,
-        Montserrat_500Medium,
-        Montserrat_600SemiBold,
-        Montserrat_700Bold,
-        Montserrat_800ExtraBold,
+        Inter_400Regular,
+        Inter_500Medium,
+        Inter_600SemiBold,
+        Inter_700Bold,
+        Inter_800ExtraBold,
       });
       setFontsLoaded(true);
       await checkSession();
@@ -123,7 +123,7 @@ function AppContent() {
         token = await SecureStore.getItemAsync('token');
         farmId = await SecureStore.getItemAsync('selectedFarmId');
       }
-      
+
       if (token && farmId) {
         setInitialRoute('MainDrawer');
       } else {
@@ -146,7 +146,7 @@ function AppContent() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <StatusBar style="auto" />
-        <Stack.Navigator 
+        <Stack.Navigator
           initialRouteName={initialRoute}
           screenOptions={{
             headerShown: false,
@@ -157,10 +157,10 @@ function AppContent() {
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-          
+
           {/* Main App (Drawer) */}
           <Stack.Screen name="MainDrawer" component={MainDrawer} />
-          
+
           {/* Detail/Modal Screens outside Drawer but in same stack */}
           <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} />
           <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />

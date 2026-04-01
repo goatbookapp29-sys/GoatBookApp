@@ -150,6 +150,17 @@ const AddEmployeeScreen = ({ navigation, route }) => {
       <GHeader 
         title={isEditing ? "Edit employee" : "Add employee"} 
         onBack={() => navigation.goBack()} 
+        rightIcon={
+          <View style={{ 
+            backgroundColor: state === 'Terminated' ? theme.colors.error : (theme.colors.success || '#10B981'), 
+            paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, opacity: 0.9,
+            width: 75, alignItems: 'center'
+          }}>
+            <Text style={{ color: 'white', fontSize: 9, fontFamily: 'Inter_700Bold' }}>
+              {state === 'Terminated' ? 'TERMINATED' : 'WORKING'}
+            </Text>
+          </View>
+        }
       />
       
       <KeyboardAvoidingView 
@@ -357,7 +368,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   photoBtnText: {
     fontSize: 12,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   section: {
     marginBottom: SPACING.xl,
@@ -365,7 +376,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginBottom: SPACING.md,
     letterSpacing: 0.5,
     borderBottomWidth: 1.5,
@@ -390,7 +401,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   resetTriggerText: {
     marginLeft: 12,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   resetBox: {
     marginTop: SPACING.sm,
@@ -402,10 +413,10 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     gap: 24,
   },
   cancelText: {
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   confirmText: {
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   footer: {
     paddingVertical: SPACING.xl,

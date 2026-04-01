@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StyleSheet, View, Text, ScrollView, Image, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
@@ -20,7 +21,8 @@ import { getFromCache } from '../utils/cache';
 
 const AddAnimalScreen = ({ navigation, route }) => {
   const { isDarkMode, theme } = useTheme();
-  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
+  const insets = useSafeAreaInsets();
+  const styles = useMemo(() => getStyles(theme, isDarkMode, insets), [theme, isDarkMode, insets]);
 
   const CheckBox = ({ label, value, onToggle }) => {
     return (
@@ -77,6 +79,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [purchaseDate, setPurchaseDate] = useState(existingAnimal.purchaseDate || '');
   const [purchasePrice, setPurchasePrice] = useState(existingAnimal.purchasePrice?.toString() || '');
   const [femaleCondition, setFemaleCondition] = useState(existingAnimal.femaleCondition || 'NONE');
+  const [matingDate, setMatingDate] = useState(existingAnimal.matingDate || '');
+  const [expectedDeliveryDate, setExpectedDeliveryDate] = useState(existingAnimal.expectedDeliveryDate || '');
 
   // Misc
   const [remark, setRemark] = useState(existingAnimal.remark || '');
@@ -365,6 +369,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
         purchaseDate: (acquisitionMethod === 'PURCHASED' && isValidDate(purchaseDate)) ? purchaseDate : null,
         purchasePrice: (purchasePrice && !isNaN(parseFloat(purchasePrice))) ? parseFloat(purchasePrice) : null,
         femaleCondition: (gender === 'FEMALE') ? femaleCondition : null,
+        matingDate: femaleCondition === 'MATED' ? (isValidDate(matingDate) ? matingDate : null) : null,
+        expectedDeliveryDate: femaleCondition === 'PREGNANT' ? (isValidDate(expectedDeliveryDate) ? expectedDeliveryDate : null) : null,
         remark,
         isReadyForSale,
         currentWeight: isReadyForSale ? (parseFloat(currentWeight) || null) : null,
@@ -429,7 +435,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
     styles.sectionTitle, 
     { 
       color: theme.colors.primary, 
-      fontFamily: 'Montserrat_600SemiBold',
+      fontFamily: 'Inter_600SemiBold',
       letterSpacing: 0.5,
       fontSize: 15,
       marginBottom: 20,
@@ -468,7 +474,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               >
                 <Text style={{ 
                   fontSize: 16, 
-                  fontFamily: status === s ? 'Montserrat_600SemiBold' : 'Montserrat_500Medium',
+                  fontFamily: status === s ? 'Inter_600SemiBold' : 'Inter_500Medium',
                   color: status === s ? theme.colors.primary : theme.colors.text
                 }}>{s}</Text>
               </TouchableOpacity>
@@ -499,7 +505,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setShowDeadHelp(false)}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -527,7 +533,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setShowSoldHelp(false)}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -555,7 +561,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setShowTagHelp(false)}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -582,7 +588,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setHelpInfo({ ...helpInfo, visible: false })}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -610,7 +616,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               style={[styles.statusOption, { borderBottomWidth: 0, justifyContent: 'center' }]} 
               onPress={() => setShowShedHelp(false)}
             >
-              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dismiss</Text>
+              <Text style={[styles.modalOptionText, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Dismiss</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -640,7 +646,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               onPress={() => setPhotoExpanded(!photoExpanded)}
             >
               <View style={styles.iconGroup}>
-                <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Add Photo</Text>
+                <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Add Photo</Text>
                 <Camera size={20} color={theme.colors.textMuted} style={{ marginLeft: 8 }} />
               </View>
               {photoExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
@@ -689,7 +695,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
           {isEditing && status === 'Live' && (
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
-                  <Text style={[styles.readyTitle, { color: theme.colors.error, fontFamily: 'Montserrat_600SemiBold' }]}>Ready to Sell</Text>
+                  <Text style={[styles.readyTitle, { color: theme.colors.error, fontFamily: 'Inter_600SemiBold' }]}>Ready to Sell</Text>
                   <HelpCircle size={18} color={theme.colors.textMuted} />
                </View>
                <View style={styles.readyOptions}>
@@ -703,7 +709,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
           {status === 'Dead' && (
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
-                  <Text style={[styles.readyTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Dead Record</Text>
+                  <Text style={[styles.readyTitle, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Dead Record</Text>
                   <TouchableOpacity onPress={() => setShowDeadHelp(true)}>
                     <HelpCircle size={18} color={theme.colors.textMuted} />
                   </TouchableOpacity>
@@ -728,7 +734,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
           {status === 'Sold' && (
             <View style={styles.readyToSellCard}>
                <View style={styles.readyHeaderRow}>
-                  <Text style={[styles.readyTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Sold Record</Text>
+                  <Text style={[styles.readyTitle, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Sold Record</Text>
                   <TouchableOpacity onPress={() => setShowSoldHelp(true)}>
                     <HelpCircle size={18} color={theme.colors.textMuted} />
                   </TouchableOpacity>
@@ -752,7 +758,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   </View>
                   <GInput 
                     label="Remark" 
-                    placeholder="Remark" 
+                    placeholder="e.g. Healthy and active" 
                     value={soldRemark} 
                     onChangeText={setSoldRemark} 
                   />
@@ -767,7 +773,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
               onPress={() => setIdentificationExpanded(!identificationExpanded)}
             >
               <View style={styles.iconGroup}>
-                <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Identification</Text>
+                <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Identification</Text>
               </View>
               {identificationExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
             </TouchableOpacity>
@@ -825,28 +831,6 @@ const AddAnimalScreen = ({ navigation, route }) => {
                     />
                   </View>
 
-                  {gender === 'MALE' && (
-                    <View style={{ 
-                      flexDirection: 'row', 
-                      alignItems: 'center', 
-                      marginVertical: 12, 
-                      paddingHorizontal: 4,
-                      justifyContent: 'flex-start'
-                    }}>
-                      <Text style={{ 
-                        fontSize: 13, 
-                        color: theme.colors.text, 
-                        fontFamily: 'Montserrat_700Bold',
-                        marginRight: 12,
-                      }}>Male Options:</Text>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <CheckBox label="Breeder" value={isBreeder} onToggle={toggleBreeder} />
-                        <View style={{ width: 12 }} />
-                        <CheckBox label="Qurbani" value={isQurbani} onToggle={toggleQurbani} />
-                      </View>
-                    </View>
-                  )}
-
                   <View style={styles.row}>
                     <GInput 
                       containerStyle={styles.halfWidth}
@@ -886,6 +870,24 @@ const AddAnimalScreen = ({ navigation, route }) => {
                       helpAction={() => setShowShedHelp(true)}
                     />
                   </View>
+
+                  {gender === 'MALE' && (
+                    <View style={{ 
+                      flexDirection: 'row', 
+                      alignItems: 'center', 
+                      marginTop: 16, 
+                      marginBottom: 8,
+                      marginHorizontal: 4,
+                      justifyContent: 'flex-start'
+                    }}>
+                      <Text style={styles.maleLabel}>Male Options:</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <CheckBox label="Breeder" value={isBreeder} onToggle={toggleBreeder} />
+                        <View style={{ width: 12 }} />
+                        <CheckBox label="Qurbani" value={isQurbani} onToggle={toggleQurbani} />
+                      </View>
+                    </View>
+                  )}
                 </View>
               </View>
             )}
@@ -893,14 +895,14 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
           {/* GROWTH & BACKGROUND CARD */}
           {((gender === 'FEMALE') || (acquisitionMethod === 'PURCHASED') || (acquisitionMethod === 'BORN')) && (
-            <View style={[styles.photoCard, { borderColor: theme.colors.border, marginTop: 8 }]}>
+            <View style={[styles.photoCard, { borderColor: theme.colors.border }]}>
               <TouchableOpacity 
                 style={[styles.photoHeader, { borderBottomWidth: growthExpanded ? 1 : 0, borderBottomColor: theme.colors.border }]} 
                 activeOpacity={0.7}
                 onPress={() => setGrowthExpanded(!growthExpanded)}
               >
                 <View style={styles.iconGroup}>
-                  <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Montserrat_600SemiBold' }]}>Growth & Background</Text>
+                  <Text style={[styles.photoTitle, { color: theme.colors.primary, fontFamily: 'Inter_600SemiBold' }]}>Growth & Background</Text>
                 </View>
                 {growthExpanded ? <ChevronUp size={20} color={theme.colors.textMuted} /> : <ChevronDown size={20} color={theme.colors.textMuted} />}
               </TouchableOpacity>
@@ -999,28 +1001,48 @@ const AddAnimalScreen = ({ navigation, route }) => {
                       </View>
                     )}
                     
-                    {gender === 'FEMALE' && (
-                      <View style={styles.row}>
-                        <GSelect 
+                  {gender === 'FEMALE' && acquisitionMethod === 'PURCHASED' && (
+                    <View style={styles.row}>
+                      <GSelect 
+                        containerStyle={styles.halfWidth}
+                        label="Female Cond." 
+                        value={femaleCondition} 
+                        onSelect={(val) => {
+                          setFemaleCondition(val);
+                          if (val === 'MATED') setExpectedDeliveryDate('');
+                          if (val === 'PREGNANT') setMatingDate('');
+                        }}
+                        options={[
+                          { label: 'Mated', value: 'MATED' },
+                          { label: 'Pregnant', value: 'PREGNANT' }
+                        ]}
+                        placeholder="Select"
+                      />
+                      {femaleCondition === 'MATED' ? (
+                        <GDatePicker 
                           containerStyle={styles.halfWidth}
-                          label="Female Cond." 
-                          value={femaleCondition} 
-                          onSelect={setFemaleCondition}
-                          options={[
-                            { label: 'None', value: 'NONE' },
-                            { label: 'Mated', value: 'MATED' },
-                            { label: 'Pregnant', value: 'PREGNANT' }
-                          ]}
+                          label="Mating Date" 
+                          value={matingDate} 
+                          onDateChange={setMatingDate}
                         />
+                      ) : femaleCondition === 'PREGNANT' ? (
+                        <GDatePicker 
+                          containerStyle={styles.halfWidth}
+                          label="Delivery Due Date" 
+                          value={expectedDeliveryDate} 
+                          onDateChange={setExpectedDeliveryDate}
+                        />
+                      ) : (
                         <View style={styles.halfWidth} />
-                      </View>
-                    )}
+                      )}
+                    </View>
+                  )}
 
                     <GInput 
                       label="Remark" 
                       value={remark} 
                       onChangeText={setRemark} 
-                      placeholder="e.g. Sexy"
+                      placeholder="e.g. Healthy and active"
                       multiline
                       style={{ minHeight: 80, paddingTop: 12, color: theme.colors.text }}
                     />
@@ -1270,7 +1292,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                     <Text style={{ 
                       fontSize: 15, 
                       color: theme.colors.primary, 
-                      fontFamily: 'Montserrat_600SemiBold'
+                      fontFamily: 'Inter_600SemiBold'
                     }}>Insurance</Text>
                     <TouchableOpacity 
                       onPress={() => showHelp('What is Insurance?', 'Store insurance details for your livestock, including company name, policy number, and coverage period, ensuring your farm assets are well-protected.')}

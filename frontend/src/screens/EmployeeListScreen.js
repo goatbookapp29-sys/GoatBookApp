@@ -52,7 +52,7 @@ const EmployeeListScreen = ({ navigation }) => {
             backgroundColor: item.state === 'Terminated' ? theme.colors.error : (theme.colors.success || '#10B981'), 
             paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, marginLeft: 8 
           }}>
-            <Text style={{ color: 'white', fontSize: 10, fontFamily: 'Montserrat_700Bold' }}>
+            <Text style={{ color: 'white', fontSize: 10, fontFamily: 'Inter_700Bold' }}>
               {item.state === 'Terminated' ? 'TERMINATED' : 'WORKING'}
             </Text>
           </View>
@@ -121,7 +121,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   addButtonText: {
     color: 'white',
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginLeft: 8,
     fontSize: 14,
   },
@@ -157,19 +157,19 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   avatarInitial: {
     fontSize: 18,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   info: {
     flex: 1,
   },
   name: {
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   role: {
     fontSize: 14,
     marginTop: 4,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   center: {
     flex: 1,
@@ -184,7 +184,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   }
 });
 

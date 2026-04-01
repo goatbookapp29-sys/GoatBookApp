@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, 
 import { COLORS, SPACING, SHADOW, lightTheme } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
-import { Syringe, Calendar, User, Plus } from 'lucide-react-native';
+import { Syringe, Calendar, User, Plus, Tag } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -53,8 +53,8 @@ const VaccinationListScreen = ({ navigation, route }) => {
         <View style={{ flex: 1 }}>
           <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{item.vaccine?.name}</Text>
           <View style={styles.tagRow}>
-            <User size={14} color={theme.colors.textLight} />
-            <Text style={[styles.tagNumber, { color: theme.colors.textLight }]}>Tag: {item.animal?.tagNumber}</Text>
+            <Tag size={14} color={theme.colors.textLight} style={{ marginRight: 4 }} />
+            <Text style={[styles.tagNumber, { color: theme.colors.textLight }]}>{item.animal?.tagNumber}</Text>
           </View>
         </View>
         <View style={styles.rightCol}>
@@ -154,7 +154,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   vaccineName: {
     fontSize: 17,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: -0.5,
   },
   tagRow: {
@@ -164,8 +164,8 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   tagNumber: {
     fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
-    marginLeft: 4,
+    fontFamily: 'Inter_700Bold',
+    marginLeft: 0,
   },
   dateBox: {
     flexDirection: 'row',
@@ -177,7 +177,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   dateText: {
     fontSize: 11,
     marginLeft: 4,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   rightCol: {
     alignItems: 'flex-end',
@@ -190,7 +190,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   modeText: {
     fontSize: 10,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     textTransform: 'uppercase',
   },
   dueSection: {
@@ -202,11 +202,11 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   dueLabel: {
     fontSize: 13,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   dueValue: {
     fontSize: 13,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 0.2,
   },
   remarkText: {
@@ -215,7 +215,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     marginTop: 10,
     borderTopWidth: 1,
     paddingTop: 10,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   center: {
     flex: 1,
@@ -231,7 +231,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   fab: {
     position: 'absolute',

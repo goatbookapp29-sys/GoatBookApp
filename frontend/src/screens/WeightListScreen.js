@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
-import { Search, Plus, Scale, Trash2 } from 'lucide-react-native';
+import { Search, Plus, Scale, Trash2, Tag } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
@@ -90,7 +90,10 @@ const WeightListScreen = ({ navigation }) => {
   const renderWeightItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.mainInfo}>
-        <Text style={[styles.tagText, { color: theme.colors.text }]}>Tag: {item.tagNumber}</Text>
+        <View style={styles.tagWrapper}>
+          <Tag size={16} color={theme.colors.textLight} style={styles.tagIcon} />
+          <Text style={[styles.tagText, { color: theme.colors.text }]}>{item.tagNumber}</Text>
+        </View>
         <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{new Date(item.date).toLocaleDateString()}</Text>
       </View>
       <View style={styles.statsBox}>
@@ -179,7 +182,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flex: 1,
     marginLeft: 12,
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   list: {
     paddingBottom: 80,
@@ -197,14 +200,22 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   mainInfo: {
     flex: 1,
   },
+  tagWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  tagIcon: {
+    marginRight: 6,
+  },
   tagText: {
-    fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontSize: 17,
+    fontFamily: 'Inter_700Bold',
   },
   dateText: {
     fontSize: 14,
     marginTop: 4,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   statsBox: {
     alignItems: 'flex-end',
@@ -212,11 +223,11 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   weightValue: {
     fontSize: 18,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   heightValue: {
     fontSize: 12,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   deleteBtn: {
     padding: 8,
@@ -233,7 +244,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   emptyText: {
     fontSize: 22,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginTop: 20,
     textAlign: 'center',
   },
@@ -242,7 +253,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 20,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   fab: {
     position: 'absolute',

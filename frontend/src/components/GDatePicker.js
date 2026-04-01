@@ -56,13 +56,14 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
   const labelStyle = {
     position: 'absolute',
     left: 12,
+    right: 30,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [14, -10],
     }),
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [16, 12],
+      outputRange: [15, 11],
     }),
     color: animatedValue.interpolate({
       inputRange: [0, 1],
@@ -89,12 +90,20 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
         }}
         activeOpacity={0.7}
       >
-        <Animated.Text style={labelStyle} pointerEvents="none">
+        <Animated.Text 
+          style={labelStyle} 
+          pointerEvents="none"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
           {label}{required && '*'}
         </Animated.Text>
 
         {value || show ? (
-          <Text style={[styles.valueText, { color: theme.colors.text }, !value && { color: theme.colors.textMuted }]}>
+          <Text 
+            style={[styles.valueText, { color: theme.colors.text }, !value && { color: theme.colors.textMuted }]}
+            numberOfLines={1}
+          >
             {value ? formatDate(value) : placeholder}
           </Text>
         ) : <View style={{ flex: 1 }} />}
@@ -153,11 +162,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderRadius: 14,
     paddingHorizontal: 12,
-    height: 56,
+    height: 52,
   },
   valueText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
+    flex: 1,
+    marginRight: 12,
   },
   errorContainer: {
     flexDirection: 'row',

@@ -34,6 +34,7 @@ const GInput = ({
   const labelContainerStyle = {
     position: 'absolute',
     left: 12,
+    right: 32,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [14, -10],

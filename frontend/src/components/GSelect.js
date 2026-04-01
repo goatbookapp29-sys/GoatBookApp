@@ -31,6 +31,7 @@ const GSelect = ({
   const labelContainerStyle = {
     position: 'absolute',
     left: 12,
+    right: 32,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [14, -10],
@@ -41,7 +42,7 @@ const GSelect = ({
     flexDirection: 'row',
     alignItems: 'center',
     pointerEvents: 'box-none',
-    maxWidth: '80%',
+    maxWidth: '72%',
     paddingRight: 4,
   };
 
@@ -84,7 +85,7 @@ const GSelect = ({
             <Animated.View style={{
               marginLeft: animatedValue.interpolate({
                 inputRange: [0, 1],
-                outputRange: [8, 3],
+                outputRange: [5, 2],
               }),
               transform: [{
                 scale: animatedValue.interpolate({

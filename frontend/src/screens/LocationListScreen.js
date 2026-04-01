@@ -185,7 +185,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flex: 1,
     fontSize: 15,
     paddingVertical: 8,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   actionRow: {
     padding: 16,
@@ -206,7 +206,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   addButtonText: {
     color: 'white',
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
   },
   listContent: {
@@ -230,12 +230,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   locationName: {
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   locationMeta: {
     fontSize: 14,
     marginTop: 4,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -246,14 +246,14 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   noRecords: {
     fontSize: 18,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     marginTop: 16,
   },
   emptyDesc: {
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 20,
-    fontFamily: 'Montserrat_400Regular',
+    fontFamily: 'Inter_400Regular',
   },
   center: {
     flex: 1,

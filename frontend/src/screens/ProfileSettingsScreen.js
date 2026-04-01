@@ -237,7 +237,7 @@ const ProfileSettingsScreen = ({ navigation }) => {
             />
 
             {formData.employeeType !== 'OWNER' && (
-              <Text style={{ fontSize: 12, color: theme.colors.textLight, marginTop: 4, fontFamily: 'Montserrat_500Medium', fontStyle: 'italic' }}>
+              <Text style={{ fontSize: 12, color: theme.colors.textLight, marginTop: 4, fontFamily: 'Inter_500Medium', fontStyle: 'italic' }}>
                 * Only the Farm Owner can update your phone number or email.
               </Text>
             )}
@@ -352,7 +352,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   photoBtnText: {
     fontSize: 12,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   formContainer: {
     marginBottom: SPACING.xl,
@@ -360,7 +360,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginBottom: SPACING.lg,
     letterSpacing: -0.5,
     color: theme.colors.text,

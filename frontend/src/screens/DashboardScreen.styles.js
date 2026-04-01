@@ -7,9 +7,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 24) : 48,
     paddingHorizontal: 20,
-    paddingBottom: 20,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.colors.primary,
@@ -20,7 +18,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     color: '#FFF',
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     flex: 1,
   },
   themeToggle: {
@@ -55,7 +53,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   tileTitle: {
     fontSize: 13,
     color: theme.colors.text,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     textAlign: 'center',
   },
   // Modal Styles
@@ -87,14 +85,14 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   modalTitle: {
     fontSize: 22,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Inter_700Bold',
     color: theme.colors.text,
     marginBottom: 12,
     textAlign: 'center',
   },
   modalMessage: {
     fontSize: 15,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     color: theme.colors.textLight,
     textAlign: 'center',
     lineHeight: 22,
@@ -111,6 +109,6 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   modalButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
 });

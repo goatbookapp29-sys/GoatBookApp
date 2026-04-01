@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, Platform, Modal, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../theme/ThemeContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -13,6 +14,7 @@ import { getStyles } from './DashboardScreen.styles';
 
 const DashboardScreen = ({ navigation }) => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [farmName, setFarmName] = useState('Goatwala Farm');
   const [userRole, setUserRole] = useState(null);
   const [soonVisible, setSoonVisible] = useState(false);
@@ -83,7 +85,7 @@ const DashboardScreen = ({ navigation }) => {
       <StatusBar style="light" backgroundColor={theme.colors.primary} />
       
       {/* Header - Simple & Flat */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + (Platform.OS === 'web' ? 15 : 10), paddingBottom: 15 }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
           <TouchableOpacity 
             style={styles.menuButton}

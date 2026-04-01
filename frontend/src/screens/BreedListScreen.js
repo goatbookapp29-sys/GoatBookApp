@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Animated, Platform, Alert, SafeAreaView, Modal } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { lightTheme } from '../theme';
 import GHeader from '../components/GHeader';
@@ -11,6 +12,7 @@ import { getFromCache, saveToCache } from '../utils/cache';
 
 const BreedListScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const [breeds, setBreeds] = useState([]);
   const [filteredBreeds, setFilteredBreeds] = useState([]);
@@ -157,7 +159,7 @@ const BreedListScreen = ({ navigation }) => {
         </View>
         
         <View style={styles.breedStats}>
-          <View style={[styles.countBadge, { backgroundColor: theme.colors.primary + '15' }]}>
+          <View style={[styles.countBadge, { backgroundColor: theme.colors.primary + '20' }]}>
             <Text style={[styles.countText, { color: theme.colors.primary }]}>{item.animalCount || 0}</Text>
           </View>
           {isSelectionMode ? (
@@ -195,7 +197,7 @@ const BreedListScreen = ({ navigation }) => {
       />
 
       {isSelectionMode ? (
-        <View style={styles.selectionHeader}>
+        <View style={[styles.selectionHeader, { paddingTop: insets.top + 10, paddingBottom: 10 }]}>
             <TouchableOpacity onPress={exitSelectionMode} style={styles.headerButton}>
                 <Text style={[styles.headerButtonText, { color: theme.colors.primary }]}>Cancel</Text>
             </TouchableOpacity>
@@ -335,15 +337,13 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 15,
-    height: Platform.OS === 'ios' ? 100 : 70,
     backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
-    paddingTop: Platform.OS === 'ios' ? 40 : 0,
   },
   headerButton: { padding: 10, minWidth: 60 },
-  headerButtonText: { fontSize: 16, fontFamily: 'Montserrat_600SemiBold' },
-  selectionTitle: { fontSize: 18, fontFamily: 'Montserrat_700Bold' },
+  headerButtonText: { fontSize: 16, fontFamily: 'Inter_600SemiBold' },
+  selectionTitle: { fontSize: 18, fontFamily: 'Inter_700Bold' },
   searchBarContainer: {
     paddingHorizontal: 16,
     paddingTop: 8,
@@ -358,10 +358,9 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderWidth: 1.5,
     borderColor: theme.colors.border,
-    ...theme.shadow.sm,
   },
   searchIcon: { marginRight: 8 },
-  searchInput: { flex: 1, fontSize: 15, fontFamily: 'Montserrat_500Medium' },
+  searchInput: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium' },
   listContent: { flexGrow: 1, paddingHorizontal: 16, paddingBottom: 120, paddingTop: 16 },
   breedCard: {
     flexDirection: 'row',
@@ -378,24 +377,29 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   checkboxUnselected: { borderColor: theme.colors.border },
   checkboxSelected: { borderColor: '#007AFF', backgroundColor: '#007AFF' },
   breedInfo: { flex: 1 },
-  breedName: { fontSize: 16, fontFamily: 'Montserrat_600SemiBold' },
-  animalType: { fontSize: 14, marginTop: 4, fontFamily: 'Montserrat_500Medium' },
+  breedName: { fontSize: 16, fontFamily: 'Inter_600SemiBold' },
+  animalType: { fontSize: 14, marginTop: 4, fontFamily: 'Inter_500Medium' },
   breedStats: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  animalCountText: {
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    marginRight: 8,
+  },
   countBadge: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-    marginRight: 8,
+    paddingVertical: 5,
+    borderRadius: 8,
+    marginRight: 10,
   },
   countText: {
     fontSize: 14,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Inter_700Bold',
   },
   emptyContainer: { alignItems: 'center', paddingTop: 60 },
-  noRecords: { fontSize: 18, fontFamily: 'Montserrat_500Medium', marginTop: 16 },
+  noRecords: { fontSize: 18, fontFamily: 'Inter_500Medium', marginTop: 16 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   bottomActions: {
     position: 'absolute',
@@ -414,7 +418,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     elevation: 100,
   },
   deleteAction: { alignItems: 'center', justifyContent: 'center', flex: 1, height: '100%' },
-  deleteText: { fontSize: 12, marginTop: 4, fontFamily: 'Montserrat_600SemiBold' },
+  deleteText: { fontSize: 12, marginTop: 4, fontFamily: 'Inter_600SemiBold' },
   fab: {
     position: 'absolute',
     bottom: 30,
@@ -456,14 +460,14 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Inter_700Bold',
     color: theme.colors.text,
     marginBottom: 12,
     textAlign: 'center',
   },
   modalSubtitle: {
     fontSize: 14,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     color: theme.colors.textLight,
     textAlign: 'center',
     lineHeight: 20,
@@ -486,7 +490,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   modalCancelText: {
     fontSize: 15,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.primary,
   },
   modalDeleteButton: {
@@ -499,7 +503,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   modalDeleteText: {
     fontSize: 15,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: 'white',
   },
 });

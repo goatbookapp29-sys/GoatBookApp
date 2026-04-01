@@ -143,12 +143,12 @@ const styles = StyleSheet.create({
   userName: {
     color: '#FFFFFF',
     fontSize: 20,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   farmName: {
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 14,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     marginTop: 2,
   },
   menuList: {
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 15,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     marginLeft: 16,
   },
   logoutButton: {
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 15,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginLeft: 16,
   },
 });

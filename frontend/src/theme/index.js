@@ -17,11 +17,11 @@ export const lightTheme = {
     black: '#000000',
   },
   typography: {
-    regular: 'Montserrat_400Regular',
-    medium: 'Montserrat_500Medium',
-    semiBold: 'Montserrat_600SemiBold',
-    bold: 'Montserrat_600SemiBold',
-    extraBold: 'Montserrat_700Bold',
+    regular: 'Inter_400Regular',
+    medium: 'Inter_500Medium',
+    semiBold: 'Inter_600SemiBold',
+    bold: 'Inter_600SemiBold',
+    extraBold: 'Inter_700Bold',
   },
   spacing: {
     xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 40,

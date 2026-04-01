@@ -354,7 +354,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   statLabel: {
     fontSize: 14,
     marginRight: 8,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   badge: {
     paddingHorizontal: 12,
@@ -364,17 +364,17 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   badgeText: {
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.primary,
   },
   statSuffix: {
     fontSize: 14,
     marginLeft: 8,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginVertical: SPACING.lg,
     letterSpacing: -0.5,
   },
@@ -396,7 +396,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   addTagBtnText: {
     color: '#FFFFFF',
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
   },
   selectedContainer: {
@@ -419,14 +419,14 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   chipText: {
     marginHorizontal: 8,
     fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: isDarkMode ? theme.colors.white : theme.colors.primary,
   },
   emptyText: {
     fontSize: 14,
     textAlign: 'center',
     marginTop: 24,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   footer: {
     marginTop: 20,
@@ -448,7 +448,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   editInfoLabel: {
     fontSize: 12,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: COLORS.primary,
     marginBottom: 16,
     letterSpacing: 0.5,
@@ -462,7 +462,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   editTagText: {
     fontSize: 22,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginLeft: 10,
   },
 });

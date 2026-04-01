@@ -116,12 +116,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   vaccineName: {
     fontSize: 17,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: -0.5,
   },
   daysText: {
     fontSize: 13,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   remarkText: {
     marginTop: 10,
@@ -129,7 +129,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontStyle: 'italic',
     paddingTop: 10,
     borderTopWidth: 1,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
   },
   editBtn: {
     padding: 8,
@@ -146,7 +146,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   emptyText: {
     marginTop: 16,
     fontSize: 16,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   fab: {
     position: 'absolute',

@@ -1,14 +1,14 @@
 import { StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { SPACING } from '../theme';
 
-export const getStyles = (theme, isDarkMode) => StyleSheet.create({
+export const getStyles = (theme, isDarkMode, insets) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
   },
   header: {
     backgroundColor: theme.colors.primary,
-    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 24) : 48,
+    paddingTop: Platform.OS === 'ios' ? insets.top : (RNStatusBar.currentHeight || insets.top || 24),
   },
   headerRow: {
     flexDirection: 'row',
@@ -25,7 +25,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   headerTitle: {
     flex: 1,
     fontSize: 18,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Inter_700Bold',
     color: '#FFF',
   },
   flex: {
@@ -38,7 +38,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.primary,
     marginBottom: SPACING.md,
     letterSpacing: 0.5,
@@ -69,7 +69,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   maleLabel: {
     fontSize: 14,
     color: theme.colors.text,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     marginRight: 12,
   },
   checkboxContainer: {
@@ -92,7 +92,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   checkboxLabel: {
     fontSize: 14,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     color: theme.colors.text,
   },
   statusContainer: {
@@ -114,7 +114,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   statusText: {
     color: '#FFF',
     fontSize: 12,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Inter_700Bold',
   },
   statusChevron: {
     marginLeft: 4,
@@ -151,13 +151,13 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   addNewText: {
     color: '#FFF',
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     fontSize: 14,
     marginLeft: 6,
   },
   noRecordsText: {
     color: theme.colors.textMuted,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     fontSize: 13,
     marginTop: 20,
     marginBottom: 20,
@@ -186,12 +186,12 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   weightKg: {
     fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.text,
   },
   weightDate: {
     fontSize: 12,
-    fontFamily: 'Montserrat_400Regular',
+    fontFamily: 'Inter_400Regular',
     color: theme.colors.textLight,
   },
   heightInfoBlock: {
@@ -199,12 +199,12 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   weightLabel: {
     fontSize: 10,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.textLight,
   },
   weightValue: {
     fontSize: 12,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.text,
   },
   sectionDivider: {
@@ -220,7 +220,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   readyLabel: {
     fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     color: theme.colors.primary,
   },
   statusBadge: {
@@ -240,7 +240,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   statusText: {
     color: '#FFF',
     fontSize: 12,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   readyToSellCard: {
     padding: 20,
@@ -249,7 +249,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderWidth: 1.5,
     borderColor: theme.colors.border,
     backgroundColor: theme.colors.surface,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   readyHeaderRow: {
     flexDirection: 'row',
@@ -259,7 +259,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   readyTitle: {
     fontSize: 15,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 0.5,
   },
   readyOptions: {
@@ -282,7 +282,7 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   photoTitle: {
     fontSize: 15,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 0.5,
   },
   photoContent: {
@@ -341,13 +341,13 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontFamily: 'Montserrat_700Bold',
+    fontFamily: 'Inter_700Bold',
     color: theme.colors.text,
     marginBottom: 12,
   },
   modalOptionText: {
     fontSize: 14,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     color: theme.colors.text,
   },
   statusOption: {

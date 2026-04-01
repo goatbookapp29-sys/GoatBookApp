@@ -188,10 +188,10 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   note: {
     fontSize: 13,
     lineHeight: 20,
-    fontFamily: 'Montserrat_400Regular',
+    fontFamily: 'Inter_400Regular',
   },
   noteBold: {
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   footer: {
     marginTop: 'auto',
@@ -215,7 +215,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   warningText: {
     fontSize: 13,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     textAlign: 'center',
   },
 });

@@ -208,7 +208,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    fontFamily: 'Montserrat_400Regular',
+    fontFamily: 'Inter_400Regular',
   },
   animalDetailCard: {
     padding: 16,
@@ -225,12 +225,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    fontFamily: 'Montserrat_500Medium',
+    fontFamily: 'Inter_500Medium',
     marginLeft: 10,
   },
   detailValue: {
     fontSize: 14,
-    fontFamily: 'Montserrat_600SemiBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   submitBtn: {
     marginTop: 10,
