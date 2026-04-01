@@ -123,23 +123,25 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     width: '100%',
-    gap: 12,
+    gap: 16,
+    paddingTop: 8,
   },
   cancelBtn: {
     flex: 1,
-    height: 50,
-    borderRadius: 12,
-    borderWidth: 1,
+    height: 56,
+    borderRadius: 16,
+    borderWidth: 1.5,
     justifyContent: 'center',
     alignItems: 'center',
   },
   cancelBtnText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 15,
+    fontSize: 16,
   },
   confirmBtnWrapper: {
-    flex: 1.5,
-  }
+    flex: 1,
+    height: 56,
+  },
 });
 
 export default GConfirmModal;

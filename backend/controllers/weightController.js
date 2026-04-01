@@ -58,11 +58,11 @@ exports.addWeight = async (req, res) => {
       data: {
         id: uuidv4(), 
         animal_id: animal.id, 
-        farm_id: req.farmId,
+        farm_id: req.farmId || animal.farm_id, // Fallback to animal's farm if middleware missed it
         tag_number: tagNumber, 
-        weight, 
-        height: height || null,
-        date: date ? new Date(date) : now, 
+        weight: weight.toString(), 
+        height: height ? height.toString() : null,
+        date: date ? new Date(date).toISOString() : now.toISOString(), 
         remark,
         created_by_user_id: req.user.id, 
         created_at: now, 

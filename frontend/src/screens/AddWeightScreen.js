@@ -8,6 +8,8 @@ import GButton from '../components/GButton';
 import GDatePicker from '../components/GDatePicker';
 import { Scan, Info } from 'lucide-react-native';
 import api from '../api';
+import { useFocusEffect } from '@react-navigation/native';
+import GAlert from '../components/GAlert';
 
 const AddWeightScreen = ({ route, navigation }) => {
   const { isDarkMode, theme } = useTheme();
@@ -21,6 +23,7 @@ const AddWeightScreen = ({ route, navigation }) => {
   const [animalInfo, setAnimalInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetchingAnimal, setFetchingAnimal] = useState(false);
+  const [successVisible, setSuccessVisible] = useState(false);
 
   useEffect(() => {
     if (initialTag) {
@@ -74,14 +77,12 @@ const AddWeightScreen = ({ route, navigation }) => {
 
       await api.post('/weights', {
         tagNumber,
-        weight,
-        height,
+        weight: parseFloat(weight),
+        height: height ? parseFloat(height) : null,
         date,
         remark
       });
-      Alert.alert('Success', 'Weight record added successfully', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
+      setSuccessVisible(true);
     } catch (error) {
       console.error('Add weight error:', error);
       const msg = error.response?.data?.message || 'Failed to add weight record';
@@ -177,6 +178,18 @@ const AddWeightScreen = ({ route, navigation }) => {
           containerStyle={styles.submitBtn}
         />
       </ScrollView>
+
+      <GAlert 
+        visible={successVisible}
+        title="Success! 🎉"
+        message={`Weight record for Tag ${tagNumber} has been saved successfully.`}
+        type="success"
+        confirmText="Excellent"
+        onClose={() => {
+          setSuccessVisible(false);
+          navigation.goBack();
+        }}
+      />
     </View>
   );
 };

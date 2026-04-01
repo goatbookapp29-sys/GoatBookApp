@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Alert, RefreshControl } from 'react-native';
+import React, { useState, useCallback, useMemo } from 'react';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Alert, RefreshControl, Modal, ScrollView } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
-import { Search, Plus, Scale, Trash2, Tag } from 'lucide-react-native';
+import GConfirmModal from '../components/GConfirmModal';
+import { Search, Plus, Scale, Trash2, Tag, ChevronRight, X } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { getFromCache, saveToCache } from '../utils/cache';
@@ -12,10 +13,16 @@ const WeightListScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
   const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
   const [weights, setWeights] = useState([]);
-  const [filteredWeights, setFilteredWeights] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  
+  // Custom Delete Modal State
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -23,95 +30,126 @@ const WeightListScreen = ({ navigation }) => {
     }, [])
   );
 
-  // Fetch weight records from backend and update local state + cache
+  // Group weights by tag number for the summary view
+  const groupedWeights = useMemo(() => {
+    const groups = {};
+    weights.forEach(w => {
+      if (!groups[w.tagNumber]) {
+        groups[w.tagNumber] = [];
+      }
+      groups[w.tagNumber].push(w);
+    });
+    
+    // Sort each group by date (latest first)
+    Object.keys(groups).forEach(tag => {
+      groups[tag].sort((a, b) => new Date(b.date) - new Date(a.date));
+    });
+
+    return groups;
+  }, [weights]);
+
+  // Unique tags for the main list, filtered by search query
+  const tagList = useMemo(() => {
+    const tags = Object.keys(groupedWeights).map(tag => ({
+      tagNumber: tag,
+      latestWeight: groupedWeights[tag][0].weight,
+      latestDate: groupedWeights[tag][0].date,
+      count: groupedWeights[tag].length,
+      history: groupedWeights[tag]
+    }));
+
+    if (!searchQuery) return tags;
+    return tags.filter(t => t.tagNumber.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [groupedWeights, searchQuery]);
+
+  const openHistory = (tagData) => {
+    setSelectedTag(tagData);
+    setIsHistoryVisible(true);
+  };
+
   const fetchWeights = async (isRefreshing = false) => {
     try {
       if (!isRefreshing) setLoading(true);
       const response = await api.get('/weights');
-      const data = response.data;
-      setWeights(data);
-      applyFilter(searchQuery, data); // Refresh current search view
-      await saveToCache('weights', data); // Backup for offline access
+      setWeights(response.data);
+      await saveToCache('weights', response.data);
     } catch (error) {
       console.error('Fetch weights error:', error);
-      // Fallback to cache if server is unreachable
       const cached = await getFromCache('weights');
-      if (cached) {
-        setWeights(cached);
-        applyFilter(searchQuery, cached);
-      }
+      if (cached) setWeights(cached);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // Intermediate search handler
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    applyFilter(query, weights);
+  const handleDeletePress = (record) => {
+    setRecordToDelete(record);
+    setIsDeleteModalVisible(true);
   };
 
-  // Main logic to filter weights by tag number
-  const applyFilter = (query, data) => {
-    if (!query) {
-      setFilteredWeights(data);
-    } else {
-      const filtered = data.filter(w => 
-        w.tagNumber.toLowerCase().includes(query.toLowerCase())
-      );
-      setFilteredWeights(filtered);
+  const confirmDelete = async () => {
+    if (!recordToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await api.delete(`/weights/${recordToDelete.id}`);
+      await fetchWeights();
+      
+      // If we deleted the last record in history, close history modal
+      if (selectedTag && selectedTag.history.length === 1) {
+        setIsHistoryVisible(false);
+      } else if (selectedTag) {
+        // Refresh local history view inside modal
+        const updatedHistory = selectedTag.history.filter(h => h.id !== recordToDelete.id);
+        setSelectedTag({ ...selectedTag, history: updatedHistory });
+      }
+      
+      setIsDeleteModalVisible(false);
+      setRecordToDelete(null);
+    } catch (error) {
+      alert('Failed to delete record');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    Alert.alert(
-      'Delete Weight Record',
-      'Are you sure you want to remove this weight record?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive', 
-          onPress: async () => {
-            try {
-              await api.delete(`/weights/${id}`);
-              fetchWeights();
-            } catch (error) {
-              console.error('Delete weight error:', error);
-              alert('Failed to delete weight record');
-            }
-          } 
-        }
-      ]
-    );
-  };
-
-  const renderWeightItem = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.mainInfo}>
-        <View style={styles.tagWrapper}>
-          <Tag size={16} color={theme.colors.textLight} style={styles.tagIcon} />
-          <Text style={[styles.tagText, { color: theme.colors.text }]}>{item.tagNumber}</Text>
+  const renderTagItem = ({ item }) => (
+    <TouchableOpacity 
+      style={styles.tagCard} 
+      onPress={() => openHistory(item)}
+      activeOpacity={0.8}
+    >
+      <View style={styles.tagCardHeader}>
+        <View style={styles.tagBadge}>
+          <Tag size={16} color={theme.colors.primary} style={{ marginRight: 6 }} />
+          <Text style={[styles.tagNumberText, { color: theme.colors.text }]}>{item.tagNumber}</Text>
         </View>
-        <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{new Date(item.date).toLocaleDateString()}</Text>
+        <View style={[styles.countBadge, { backgroundColor: theme.colors.primary + '15' }]}>
+          <Text style={[styles.countText, { color: theme.colors.primary }]}>{item.count} {item.count === 1 ? 'Record' : 'Records'}</Text>
+        </View>
       </View>
-      <View style={styles.statsBox}>
-        <Text style={[styles.weightValue, { color: theme.colors.primary }]}>{item.weight} KG</Text>
-        {item.height ? <Text style={[styles.heightValue, { color: theme.colors.textLight }]}>H: {item.height}</Text> : null}
+      
+      <View style={styles.tagCardFooter}>
+        <View>
+          <Text style={[styles.latestLabel, { color: theme.colors.textLight }]}>Latest Weight</Text>
+          <Text style={[styles.latestValue, { color: theme.colors.primary }]}>{item.latestWeight} KG</Text>
+        </View>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text style={[styles.latestLabel, { color: theme.colors.textLight }]}>Last Recorded</Text>
+          <Text style={[styles.latestDate, { color: theme.colors.text }]}>{new Date(item.latestDate).toLocaleDateString()}</Text>
+        </View>
       </View>
-      <TouchableOpacity 
-        style={styles.deleteBtn} 
-        onPress={() => handleDelete(item.id)}
-      >
-        <Trash2 size={20} color={theme.colors.error} />
-      </TouchableOpacity>
-    </View>
+      <View style={styles.cardAction}>
+        <Text style={[styles.viewAllText, { color: theme.colors.textLight }]}>View History</Text>
+        <ChevronRight size={16} color={theme.colors.textMuted} />
+      </View>
+    </TouchableOpacity>
   );
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Weight Records" onBack={() => navigation.goBack()} />
+      <GHeader title="Weight Records" onBack={() => navigation.goBack()} leftAlign />
       
       <View style={styles.content}>
         <View style={styles.searchContainer}>
@@ -121,7 +159,7 @@ const WeightListScreen = ({ navigation }) => {
             placeholder="Search Tag Number..."
             placeholderTextColor={theme.colors.textMuted}
             value={searchQuery}
-            onChangeText={handleSearch}
+            onChangeText={setSearchQuery}
           />
         </View>
 
@@ -131,9 +169,9 @@ const WeightListScreen = ({ navigation }) => {
           </View>
         ) : (
           <FlatList
-            data={filteredWeights}
-            renderItem={renderWeightItem}
-            keyExtractor={item => item.id}
+            data={tagList}
+            renderItem={renderTagItem}
+            keyExtractor={item => item.tagNumber}
             contentContainerStyle={styles.list}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={() => fetchWeights(true)} />
@@ -141,13 +179,73 @@ const WeightListScreen = ({ navigation }) => {
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Scale size={64} color={theme.colors.border} />
-                <Text style={[styles.emptyText, { color: theme.colors.text }]}>No weight records found</Text>
-                <Text style={[styles.emptySub, { color: theme.colors.textLight }]}>Start tracking growth by adding weight measurements.</Text>
+                <Text style={[styles.emptyText, { color: theme.colors.text }]}>No records found</Text>
+                <Text style={[styles.emptySub, { color: theme.colors.textLight }]}>Add measurements to start tracking by tag.</Text>
               </View>
             }
           />
         )}
       </View>
+
+      {/* History Modal */}
+      <Modal
+        visible={isHistoryVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsHistoryVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.modalHeader}>
+              <View>
+                <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Weight History</Text>
+                <Text style={[styles.modalSubtitle, { color: theme.colors.textLight }]}>Tag: {selectedTag?.tagNumber}</Text>
+              </View>
+              <TouchableOpacity onPress={() => setIsHistoryVisible(false)} style={styles.closeBtn}>
+                <X size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.historyList}>
+              {selectedTag?.history.map((record, index) => (
+                <View key={record.id} style={styles.historyItem}>
+                  <View style={styles.timeline}>
+                    <View style={[styles.dot, { backgroundColor: theme.colors.primary }]} />
+                    {index !== selectedTag.history.length - 1 && <View style={[styles.line, { backgroundColor: theme.colors.border }]} />}
+                  </View>
+                  
+                  <View style={[styles.historyCard, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}>
+                    <View style={styles.historyCardMain}>
+                      <View>
+                        <Text style={[styles.historyDate, { color: theme.colors.text }]}>{new Date(record.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</Text>
+                        <View style={{ flexDirection: 'row', gap: 12 }}>
+                          {record.height ? <Text style={[styles.historyHeight, { color: theme.colors.textLight }]}>Height: {record.height} cm</Text> : null}
+                          {record.remark ? <Text style={[styles.historyRemark, { color: theme.colors.textLight }]} numberOfLines={1}>• {record.remark}</Text> : null}
+                        </View>
+                      </View>
+                      <Text style={[styles.historyWeight, { color: theme.colors.primary }]}>{record.weight} KG</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => handleDeletePress(record)} style={styles.deleteHistoryBtn}>
+                      <Trash2 size={18} color={theme.colors.error + '90'} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <GConfirmModal
+        visible={isDeleteModalVisible}
+        title="Delete Weight Record?"
+        message="Are you sure you want to remove this measurement? This growth history data cannot be recovered."
+        confirmText="Delete"
+        type="delete"
+        onConfirm={confirmDelete}
+        onCancel={() => setIsDeleteModalVisible(false)}
+        loading={isDeleting}
+      />
 
       <TouchableOpacity 
         style={[styles.fab, { backgroundColor: theme.colors.primary }]} 
@@ -182,54 +280,164 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flex: 1,
     marginLeft: 12,
     fontSize: 16,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_400Regular',
   },
   list: {
     paddingBottom: 80,
   },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
+  tagCard: {
+    borderRadius: 20,
     backgroundColor: theme.colors.surface,
-    marginBottom: 12,
-    borderWidth: 1,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1.5,
     borderColor: theme.colors.border,
+    ...theme.shadow.sm,
   },
-  mainInfo: {
-    flex: 1,
+  tagCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  tagWrapper: {
+  tagBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
   },
-  tagIcon: {
-    marginRight: 6,
-  },
-  tagText: {
-    fontSize: 17,
+  tagNumberText: {
+    fontSize: 20,
     fontFamily: 'Inter_700Bold',
   },
-  dateText: {
-    fontSize: 14,
-    marginTop: 4,
-    fontFamily: 'Inter_500Medium',
+  countBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
-  statsBox: {
-    alignItems: 'flex-end',
-    marginRight: 12,
-  },
-  weightValue: {
-    fontSize: 18,
+  countText: {
+    fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
   },
-  heightValue: {
-    fontSize: 12,
+  tagCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border + '50',
+  },
+  latestLabel: {
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 2,
+    textTransform: 'uppercase',
+  },
+  latestValue: {
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+  },
+  latestDate: {
+    fontSize: 14,
     fontFamily: 'Inter_500Medium',
   },
-  deleteBtn: {
+  cardAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 12,
+    gap: 4,
+  },
+  viewAllText: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    height: '85%',
+    padding: 24,
+    ...theme.shadow.lg,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: 'Inter_700Bold',
+  },
+  modalSubtitle: {
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
+    marginTop: 2,
+  },
+  closeBtn: {
+    padding: 8,
+  },
+  historyList: {
+    paddingBottom: 40,
+  },
+  historyItem: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  timeline: {
+    width: 20,
+    alignItems: 'center',
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    zIndex: 1,
+  },
+  line: {
+    width: 2,
+    flex: 1,
+    marginVertical: -2,
+  },
+  historyCard: {
+    flex: 1,
+    borderRadius: 16,
+    borderWidth: 1.2,
+    padding: 16,
+    marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  historyCardMain: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flex: 1,
+    marginRight: 16,
+    alignItems: 'center',
+  },
+  historyDate: {
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  historyHeight: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 2,
+  },
+  historyRemark: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 2,
+    flexShrink: 1,
+  },
+  historyWeight: {
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+  },
+  deleteHistoryBtn: {
     padding: 8,
   },
   center: {
@@ -243,7 +451,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingHorizontal: 40,
   },
   emptyText: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: 'Inter_600SemiBold',
     marginTop: 20,
     textAlign: 'center',
@@ -253,7 +461,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 20,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_400Regular',
   },
   fab: {
     position: 'absolute',
@@ -264,8 +472,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.primaryDark,
+    ...theme.shadow.lg,
   },
 });
 
