@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
-import { Home, Users, Search } from 'lucide-react-native';
-import { SPACING } from '../theme';
+import { Home, Users, Search, LayoutGrid, ArrowRightLeft, PlusCircle } from 'lucide-react-native';
+import { SPACING, SHADOW } from '../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -14,20 +14,30 @@ const LocationMenuScreen = ({ navigation }) => {
   const menuItems = [
     {
       id: 'create',
-      title: 'Create Location/Shed',
-      icon: <Home color={theme.colors.primary} size={32} strokeWidth={2} />,
+      title: 'Create Shed',
+      subtitle: 'Add new stable or pen',
+      icon: <PlusCircle color={theme.colors.primary} size={32} strokeWidth={1.5} />,
       screen: 'CreateLocation',
     },
     {
+      id: 'list',
+      title: 'Shed List',
+      subtitle: 'View all farm locations',
+      icon: <LayoutGrid color={theme.colors.primary} size={32} strokeWidth={1.5} />,
+      screen: 'LocationList',
+    },
+    {
       id: 'single',
-      title: 'Assign Single Animal',
-      icon: <Users color={theme.colors.primary} size={32} strokeWidth={2} />,
+      title: 'Single Relocation',
+      subtitle: 'Move one animal',
+      icon: <Home color={theme.colors.primary} size={32} strokeWidth={1.5} />,
       screen: 'AddLocation',
     },
     {
       id: 'mass',
-      title: 'Assign Mass Animals',
-      icon: <Users color={theme.colors.primary} size={32} strokeWidth={2} />,
+      title: 'Mass Relocation',
+      subtitle: 'Move animals in bulk',
+      icon: <ArrowRightLeft color={theme.colors.primary} size={32} strokeWidth={1.5} />,
       screen: 'MassLocation',
     },
   ];
@@ -36,28 +46,30 @@ const LocationMenuScreen = ({ navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title="Location" 
-        onBack={() => navigation.goBack()} 
-        rightIcon={<Search color="#FFF" size={24} />}
-        onRightPress={() => navigation.navigate('LocationList')}
+        onMenu={() => navigation.openDrawer()} 
+        leftAlign={true}
       />
       
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.grid}>
           {menuItems.map((item) => (
             <TouchableOpacity
               key={item.id}
-              style={styles.card}
+              style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
               onPress={() => navigation.navigate(item.screen)}
               activeOpacity={0.7}
             >
-              <View style={styles.iconContainer}>
+              <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '10' }]}>
                 {item.icon}
               </View>
-              <Text style={styles.cardTitle}>{item.title}</Text>
+              <View style={styles.textContainer}>
+                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
+                <Text style={[styles.cardSubtitle, { color: theme.colors.textLight }]}>{item.subtitle}</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -66,35 +78,42 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
-    padding: SPACING.md,
+  scrollContent: {
+    padding: SPACING.lg,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: 16,
   },
   card: {
-    width: '47%',
-    height: 150,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-    borderWidth: 1.5,
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
+    width: (width - SPACING.lg * 2 - 16) / 2,
+    padding: 20,
+    borderRadius: 24,
+    borderWidth: 1,
+    ...SHADOW.sm,
   },
   iconContainer: {
-    marginBottom: SPACING.md,
+    width: 60,
+    height: 60,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  textContainer: {
+    gap: 4,
   },
   cardTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: theme.colors.text,
-    textAlign: 'center',
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    opacity: 0.8,
   },
 });
 

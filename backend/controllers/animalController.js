@@ -362,11 +362,9 @@ exports.checkTagExists = async (req, res) => {
         tag_number: req.params.tagNumber, 
         farm_id: req.farmId 
       },
-      select: {
-        id: true,
-        tag_number: true,
-        gender: true,
-        breeds: { select: { name: true } }
+      include: {
+        breeds: { select: { name: true } },
+        locations: { select: { name: true } }
       }
     });
 
@@ -374,7 +372,15 @@ exports.checkTagExists = async (req, res) => {
       return res.status(404).json({ message: 'Tag ID not found in your farm' });
     }
 
-    res.json(animal);
+    // Map to frontend standard
+    res.json({
+      id: animal.id,
+      tagNumber: animal.tag_number,
+      gender: animal.gender,
+      breedName: animal.breeds?.name || 'Unknown Breed',
+      currentLocationName: animal.locations?.name || 'Unassigned',
+      ageInMonths: animal.age_in_months || 0
+    });
   } catch (err) {
     console.error('CHECK TAG ERROR:', err);
     res.status(500).json({ message: 'Animal API Error: Check Tag', error: err.message, code: err.code });

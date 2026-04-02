@@ -61,8 +61,7 @@ const GConfirmModal = ({
                 title={confirmText}
                 onPress={onConfirm}
                 loading={loading}
-                variant={variant === 'destructive' ? 'primary' : 'primary'}
-                style={variant === 'destructive' ? { backgroundColor: theme.colors.error } : {}}
+                variant="primary"
               />
             </View>
           </View>
@@ -121,14 +120,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column-reverse',
     width: '100%',
-    gap: 16,
+    gap: 12,
     paddingTop: 8,
   },
   cancelBtn: {
-    flex: 1,
-    height: 56,
+    width: '100%',
+    minHeight: 56,
+    paddingVertical: 12,
     borderRadius: 16,
     borderWidth: 1.5,
     justifyContent: 'center',
@@ -139,8 +139,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   confirmBtnWrapper: {
-    flex: 1,
-    height: 56,
+    width: '100%',
+    minHeight: 56,
   },
 });
 

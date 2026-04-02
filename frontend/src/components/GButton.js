@@ -46,7 +46,9 @@ const GButton = ({ title, label, onPress, loading, containerStyle, titleStyle, v
 
 const styles = StyleSheet.create({
   button: {
-    height: 52,
+    minHeight: 52,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',

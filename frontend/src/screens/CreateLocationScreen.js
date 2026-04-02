@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, SafeAreaView } from 'react-native';
 import { SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
@@ -27,10 +27,12 @@ const CreateLocationScreen = ({ navigation, route }) => {
   const fetchLocations = async () => {
     try {
       const response = await api.get('/locations');
-      const formattedLocs = response.data.map(loc => ({
-        label: loc.displayName || loc.name,
-        value: loc.id
-      }));
+      const formattedLocs = response.data
+        .filter(loc => !locationToEdit || loc.id !== locationToEdit.id) // Prevent self-parenting
+        .map(loc => ({
+          label: loc.displayName || loc.name,
+          value: loc.id
+        }));
       setLocations([{ label: 'None (Top Level)', value: null }, ...formattedLocs]);
     } catch (err) {
       console.error('Error fetching existing locations:', err);
@@ -38,15 +40,14 @@ const CreateLocationScreen = ({ navigation, route }) => {
   };
 
   const handleSave = async () => {
-    if (!name) {
-      Alert.alert('Validation Error', 'Location Name is required');
+    if (!name.trim()) {
+      Alert.alert('Validation', 'Location Name is required');
       return;
     }
 
     setLoading(true);
     try {
       if (locationToEdit) {
-        // Edit mode
         await api.put(`/locations/${locationToEdit.id}`, {
           name,
           code: locationToEdit.code,
@@ -55,7 +56,6 @@ const CreateLocationScreen = ({ navigation, route }) => {
         });
         Alert.alert('Success', 'Physical Location/Shed updated successfully!');
       } else {
-        // Create mode
         const generatedCode = name.replace(/\s+/g, '-').substring(0, 6).toUpperCase() + '-' + Math.floor(Math.random() * 1000);
         
         await api.post('/locations', {
@@ -81,49 +81,53 @@ const CreateLocationScreen = ({ navigation, route }) => {
       <GHeader 
         title={locationToEdit ? "Edit Shed" : "Create Shed"} 
         onBack={() => navigation.goBack()} 
+        leftAlign={true}
       />
       
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={styles.flex}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.section}>
-            <Text style={[styles.sectionInfo, { color: theme.colors.textLight }]}>
-              Define the physical pens, sheds, and pastures on your farm so you can assign animals to them later.
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.formArea}>
+            <Text style={[styles.infoText, { color: theme.colors.textLight }]}>
+              Define the physical pens, sheds, and pastures on your farm so you can organize your livestock efficiently.
             </Text>
             
-            <View style={styles.gap} />
+            <View style={styles.spacer} />
 
             <GInput 
-              label="Location Name*" 
+              label="Location Name" 
               value={name} 
               onChangeText={setName} 
               placeholder="e.g. Maternity Ward B"
               required 
             />
             
-            <View style={styles.gap} />
+            <View style={styles.spacer} />
             
             <GSelect 
               label="Parent Location (Optional)" 
               value={parentLocationId} 
               onSelect={setParentLocationId}
               options={locations}
-              placeholder="Is this inside another shed?"
-            />
-
-          </View>
-
-          <View style={styles.footer}>
-            <GButton 
-              title={locationToEdit ? "Update Structure" : "Create Structure"} 
-              onPress={handleSave}
-              loading={loading}
+              helpAction={() => {}}
             />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 20 }]}>
+        <GButton 
+          title={locationToEdit ? "Update Shed" : "Create Shed"} 
+          onPress={handleSave}
+          loading={loading}
+          containerStyle={styles.submitBtn}
+        />
+      </View>
     </View>
   );
 };
@@ -133,23 +137,32 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   flex: { flex: 1 },
   scrollContent: {
     padding: SPACING.lg,
-    flexGrow: 1,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
-  section: {
-    marginBottom: SPACING.xl,
-    paddingTop: 8,
+  formArea: {
+    marginTop: 8,
   },
-  sectionInfo: {
+  infoText: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
     lineHeight: 22,
-    marginBottom: 8,
+    opacity: 0.8,
   },
-  gap: { height: 16 },
+  spacer: { height: 24 },
   footer: {
-    paddingVertical: SPACING.xl,
-    marginTop: 'auto',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: 12,
+    backgroundColor: theme.colors.background,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border + '30',
+  },
+  submitBtn: {
+    height: 56,
+    borderRadius: 16,
   }
 });
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   StyleSheet, View, Text, TouchableOpacity, FlatList, 
   SafeAreaView, Modal, TextInput, Alert, ActivityIndicator, Platform 
@@ -6,8 +6,12 @@ import {
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GButton from '../components/GButton';
-import { ChevronDown, Check } from 'lucide-react-native';
-import { SPACING } from '../theme';
+import GSelect from '../components/GSelect';
+import { 
+  Check, Square, CheckSquare, Circle, CheckCircle2, Scan, ChevronDown, 
+  Search, X 
+} from 'lucide-react-native';
+import { SPACING, SHADOW } from '../theme';
 import api from '../api';
 
 const MassLocationScreen = ({ navigation }) => {
@@ -17,12 +21,11 @@ const MassLocationScreen = ({ navigation }) => {
   const [animals, setAnimals] = useState([]);
   const [locations, setLocations] = useState([]);
   const [selectedAnimals, setSelectedAnimals] = useState(new Set());
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedLocationId, setSelectedLocationId] = useState(null);
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [showAddLocation, setShowAddLocation] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [newLocationName, setNewLocationName] = useState('');
 
   useEffect(() => {
@@ -37,7 +40,10 @@ const MassLocationScreen = ({ navigation }) => {
         api.get('/locations')
       ]);
       setAnimals(animalsRes.data);
-      setLocations(locationsRes.data);
+      setLocations(locationsRes.data.map(loc => ({
+        label: `${loc.displayName || loc.name} (${loc.animalCount || 0})`,
+        value: loc.id
+      })));
     } catch (error) {
       console.error('Fetch data error:', error);
       Alert.alert('Error', 'Failed to load data');
@@ -46,21 +52,46 @@ const MassLocationScreen = ({ navigation }) => {
     }
   };
 
-  const toggleAnimalSelection = (id) => {
-    const newSelection = new Set(selectedAnimals);
-    if (newSelection.has(id)) {
-      newSelection.delete(id);
-    } else {
-      newSelection.add(id);
+  const toggleAnimalSelection = useCallback((id) => {
+    setSelectedAnimals(prev => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(id)) {
+        newSelection.delete(id);
+      } else {
+        newSelection.add(id);
+      }
+      return newSelection;
+    });
+  }, []);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [remark, setRemark] = useState('');
+
+  const filteredAnimals = useMemo(() => {
+    let result = animals;
+    
+    // 1. Filter by search query (Tag ID or Breed)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(animal => 
+        animal.tagNumber?.toLowerCase().includes(q) || 
+        (animal.breeds?.name || '').toLowerCase().includes(q)
+      );
     }
-    setSelectedAnimals(newSelection);
-  };
+    
+    // 2. Auto-exclude animals already in the target shed
+    if (selectedLocationId) {
+      result = result.filter(animal => animal.locationId !== selectedLocationId);
+    }
+    
+    return result;
+  }, [animals, searchQuery, selectedLocationId]);
 
   const handleSelectAll = () => {
-    if (selectedAnimals.size === animals.length) {
+    if (selectedAnimals.size === filteredAnimals.length) {
       setSelectedAnimals(new Set());
     } else {
-      setSelectedAnimals(new Set(animals.map(a => a.id)));
+      setSelectedAnimals(new Set(filteredAnimals.map(a => a.id)));
     }
   };
 
@@ -72,10 +103,14 @@ const MassLocationScreen = ({ navigation }) => {
         code: newLocationName.toUpperCase().substring(0, 5),
         type: 'Internal Location'
       });
-      setLocations([...locations, res.data]);
-      setSelectedLocation(res.data);
+      const newLoc = {
+        label: `${res.data.name} (0)`,
+        value: res.data.id
+      };
+      setLocations(prev => [...prev, newLoc]);
+      setSelectedLocationId(res.data.id);
       setNewLocationName('');
-      setShowAddLocation(false);
+      setShowAddModal(false);
     } catch (error) {
       Alert.alert('Error', 'Failed to create location');
     }
@@ -83,11 +118,11 @@ const MassLocationScreen = ({ navigation }) => {
 
   const handleSubmit = async () => {
     if (selectedAnimals.size === 0) {
-      Alert.alert('Error', 'Please select atleast one animal');
+      Alert.alert('Validation', 'Please select atleast one animal');
       return;
     }
-    if (!selectedLocation) {
-      Alert.alert('Error', 'Please select a location');
+    if (!selectedLocationId) {
+      Alert.alert('Validation', 'Please select a destination location');
       return;
     }
 
@@ -95,7 +130,8 @@ const MassLocationScreen = ({ navigation }) => {
     try {
       await api.put('/animals/bulk-location', {
         animalIds: Array.from(selectedAnimals),
-        locationId: selectedLocation.id
+        locationId: selectedLocationId,
+        remark: remark
       });
       Alert.alert('Success', 'Location updated for selected animals');
       navigation.goBack();
@@ -110,22 +146,30 @@ const MassLocationScreen = ({ navigation }) => {
     const isChecked = selectedAnimals.has(item.id);
     return (
       <TouchableOpacity 
-        style={styles.animalItem} 
+        style={[styles.animalItem, { borderBottomColor: theme.colors.border + '30' }]} 
         onPress={() => toggleAnimalSelection(item.id)}
         activeOpacity={0.7}
       >
-        <View style={[styles.checkbox, isChecked && styles.checkboxSelected]}>
-          {isChecked && <Check color="#FFF" size={14} strokeWidth={4} />}
+        <View style={styles.checkWrapper}>
+          {isChecked ? (
+            <CheckCircle2 color={theme.colors.primary} size={24} fill={theme.colors.primary + '20'} />
+          ) : (
+            <Circle color={theme.colors.textMuted} size={24} />
+          )}
         </View>
-        <View style={styles.animalDetails}>
-          <View style={styles.animalRow}>
-            <Text style={styles.tagText}>Tag ID:{item.tagNumber}</Text>
-            <Text style={styles.breedText}>{item.Breed?.name || 'Unknown'}</Text>
+        <View style={styles.animalInfo}>
+          <View style={styles.infoTop}>
+            <Text style={[styles.tagId, { color: theme.colors.text }]}>Tag ID:{item.tagNumber}</Text>
+            <Text style={[styles.breedName, { color: theme.colors.textLight }]}>{item.breeds?.name || 'Sirohi'}</Text>
           </View>
-          <View style={styles.subTextRow}>
-            <Text style={styles.subText}>{item.gender}</Text>
-            <Text style={styles.subText}>Age (M) : {item.ageInMonths || '0'}</Text>
-            <Text style={styles.subText}>Weight : {item.currentWeight || item.birthWeight || '0'}</Text>
+          <View style={styles.infoBottom}>
+            <Text style={[styles.metaText, { color: theme.colors.textLight }]}>{item.gender || 'Male'}</Text>
+            <Text style={[styles.metaText, { color: theme.colors.primary, fontWeight: '600' }]}>
+              {item.locations?.name || 'Unassigned'}
+            </Text>
+            <Text style={[styles.metaText, { color: theme.colors.textLight }]}>
+              {item.currentWeight || item.birthWeight || 0}kg
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -140,103 +184,106 @@ const MassLocationScreen = ({ navigation }) => {
     );
   }
 
+  const isAllSelected = filteredAnimals.length > 0 && selectedAnimals.size === filteredAnimals.length;
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Add Mass Location/Shed" onBack={() => navigation.goBack()} />
+      <GHeader title="Add Mass Location/Shed" onBack={() => navigation.goBack()} leftAlign={true} />
 
-      <View style={styles.selectionRow}>
+      {/* Top Controls */}
+      <View style={styles.controlRow}>
+        <View style={styles.selectWrapper}>
+          <GSelect 
+            label="Target Shed" 
+            placeholder="Select Destination"
+            value={selectedLocationId}
+            onSelect={(id) => {
+              setSelectedLocationId(id);
+              setSelectedAnimals(new Set()); // Clear selection when target changes to re-filter
+            }}
+            options={locations}
+            rightIcon={<Scan size={20} color={theme.colors.textMuted} />}
+          />
+        </View>
         <TouchableOpacity 
-          style={styles.pickerTrigger}
-          onPress={() => setShowLocationPicker(true)}
+          style={[styles.addLocBtn, { backgroundColor: theme.colors.primary }]}
+          onPress={() => setShowAddModal(true)}
         >
-          <View style={styles.pickerLabelContainer}>
-             <Text style={styles.pickerLabel} numberOfLines={1}>
-                {selectedLocation ? selectedLocation.name : 'Select Location Shed'}
-             </Text>
-             <ChevronDown color={theme.colors.textMuted} size={20} />
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-           style={styles.addShedBtn}
-           onPress={() => setShowAddLocation(true)}
-        >
-           <Text style={styles.addShedBtnText}>Add New Location</Text>
+          <Text style={styles.addLocBtnText}>+ NEW SHED</Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity 
-        style={styles.selectAllRow}
-        onPress={handleSelectAll}
-        activeOpacity={0.7}
-      >
-         <View style={[styles.checkboxRect, selectedAnimals.size === animals.length && styles.checkboxRectSelected]}>
-            {selectedAnimals.size === animals.length && <Check color="#FFF" size={14} strokeWidth={3} />}
-         </View>
-         <Text style={styles.selectAllText}>Select All</Text>
-      </TouchableOpacity>
+      {/* Search and Select All Row */}
+      <View style={styles.searchRow}>
+        <View style={styles.searchInner}>
+          <GInput 
+            placeholder="Search Tag ID..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            leftIcon={<Search size={18} color={theme.colors.textMuted} />}
+            containerStyle={{ marginVertical: 0 }}
+          />
+        </View>
+        <TouchableOpacity 
+          style={styles.selectAllBtn} 
+          onPress={handleSelectAll}
+          activeOpacity={0.7}
+        >
+          {isAllSelected ? (
+            <CheckSquare color={theme.colors.primary} size={22} fill={theme.colors.primary + '20'} />
+          ) : (
+            <Square color={theme.colors.textMuted} size={22} />
+          )}
+          <Text style={[styles.selectAllText, { color: theme.colors.text }]}>
+            {selectedAnimals.size > 0 ? `Selected (${selectedAnimals.size})` : 'All'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
+      {/* Animal List */}
       <FlatList 
-        data={animals}
+        data={filteredAnimals}
         renderItem={renderAnimalItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.emptyText, { color: theme.colors.textLight }]}>
+              {selectedLocationId ? 'All animals are already in this shed or none match search.' : 'Select a Target Shed to begin selection.'}
+            </Text>
+          </View>
+        }
       />
 
-      <View style={styles.footer}>
-         <GButton 
-            title="Submit"
-            onPress={handleSubmit}
-            loading={submitting}
-         />
+      {/* Fixed Footer */}
+      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 20 }]}>
+        <GInput 
+          placeholder="Bulk Remark (Optional)" 
+          value={remark} 
+          onChangeText={setRemark}
+          containerStyle={{ marginBottom: 12 }}
+        />
+        <GButton 
+          title={`Move ${selectedAnimals.size} Animals`}
+          onPress={handleSubmit}
+          loading={submitting}
+          disabled={selectedAnimals.size === 0}
+        />
       </View>
 
-      {/* Location Picker Modal (Image 6) */}
-      <Modal visible={showLocationPicker} transparent animationType="fade">
-        <TouchableOpacity 
-          style={styles.modalOverlay} 
-          activeOpacity={1} 
-          onPress={() => setShowLocationPicker(false)}
-        >
-          <View style={styles.pickerModalContent}>
-            <View style={[styles.modalHeader, { backgroundColor: theme.colors.primary }]}>
-               <Text style={styles.modalHeaderText}>Select Location/Shed</Text>
-            </View>
-            <FlatList 
-              data={locations}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={styles.pickerItem}
-                  onPress={() => {
-                    setSelectedLocation(item);
-                    setShowLocationPicker(false);
-                  }}
-                >
-                  <Text style={styles.pickerItemText}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* Add New Location Modal (Image 9) */}
-      <Modal visible={showAddLocation} transparent animationType="fade">
-        <TouchableOpacity 
-          style={styles.modalOverlay} 
-          activeOpacity={1} 
-          onPress={() => setShowAddLocation(false)}
-        >
-          <View style={styles.addModalContent}>
+      {/* Add New Location Modal */}
+      <Modal visible={showAddModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
             <View style={[styles.modalHeader, { backgroundColor: theme.colors.primary }]}>
                <Text style={styles.modalHeaderText}>Add Location/Shed</Text>
             </View>
-            <View style={styles.addModalBody}>
+            <View style={styles.modalBody}>
                <TextInput 
-                  style={styles.modalInput}
+                  style={[styles.modalInput, { borderColor: theme.colors.border, color: theme.colors.text }]}
                   placeholder="Enter Location/Shed Name"
                   placeholderTextColor={theme.colors.textMuted}
                   value={newLocationName}
@@ -244,14 +291,14 @@ const MassLocationScreen = ({ navigation }) => {
                   autoFocus
                />
                <TouchableOpacity 
-                  style={[styles.modalSaveBtn, { backgroundColor: theme.colors.primary }]}
+                  style={[styles.saveBtn, { backgroundColor: theme.colors.primary }]}
                   onPress={handleAddNewLocation}
                >
-                  <Text style={styles.modalSaveBtnText}>Save</Text>
+                  <Text style={styles.saveBtnText}>Save</Text>
                </TouchableOpacity>
             </View>
           </View>
-        </TouchableOpacity>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -265,125 +312,112 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  selectionRow: {
+  controlRow: {
     flexDirection: 'row',
     padding: SPACING.md,
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  selectWrapper: {
+    flex: 1,
+  },
+  addLocBtn: {
+    paddingHorizontal: 12,
+    height: 52,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 4,
+    minWidth: 140,
+  },
+  addLocBtnText: {
+    color: '#FFF',
+    fontFamily: 'Inter_700Bold',
+    fontSize: 13,
+  },
+  selectAllRow: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 12,
+  },
+  selectAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  selectAllText: {
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
+  },
+  listContent: {
+    paddingBottom: 150,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 10,
     alignItems: 'center',
     gap: 12,
   },
-  pickerTrigger: {
+  searchInner: {
     flex: 1,
+  },
+  selectAllBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: isDarkMode ? '#444' : '#CCC',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 52,
+    gap: 8,
+    minWidth: 100,
   },
-  pickerLabelContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  pickerLabel: {
-    color: theme.colors.text,
-    fontSize: 14,
-  },
-  addShedBtn: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 12,
-    height: 52,
-    borderRadius: 8,
-    justifyContent: 'center',
+  emptyContainer: {
+    padding: 40,
     alignItems: 'center',
   },
-  addShedBtnText: {
-    color: '#FFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  selectAllRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.sm,
-  },
-  selectAllText: {
-    marginLeft: 10,
-    fontSize: 15,
-    fontWeight: '500',
-    color: theme.colors.text,
-  },
-  listContent: {
-    paddingBottom: 80,
+  emptyText: {
+    textAlign: 'center',
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 20,
   },
   animalItem: {
     flexDirection: 'row',
-    padding: SPACING.md,
+    padding: 16,
     alignItems: 'center',
-    backgroundColor: isDarkMode ? '#1A1A1A' : '#FFF',
+    borderBottomWidth: 1,
   },
-  animalDetails: {
+  checkWrapper: {
+    marginRight: 16,
+  },
+  animalInfo: {
     flex: 1,
-    marginLeft: 12,
   },
-  animalRow: {
+  infoTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 4,
   },
-  tagText: {
-    fontWeight: '700',
+  tagId: {
     fontSize: 16,
-    color: theme.colors.text,
+    fontFamily: 'Inter_600SemiBold',
   },
-  breedText: {
+  breedName: {
     fontSize: 14,
-    color: theme.colors.textMuted,
     fontFamily: 'Inter_500Medium',
   },
-  subTextRow: {
+  infoBottom: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'space-between',
   },
-  subText: {
+  metaText: {
     fontSize: 13,
-    color: theme.colors.textMuted,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    backgroundColor: theme.colors.primary,
-  },
-  checkboxRect: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxRectSelected: {
-    backgroundColor: theme.colors.primary,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: isDarkMode ? '#333' : '#F0F0F0',
+    fontFamily: 'Inter_400Regular',
   },
   footer: {
-    padding: SPACING.md,
-    paddingBottom: Platform.OS === 'ios' ? 0 : SPACING.md,
-    backgroundColor: 'transparent',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: SPACING.lg,
+    backgroundColor: theme.colors.background,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border + '30',
   },
   modalOverlay: {
     flex: 1,
@@ -391,55 +425,42 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     justifyContent: 'center',
     padding: SPACING.xl,
   },
-  pickerModalContent: {
-    backgroundColor: isDarkMode ? '#1E1E1E' : '#FFF',
-    borderRadius: 4,
-    maxHeight: '60%',
+  modalContent: {
+    borderRadius: 16,
     overflow: 'hidden',
+    ...SHADOW.lg,
   },
   modalHeader: {
-    padding: 15,
+    padding: 16,
     alignItems: 'center',
   },
   modalHeaderText: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
   },
-  pickerItem: {
-    padding: 15,
-  },
-  pickerItemText: {
-    fontSize: 15,
-    color: theme.colors.text,
-  },
-  addModalContent: {
-    backgroundColor: isDarkMode ? '#1E1E1E' : '#FFF',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  addModalBody: {
-    padding: 20,
+  modalBody: {
+    padding: 24,
   },
   modalInput: {
-    borderWidth: 1,
-    borderColor: isDarkMode ? '#444' : '#CCC',
-    borderRadius: 4,
-    height: 48,
-    paddingHorizontal: 12,
-    color: theme.colors.text,
+    borderWidth: 1.5,
+    borderRadius: 12,
+    height: 52,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
     marginBottom: 20,
   },
-  modalSaveBtn: {
-    height: 48,
-    borderRadius: 4,
+  saveBtn: {
+    height: 52,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalSaveBtnText: {
+  saveBtnText: {
     color: '#FFF',
-    fontWeight: '700',
     fontSize: 16,
+    fontFamily: 'Inter_700Bold',
   },
 });
 

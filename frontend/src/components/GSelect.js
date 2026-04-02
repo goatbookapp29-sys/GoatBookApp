@@ -14,6 +14,7 @@ const GSelect = ({
   placeholder = '',
   containerStyle,
   helpAction,
+  rightIcon,
   disabled = false
 }) => {
   const { isDarkMode, theme } = useTheme();
@@ -83,6 +84,11 @@ const GSelect = ({
         ) : <View style={{ flex: 1 }} />}
 
         <View style={styles.iconContainer}>
+          {rightIcon && (
+            <View style={{ marginRight: 8 }}>
+              {rightIcon}
+            </View>
+          )}
           {error ? (
             <AlertCircle size={20} color={theme.colors.error} />
           ) : (
@@ -144,10 +150,10 @@ const GSelect = ({
           onPress={() => setModalVisible(false)}
         >
           <SafeAreaView style={[styles.modalContent, { backgroundColor: theme.colors.surface, pointerEvents: 'box-none' }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
-              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Choose {label}</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <X size={24} color={theme.colors.text} />
+            <View style={[styles.modalHeader, { backgroundColor: theme.colors.primary }]}>
+              <Text style={[styles.modalTitle, { color: theme.colors.white }]}>Select {label}</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalCloseBtn}>
+                <X size={24} color={theme.colors.white} />
               </TouchableOpacity>
             </View>
             
@@ -204,9 +210,14 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   iconContainer: {
-    width: 24,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  modalCloseBtn: {
+    position: 'absolute',
+    right: 16,
+    top: 16,
   },
   errorContainer: {
     flexDirection: 'row',
@@ -230,11 +241,10 @@ const styles = StyleSheet.create({
     ...lightTheme.shadow.lg,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    padding: 16,
     alignItems: 'center',
-    padding: 24,
-    borderBottomWidth: 1,
+    justifyContent: 'center',
+    position: 'relative',
   },
   modalTitle: {
     fontSize: 20,
