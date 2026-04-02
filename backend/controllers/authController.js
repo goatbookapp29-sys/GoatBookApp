@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { Resend } = require('resend');
 const { v4: uuidv4 } = require('uuid');
+const { seedBreeds } = require('../seed_breeds');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -84,6 +85,10 @@ exports.register = async (req, res) => {
         }
       });
       console.log('Farm created:', farm.id);
+
+      // 4b. Seed isolated breeds for the new farm
+      await seedBreeds(farm.id, tx);
+      console.log('Isolated breeds initialized.');
 
       // 5. Explicitly link the owner (employee) to the newly created farm
       await tx.farm_employees.create({
