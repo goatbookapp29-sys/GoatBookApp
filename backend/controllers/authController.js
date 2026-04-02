@@ -98,6 +98,16 @@ exports.register = async (req, res) => {
       });
       console.log('Farm-Employee link created.');
 
+      // 6. Initialize Default Locations (Sheds) for the new farm
+      const defaultLocations = [
+        { id: uuidv4(), name: 'Shed 1', code: 'S1', type: 'Internal Location', farm_id: farm.id, created_at: now, updated_at: now },
+        { id: uuidv4(), name: 'Shed 2', code: 'S2', type: 'Internal Location', farm_id: farm.id, created_at: now, updated_at: now },
+        { id: uuidv4(), name: 'Sick Bay', code: 'SB', type: 'Internal Location', farm_id: farm.id, created_at: now, updated_at: now }
+      ];
+      
+      await tx.locations.createMany({ data: defaultLocations });
+      console.log('Default locations initialized.');
+
       return { user, farm };
     });
 
