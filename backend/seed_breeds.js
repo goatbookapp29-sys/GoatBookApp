@@ -16,62 +16,37 @@ const sheepBreeds = [
   'Kheri', 'Bikaneri (Magra Type)'
 ];
 
-async function seedBreeds(farmId) {
+async function seedBreeds() {
   try {
     await prisma.$connect();
-    console.log('--- STARTING GLOBAL BREED SEEDING ---');
+    console.log('Connected to DB');
+
+    const farms = await prisma.farms.findMany();
+    if (farms.length === 0) {
+      console.log('No farms found to seed breeds for. Create a farm first.');
+      process.exit(0);
+    }
 
     let count = 0;
     const now = new Date();
-
-    // 1. Seed Goat Breeds as System Defaults
-    for (const breedName of goatBreeds) {
-      const exists = await prisma.breeds.findFirst({
-        where: { name: breedName, is_default: true }
-      });
-
-      if (!exists) {
-        await prisma.breeds.create({
-          data: {
-            id: uuidv4(),
-            name: breedName,
-            animal_type: 'Goat',
-            farm_id: null,        // Global breed
-            is_default: true,    // Available to all farms
-            created_at: now,
-            updated_at: now
-          }
-        });
-        count++;
-        console.log(`+ Added Global Goat Breed: ${breedName}`);
+    for (const farm of farms) {
+      for (const breedName of goatBreeds) {
+        const exists = await prisma.breeds.findFirst({ where: { name: breedName, farm_id: farm.id } });
+        if (!exists) {
+          await prisma.breeds.create({ data: { id: uuidv4(), name: breedName, animal_type: 'Goat', farm_id: farm.id, created_at: now, updated_at: now } });
+          count++;
+        }
+      }
+      for (const breedName of sheepBreeds) {
+        const exists = await prisma.breeds.findFirst({ where: { name: breedName, farm_id: farm.id } });
+        if (!exists) {
+          await prisma.breeds.create({ data: { id: uuidv4(), name: breedName, animal_type: 'Sheep', farm_id: farm.id, created_at: now, updated_at: now } });
+          count++;
+        }
       }
     }
 
-    // 2. Seed Sheep Breeds as System Defaults
-    for (const breedName of sheepBreeds) {
-      const exists = await prisma.breeds.findFirst({
-        where: { name: breedName, is_default: true }
-      });
-
-      if (!exists) {
-        await prisma.breeds.create({
-          data: {
-            id: uuidv4(),
-            name: breedName,
-            animal_type: 'Sheep',
-            farm_id: farmId,        // Global breed
-            is_default: true,    // Available to all farms
-            created_at: now,
-            updated_at: now
-          }
-        });
-        count++;
-        console.log(`+ Added Global Sheep Breed: ${breedName}`);
-      }
-    }
-
-    console.log(`\nSuccessfully seeded ${count} global default breeds.`);
-    console.log('--- SEEDING COMPLETE ---');
+    console.log(`Successfully seeded ${count} new breeds across ${farms.length} farms.`);
     await prisma.$disconnect();
     process.exit(0);
   } catch (error) {
@@ -81,3 +56,4 @@ async function seedBreeds(farmId) {
   }
 }
 
+seedBreeds();
