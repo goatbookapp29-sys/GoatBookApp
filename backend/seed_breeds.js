@@ -72,12 +72,10 @@ async function seedBreeds(farmId) {
 
     console.log(`\nSuccessfully seeded ${count} global default breeds.`);
     console.log('--- SEEDING COMPLETE ---');
-    await prisma.$disconnect();
-    process.exit(0);
   } catch (error) {
     console.error('Error seeding breeds:', error);
-    await prisma.$disconnect();
-    process.exit(1);
   }
 }
+
+module.exports = { seedBreeds };
 
