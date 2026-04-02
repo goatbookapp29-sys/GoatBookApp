@@ -16,7 +16,7 @@ const sheepBreeds = [
   'Kheri', 'Bikaneri (Magra Type)'
 ];
 
-async function seedBreeds(farmId) {
+async function seedBreeds() {
   try {
     await prisma.$connect();
     console.log('--- STARTING GLOBAL BREED SEEDING ---');
@@ -59,7 +59,7 @@ async function seedBreeds(farmId) {
             id: uuidv4(),
             name: breedName,
             animal_type: 'Sheep',
-            farm_id: farmId,        // Global breed
+            farm_id: null,        // Global breed (FIXED: replaced farm_id with null)
             is_default: true,    // Available to all farms
             created_at: now,
             updated_at: now
@@ -72,10 +72,18 @@ async function seedBreeds(farmId) {
 
     console.log(`\nSuccessfully seeded ${count} global default breeds.`);
     console.log('--- SEEDING COMPLETE ---');
+    await prisma.$disconnect();
+    process.exit(0);
   } catch (error) {
     console.error('Error seeding breeds:', error);
+    await prisma.$disconnect();
+    process.exit(1);
   }
 }
 
-module.exports = { seedBreeds };
+// Standalone execution support
+if (require.main === module) {
+  seedBreeds();
+}
 
+module.exports = { seedBreeds };
