@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { Resend } = require('resend');
 const { v4: uuidv4 } = require('uuid');
+const { seedBreeds } = require('../seed_breeds');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -27,7 +28,7 @@ exports.register = async (req, res) => {
         ].filter(Boolean)
       }
     });
-    
+
     if (existingUser) {
       console.log('User already exists:', existingUser.id);
       if (email && existingUser.email === email) {
@@ -85,6 +86,9 @@ exports.register = async (req, res) => {
       });
       console.log('Farm created:', farm.id);
 
+      // seeding default breeds for the farm
+      await seedBreeds(farm.id);
+
       // 5. Explicitly link the owner (employee) to the newly created farm
       await tx.farm_employees.create({
         data: {
@@ -100,6 +104,9 @@ exports.register = async (req, res) => {
 
       return { user, farm };
     });
+
+
+
 
     // Generate session token (valid for 1 year)
     const token = jwt.sign(
@@ -223,7 +230,7 @@ exports.forgotPassword = async (req, res) => {
 
     // Generate random 6-digit code for reset
     const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
     // Store reset code and set 1-hour expiration
     await prisma.users.update({
       where: { id: user.id },

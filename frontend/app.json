@@ -11,14 +11,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "newArchEnabled": false
+      "newArchEnabled": true
     },
     "android": {
       "package": "com.goatwala.farm",
-      "newArchEnabled": false,
+      "newArchEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/splash-icon.png",
         "backgroundColor": "#ffffff"
@@ -34,9 +34,8 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "fbdd2a91-3947-442f-b555-79a7f85473d9"
+        "projectId": "7c90b789-1ef9-4dab-8dfc-0b9fa04f1a79"
       }
-    },
-    "owner": "ayush20001"
+    }
   }
 }
