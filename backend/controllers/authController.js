@@ -85,6 +85,13 @@ exports.register = async (req, res) => {
       });
       console.log('Farm created:', farm.id);
 
+<<<<<<< HEAD
+=======
+      // 4b. Seed isolated breeds for the new farm
+      await seedBreeds(farm.id, tx);
+      console.log('Isolated breeds initialized.');
+
+>>>>>>> 82a9642e58de870c907ffb12700b0246c1480381
       // 5. Explicitly link the owner (employee) to the newly created farm
       await tx.farm_employees.create({
         data: {

@@ -7,7 +7,7 @@ const prisma = require('./config/prisma');
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:8081', 'http://127.0.0.1:8081', 'http://10.116.46.95:8081', 'https://goatbookapp.onrender.com'],
+  origin: ['http://localhost:8081', 'http://127.0.0.1:8081', 'http://10.30.176.95:8081', 'http://10.116.46.95:8081', 'https://goatbookapp.onrender.com'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Farm-ID'],
   credentials: true
