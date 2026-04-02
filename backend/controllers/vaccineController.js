@@ -9,15 +9,10 @@ exports.getVaccines = async (req, res) => {
   try {
     if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
     
-    // Fetch vaccines that:
-    // 1. Are marked as global defaults (available to everyone)
-    // 2. Are custom-created for this specific farm
+    // Fetch vaccines that belong explicitly to this farm
     const vaccines = await prisma.vaccines.findMany({
       where: {
-        OR: [
-          { farm_id: req.farmId },
-          { is_default: true }
-        ]
+        farm_id: req.farmId
       },
       include: { users_vaccines_created_by_user_idTousers: { select: { name: true } } },
       orderBy: { name: 'asc' }

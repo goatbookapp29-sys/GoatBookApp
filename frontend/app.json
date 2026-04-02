@@ -11,14 +11,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-      "newArchEnabled": true
+      "newArchEnabled": false
     },
     "android": {
       "package": "com.goatwala.farm",
-      "newArchEnabled": true,
+      "newArchEnabled": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/splash-icon.png",
         "backgroundColor": "#ffffff"

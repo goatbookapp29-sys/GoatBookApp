@@ -31,7 +31,7 @@ const storage = {
 
 // For Production: Replace with your Render URL
 // For Development: Use your PC's IP address
-const BASE_URL = 'http://10.116.46.95:5001/api'; // Local Development (Use IP for mobile/simulators)
+const BASE_URL = 'http://10.30.176.95:5001/api'; // Local Development (Use IP for mobile/simulators)
 
 const api = axios.create({
   baseURL: BASE_URL,
