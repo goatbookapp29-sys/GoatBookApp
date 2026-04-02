@@ -1,90 +1,108 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { COLORS, SPACING, SHADOW, lightTheme } from '../theme';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
+import { COLORS, SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
-import { Syringe, Calendar, User, Plus, Tag } from 'lucide-react-native';
+import { Syringe, Calendar, User, Tag, ChevronRight, Hash, AlertTriangle, CheckCircle2 } from 'lucide-react-native';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 
 const VaccinationListScreen = ({ navigation, route }) => {
-  const { isDarkMode, theme } = useTheme();
-  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
-  const mode = route.params?.mode; // 'SINGLE' or 'MASS' or undefined
+  const { theme, isDarkMode } = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
+  
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const getTitle = () => {
-    if (mode === 'SINGLE') return 'Single Vaccinations';
-    if (mode === 'MASS') return 'Mass Vaccinations';
-    return 'All Vaccinations';
-  };
 
   useFocusEffect(
     useCallback(() => {
       fetchRecords();
-    }, [mode])
+    }, [])
   );
 
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const url = mode 
-        ? `/vaccines/records?creationMode=${mode}` 
-        : '/vaccines/records';
-      const response = await api.get(url);
+      const response = await api.get('/vaccines/records');
       setRecords(response.data);
-      setLoading(false);
     } catch (error) {
-      console.error('Fetch vaccination records error:', error);
+      console.error('Fetch records error:', error);
+    } finally {
       setLoading(false);
     }
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity 
-      style={[styles.recordItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
-      onPress={() => navigation.navigate('AddVaccination', { mode: 'single', record: item })}
-    >
-      <View style={styles.recordHeader}>
-        <View style={[styles.iconBox, { backgroundColor: isDarkMode ? '#1E293B' : '#EEF2FF' }]}>
-          <Syringe size={20} color={theme.colors.primary} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{item.vaccine?.name}</Text>
-          <View style={styles.tagRow}>
-            <Tag size={14} color={theme.colors.textLight} style={{ marginRight: 4 }} />
-            <Text style={[styles.tagNumber, { color: theme.colors.textLight }]}>{item.animal?.tagNumber}</Text>
-          </View>
-        </View>
-        <View style={styles.rightCol}>
-          <View style={[styles.dateBox, { backgroundColor: isDarkMode ? '#334155' : '#F3F4F6' }]}>
-            <Calendar size={12} color={theme.colors.textLight} />
-            <Text style={[styles.dateText, { color: theme.colors.textLight }]}>{new Date(item.date).toLocaleDateString()}</Text>
-          </View>
-          <View style={[styles.modeBadge, 
-            { backgroundColor: isDarkMode ? '#1E293B' : (item.creationMode === 'MASS' ? '#EEF2FF' : '#F3F4F6') }]}>
-            <Text style={[styles.modeText, { color: isDarkMode ? theme.colors.primary : '#6B7280' }]}>{item.creationMode || 'SINGLE'}</Text>
-          </View>
-        </View>
-      </View>
-      
-      {item.nextDueDate && (
-        <View style={[styles.dueSection, { backgroundColor: isDarkMode ? '#451A03' : '#FFFBEB' }]}>
-          <Text style={[styles.dueLabel, { color: isDarkMode ? '#FCD34D' : '#D97706' }]}>Next Due Date:</Text>
-          <Text style={[styles.dueValue, { color: isDarkMode ? '#FCD34D' : '#D97706' }]}>{new Date(item.nextDueDate).toLocaleDateString()}</Text>
-        </View>
-      )}
+  const getBoosterStatus = (nextDueDate) => {
+    if (!nextDueDate) return null;
+    const today = new Date();
+    const due = new Date(nextDueDate);
+    const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return { label: 'Overdue', color: '#EF4444', icon: <AlertTriangle size={12} color="#EF4444" /> };
+    if (diffDays <= 7) return { label: 'Due Soon', color: '#F59E0B', icon: <AlertTriangle size={12} color="#F59E0B" /> };
+    return { label: 'Active', color: '#10B981', icon: <CheckCircle2 size={12} color="#10B981" /> };
+  };
 
-      {item.remark ? (
-        <Text style={[styles.remarkText, { color: theme.colors.textLight, borderTopColor: theme.colors.border }]} numberOfLines={2}>Note: {item.remark}</Text>
-      ) : null}
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }) => {
+    const booster = getBoosterStatus(item.nextDueDate);
+    return (
+      <TouchableOpacity 
+        style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('AddVaccination', { record: item })}
+      >
+        <View style={styles.cardHeader}>
+          <View style={[styles.iconBox, { backgroundColor: theme.colors.primary + '10' }]}>
+            <Syringe size={22} color={theme.colors.primary} />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{item.vaccines?.name}</Text>
+            <View style={styles.tagRow}>
+              <Hash size={14} color={theme.colors.textMuted} />
+              <Text style={[styles.tagNumber, { color: theme.colors.text }]}>{item.animals?.tag_number}</Text>
+              <Text style={[styles.modeLabel, { backgroundColor: item.creation_mode === 'MASS' ? theme.colors.info + '15' : theme.colors.border + '30', color: item.creation_mode === 'MASS' ? theme.colors.info : theme.colors.textLight }]}>
+                {item.creation_mode}
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={20} color={theme.colors.textMuted} />
+        </View>
+
+        <View style={[styles.cardBody, { borderTopColor: theme.colors.border + '15' }]}>
+          <View style={styles.metaRow}>
+            <View style={styles.metaCol}>
+              <View style={styles.labelRow}>
+                <Calendar size={12} color={theme.colors.textLight} />
+                <Text style={[styles.metaLabel, { color: theme.colors.textLight }]}>ADMIN DATE</Text>
+              </View>
+              <Text style={[styles.metaValue, { color: theme.colors.text }]}>
+                {new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+              </Text>
+            </View>
+            <View style={styles.metaCol}>
+              <View style={styles.labelRow}>
+                <Text style={[styles.metaLabel, { color: theme.colors.textLight }]}>NEXT DUE</Text>
+              </View>
+              <Text style={[styles.metaValue, { color: booster ? booster.color : theme.colors.textLight }]}>
+                {item.next_due_date ? new Date(item.next_due_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {booster && (
+          <View style={[styles.boosterFooter, { backgroundColor: booster.color + '08' }]}>
+            {booster.icon}
+            <Text style={[styles.boosterText, { color: booster.color }]}>Booster is {booster.label}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title={getTitle()} onBack={() => navigation.goBack()} />
+      <GHeader title="Vaccination Journal" onBack={() => navigation.goBack()} leftAlign={true} />
       
       {loading ? (
         <View style={styles.center}>
@@ -96,126 +114,115 @@ const VaccinationListScreen = ({ navigation, route }) => {
           renderItem={renderItem}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Syringe size={64} color={theme.colors.border} />
-              <Text style={[styles.emptyText, { color: theme.colors.textLight }]}>No vaccination records found</Text>
+              <View style={[styles.emptyIcon, { backgroundColor: theme.colors.border + '20' }]}>
+                <Syringe size={48} color={theme.colors.textMuted} />
+              </View>
+              <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>No Records Yet</Text>
+              <Text style={[styles.emptySub, { color: theme.colors.textLight }]}>
+                Historical vaccination events will appear here once recorded.
+              </Text>
             </View>
           }
         />
       )}
-
-      {/* Floating Action Button to Add */}
-      <TouchableOpacity 
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
-        onPress={() => {
-          Alert.alert(
-            'Add Vaccination',
-            'Choose vaccination mode',
-            [
-              { text: 'Single Vaccination', onPress: () => navigation.navigate('AddVaccination', { mode: 'single' }) },
-              { text: 'Mass Vaccination', onPress: () => navigation.navigate('AddVaccination', { mode: 'mass' }) },
-              { text: 'Cancel', style: 'cancel' },
-            ]
-          );
-        }}
-      >
-        <Plus size={30} color={theme.colors.white} />
-      </TouchableOpacity>
     </View>
   );
 };
 
-const getStyles = (theme, isDarkMode) => StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
   },
   listContent: {
-    padding: SPACING.lg,
+    padding: SPACING.md,
+    paddingBottom: 40,
   },
-  recordItem: {
-    borderRadius: 20,
+  card: {
+    borderRadius: 16,
+    borderWidth: 1.2,
+    marginBottom: 16,
+    overflow: 'hidden',
+    ...SHADOW.small,
+  },
+  cardHeader: {
     padding: 16,
-    marginBottom: SPACING.md,
-    borderWidth: 1.5,
-  },
-  recordHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   iconBox: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
+  },
+  headerText: {
+    flex: 1,
   },
   vaccineName: {
-    fontSize: 17,
-    fontFamily: 'Inter_600SemiBold',
-    letterSpacing: -0.5,
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 4,
   },
   tagRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
+    gap: 4,
   },
   tagNumber: {
     fontSize: 14,
-    fontFamily: 'Inter_700Bold',
-    marginLeft: 0,
-  },
-  dateBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  dateText: {
-    fontSize: 11,
-    marginLeft: 4,
     fontFamily: 'Inter_600SemiBold',
   },
-  rightCol: {
-    alignItems: 'flex-end',
-  },
-  modeBadge: {
-    marginTop: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  modeText: {
+  modeLabel: {
     fontSize: 10,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_700Bold',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
     textTransform: 'uppercase',
   },
-  dueSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 12,
-    borderRadius: 12,
-    marginTop: 8,
-  },
-  dueLabel: {
-    fontSize: 13,
-    fontFamily: 'Inter_600SemiBold',
-  },
-  dueValue: {
-    fontSize: 13,
-    fontFamily: 'Inter_600SemiBold',
-    letterSpacing: 0.2,
-  },
-  remarkText: {
-    fontSize: 13,
-    fontStyle: 'italic',
-    marginTop: 10,
+  cardBody: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
     borderTopWidth: 1,
-    paddingTop: 10,
-    fontFamily: 'Inter_500Medium',
+  },
+  metaRow: {
+    flexDirection: 'row',
+    paddingTop: 16,
+  },
+  metaCol: {
+    flex: 1,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  metaLabel: {
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.5,
+  },
+  metaValue: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  boosterFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  boosterText: {
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
   },
   center: {
     flex: 1,
@@ -224,27 +231,28 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   emptyContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 40,
-    paddingBottom: 80,
+    marginTop: 80,
+    paddingHorizontal: 40,
   },
-  emptyText: {
-    marginTop: 16,
-    fontSize: 16,
-    fontFamily: 'Inter_600SemiBold',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 30,
-    right: 30,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  emptyIcon: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.primaryDark,
-  }
+    marginBottom: 24,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 8,
+  },
+  emptySub: {
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
 });
 
 export default VaccinationListScreen;

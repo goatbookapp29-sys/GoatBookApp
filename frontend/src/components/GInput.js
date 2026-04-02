@@ -16,6 +16,8 @@ const GInput = ({
   placeholder,
   containerStyle,
   helpAction,
+  leftIcon,
+  rightIcon,
   ...props 
 }) => {
   const { isDarkMode, theme } = useTheme();
@@ -33,7 +35,10 @@ const GInput = ({
 
   const labelContainerStyle = {
     position: 'absolute',
-    left: 12,
+    left: animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [leftIcon ? 46 : 12, 12],
+    }),
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [14, -10],
@@ -77,6 +82,11 @@ const GInput = ({
           isMultiline && { height: 'auto', minHeight: 80, alignItems: 'flex-start', paddingTop: 16 }
         ]}
       >
+        {leftIcon && (
+          <View style={styles.leftIconWrapper}>
+            {leftIcon}
+          </View>
+        )}
         <TextInput
           ref={inputRef}
           style={StyleSheet.flatten([
@@ -101,6 +111,11 @@ const GInput = ({
           {...props}
           secureTextEntry={secureTextEntry && !showPassword}
         />
+        {rightIcon && (
+          <View style={styles.rightIconWrapper}>
+            {rightIcon}
+          </View>
+        )}
         {secureTextEntry && (
           <TouchableOpacity 
             onPress={() => setShowPassword(!showPassword)}
@@ -115,36 +130,38 @@ const GInput = ({
         )}
       </TouchableOpacity>
 
-      <Animated.View style={labelContainerStyle}>
-        <Animated.Text style={labelTextStyle} numberOfLines={1} ellipsizeMode="tail">
-          {label}{required && '*'}
-        </Animated.Text>
-        {helpAction && (
-          <Animated.View style={{
-            marginLeft: animatedValue.interpolate({
-              inputRange: [0, 1],
-              outputRange: [8, 3],
-            }),
-            transform: [{
-              scale: animatedValue.interpolate({
+      {label ? (
+        <Animated.View style={labelContainerStyle}>
+          <Animated.Text style={labelTextStyle} numberOfLines={1} ellipsizeMode="tail">
+            {label}{required && '*'}
+          </Animated.Text>
+          {helpAction && (
+            <Animated.View style={{
+              marginLeft: animatedValue.interpolate({
                 inputRange: [0, 1],
-                outputRange: [1.1, 0.85],
-              })
-            }],
-            marginTop: animatedValue.interpolate({
-              inputRange: [0, 1],
-              outputRange: [2, 1],
-            }),
-          }}>
-            <TouchableOpacity 
-              onPress={helpAction}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={1.5} />
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-      </Animated.View>
+                outputRange: [8, 3],
+              }),
+              transform: [{
+                scale: animatedValue.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1.1, 0.85],
+                })
+              }],
+              marginTop: animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [2, 1],
+              }),
+            }}>
+              <TouchableOpacity 
+                onPress={helpAction}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <HelpCircle size={16} color={theme.colors.textMuted} strokeWidth={1.5} />
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+        </Animated.View>
+      ) : null}
       {error && <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>}
     </View>
   );
@@ -179,6 +196,16 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     padding: 8,
+  },
+  leftIconWrapper: {
+    paddingRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rightIconWrapper: {
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

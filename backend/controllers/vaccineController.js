@@ -47,7 +47,11 @@ exports.getVaccines = async (req, res) => {
 // @desc    Create a custom vaccine definition for the farm
 // @route   POST /api/vaccines
 exports.createVaccine = async (req, res) => {
-  const { name, daysBetween, remark } = req.body;
+  const { 
+    name, diseaseName, doseMl, applicationRoute, 
+    immunityDurationDays, nextDueDurationDays, daysBetween, remark 
+  } = req.body;
+  
   try {
     if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
     if (!name) return res.status(400).json({ message: 'Vaccine name is required' });
@@ -57,7 +61,12 @@ exports.createVaccine = async (req, res) => {
       data: { 
         id: uuidv4(), 
         name, 
-        days_between: daysBetween || 0, // Interval for the next dose
+        disease_name: diseaseName || null,
+        dose_ml: doseMl || null,
+        application_route: applicationRoute || null,
+        immunity_duration_days: immunityDurationDays ? parseInt(immunityDurationDays) : null,
+        next_due_duration_days: nextDueDurationDays ? parseInt(nextDueDurationDays) : null,
+        days_between: daysBetween ? parseInt(daysBetween) : 0, 
         remark, 
         farm_id: req.farmId, 
         created_by_user_id: req.user.id, 
@@ -69,6 +78,44 @@ exports.createVaccine = async (req, res) => {
     res.status(201).json({ id: vaccine.id, name: vaccine.name });
   } catch (err) {
     console.error('CREATE VACCINE ERROR:', err);
+    res.status(500).json({ message: 'Server Error', error: err.message });
+  }
+};
+
+// @desc    Get upcoming boosters (due in next 30 days)
+// @route   GET /api/vaccines/upcoming
+exports.getUpcomingBoosters = async (req, res) => {
+  try {
+    if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
+
+    const today = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+    const upcoming = await prisma.vaccination_records.findMany({
+      where: {
+        farm_id: req.farmId,
+        next_due_date: {
+          gte: today,
+          lte: thirtyDaysFromNow
+        }
+      },
+      include: {
+        animals: { select: { tag_number: true } },
+        vaccines: { select: { name: true } }
+      },
+      orderBy: { next_due_date: 'asc' }
+    });
+
+    res.json(upcoming.map(r => ({
+      id: r.id,
+      tagNumber: r.animals?.tag_number,
+      vaccineName: r.vaccines?.name,
+      dueDate: r.next_due_date,
+      daysRemaining: Math.ceil((new Date(r.next_due_date) - today) / (1000 * 60 * 60 * 24))
+    })));
+  } catch (err) {
+    console.error('GET UPCOMING BOOSTERS ERROR:', err);
     res.status(500).json({ message: 'Server Error' });
   }
 };

@@ -49,6 +49,7 @@ import OverallReportScreen from './src/screens/OverallReportScreen';
 import ReplaceTagScreen from './src/screens/ReplaceTagScreen';
 import LocationMenuScreen from './src/screens/LocationMenuScreen';
 import MassLocationScreen from './src/screens/MassLocationScreen';
+import MassVaccinationScreen from './src/screens/MassVaccinationScreen';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import SideMenu from './src/components/SideMenu';
 
@@ -190,6 +191,7 @@ function AppContent() {
           <Stack.Screen name="AnimalList" component={AnimalListScreen} />
           <Stack.Screen name="LocationMenu" component={LocationMenuScreen} />
           <Stack.Screen name="MassLocation" component={MassLocationScreen} />
+          <Stack.Screen name="MassVaccination" component={MassVaccinationScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

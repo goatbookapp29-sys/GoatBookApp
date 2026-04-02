@@ -5,6 +5,7 @@ const auth = require('../middleware/auth');
 
 // --- Vaccine Definitions ---
 router.get('/', auth, vaccineController.getVaccines);
+router.get('/upcoming', auth, vaccineController.getUpcomingBoosters);
 router.post('/', auth, vaccineController.createVaccine);
 
 // --- Vaccination Records ---

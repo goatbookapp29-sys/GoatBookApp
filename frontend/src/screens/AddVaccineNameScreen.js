@@ -1,20 +1,28 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
+import GSelect from '../components/GSelect';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
-import { ListPlus } from 'lucide-react-native';
+import { Syringe, Activity, Microscope, Info, ChevronDown } from 'lucide-react-native';
 
 const AddVaccineNameScreen = ({ navigation }) => {
-  const { isDarkMode, theme } = useTheme();
-  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
+  const { theme, isDarkMode } = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
+  
+  // Form State
   const [name, setName] = useState('');
-  const [daysBetween, setDaysBetween] = useState('');
+  const [diseaseName, setDiseaseName] = useState('');
+  const [doseMl, setDoseMl] = useState('');
+  const [route, setRoute] = useState('Sub Cut S/c');
+  const [frequencyValue, setFrequencyValue] = useState('');
+  const [frequencyUnit, setFrequencyUnit] = useState('Months');
   const [remark, setRemark] = useState('');
+  
   const [loading, setLoading] = useState(false);
   const [vaccines, setVaccines] = useState([]);
   const [vaccinesLoading, setVaccinesLoading] = useState(true);
@@ -43,185 +51,275 @@ const AddVaccineNameScreen = ({ navigation }) => {
       return;
     }
 
+    // Convert frequency to days for backend
+    let days = 0;
+    const val = parseInt(frequencyValue);
+    if (val > 0) {
+      if (frequencyUnit === 'Days') days = val;
+      else if (frequencyUnit === 'Months') days = val * 30;
+      else if (frequencyUnit === 'Years') days = val * 365;
+    }
+
     setLoading(true);
     try {
       await api.post('/vaccines', {
         name,
-        daysBetween: daysBetween ? parseInt(daysBetween) : 0,
+        diseaseName,
+        doseMl: doseMl ? parseFloat(doseMl) : null,
+        applicationRoute: route,
+        daysBetween: days,
         remark
       });
       setLoading(false);
-      Alert.alert('Success', 'Vaccine name added successfully');
+      Alert.alert('Success', 'Vaccine catalog updated');
+      
+      // Reset Form
       setName('');
-      setDaysBetween('');
+      setDiseaseName('');
+      setDoseMl('');
+      setFrequencyValue('');
       setRemark('');
-      fetchVaccines(); // Refresh the list
+      fetchVaccines();
     } catch (error) {
       setLoading(false);
-      const msg = error.response?.data?.message || 'Failed to save vaccine';
-      Alert.alert('Error', msg);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to save vaccine');
     }
   };
 
+  const routeOptions = [
+    { label: 'Sub Cut S/c (Skin)', value: 'Sub Cut S/c' },
+    { label: 'Intra Muscular I/M (Muscle)', value: 'Intra Muscular I/M' },
+    { label: 'Oral (Mouth)', value: 'Oral' },
+    { label: 'Intranasal (Nose)', value: 'Intranasal' },
+  ];
+
+  const unitOptions = [
+    { label: 'Days', value: 'Days' },
+    { label: 'Months', value: 'Months' },
+    { label: 'Years', value: 'Years' },
+  ];
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Add Vaccine" onBack={() => navigation.goBack()} />
+      <GHeader title="Vaccine Catalog" onBack={() => navigation.goBack()} leftAlign={true} />
+      
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.formCard}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>BASIC INFORMATION</Text>
             <GInput 
               label="Vaccine Name*" 
               value={name} 
               onChangeText={setName} 
-              placeholder="Enter name"
-              required 
+              placeholder="e.g. PPR, ET, FMD"
+              leftIcon={<Syringe size={20} color={theme.colors.textMuted} />}
+              containerStyle={{ marginBottom: 8 }}
             />
-            
-            <View style={styles.daysRow}>
-              <Text style={[styles.daysLabel, { color: theme.colors.text }]}>Given Every*</Text>
-              <GInput 
-                containerStyle={styles.daysInputBox}
-                value={daysBetween} 
-                onChangeText={setDaysBetween} 
-                placeholder="0"
-                keyboardType="number-pad"
-              />
-              <Text style={[styles.daysSuffix, { color: theme.colors.text }]}>Days</Text>
-            </View>
-
-            <Text style={[styles.helperText, { color: theme.colors.primary }]}>
-              Given number of days help to find next due date for vaccination. Enter correct days for vaccine to get alert on due date. Enter zero for one time vaccination.
-            </Text>
-
             <GInput 
-              label="Remark" 
-              value={remark} 
-              onChangeText={setRemark} 
-              placeholder="Optional"
-              multiline
-              style={{ minHeight: 80, paddingTop: 12, color: theme.colors.text }}
+              label="Name of Disease" 
+              value={diseaseName} 
+              onChangeText={setDiseaseName} 
+              placeholder="Target disease"
+              leftIcon={<Activity size={20} color={theme.colors.textMuted} />}
             />
           </View>
 
-          <View style={styles.footer}>
-            <GButton 
-              title="SAVE VACCINE" 
-              onPress={handleSave} 
-              loading={loading}
-            />
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>DOSAGE & ROUTE</Text>
+            <View style={styles.row}>
+              <View style={{ flex: 1 }}>
+                <GInput 
+                  label="Dose (ml)" 
+                  value={doseMl} 
+                  onChangeText={setDoseMl} 
+                  placeholder="e.g. 1.0"
+                  keyboardType="decimal-pad"
+                />
+              </View>
+              <View style={{ width: 16 }} />
+              <View style={{ flex: 1.5 }}>
+                <GSelect 
+                  label="App. Route" 
+                  value={route}
+                  onSelect={setRoute}
+                  options={routeOptions}
+                  placeholder="Select Route"
+                />
+              </View>
+            </View>
           </View>
 
-          {/* List View for Vaccine Names */}
-          <View style={[styles.listSection, { borderTopColor: theme.colors.border }]}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Existing Vaccines</Text>
-            {vaccinesLoading ? (
-              <ActivityIndicator color={theme.colors.primary} style={{ marginTop: 20 }} />
-            ) : vaccines.length > 0 ? (
-              vaccines.map((v) => (
-                <View key={v.id} style={styles.vaccineItem}>
-                  <View style={styles.vaccineIcon}>
-                    <ListPlus size={20} color={theme.colors.primary} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.vaccineLabel, { color: theme.colors.text }]}>{v.name}</Text>
-                    <Text style={[styles.vaccineDays, { color: theme.colors.textLight }]}>Every {v.daysBetween} days</Text>
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>BOOSTER FREQUENCY</Text>
+            <View style={styles.row}>
+              <View style={{ flex: 1 }}>
+                <GInput 
+                  label="Given Every" 
+                  value={frequencyValue} 
+                  onChangeText={setFrequencyValue} 
+                  placeholder="0"
+                  keyboardType="number-pad"
+                />
+              </View>
+              <View style={{ width: 16 }} />
+              <View style={{ flex: 1 }}>
+                <GSelect 
+                  label="Unit" 
+                  value={frequencyUnit}
+                  onSelect={setFrequencyUnit}
+                  options={unitOptions}
+                />
+              </View>
+            </View>
+            <View style={[styles.infoBox, { backgroundColor: theme.colors.primary + '08', borderColor: theme.colors.primary + '20' }]}>
+              <Info size={16} color={theme.colors.primary} />
+              <Text style={[styles.infoText, { color: theme.colors.textLight }]}>
+                Set frequency to <Text style={{ fontWeight: 'bold' }}>0</Text> for one-time vaccinations. This interval helps calculate next due dates automatically.
+              </Text>
+            </View>
+          </View>
+
+          <GInput 
+            label="Remark" 
+            value={remark} 
+            onChangeText={setRemark} 
+            placeholder="Additional notes..."
+            multiline
+            numberOfLines={3}
+          />
+
+          <GButton 
+            title="Save to Catalog" 
+            onPress={handleSave} 
+            loading={loading}
+            containerStyle={{ marginTop: 12, marginBottom: 40 }}
+          />
+
+          {/* Existing Catalog List */}
+          <View style={[styles.listHeader, { borderTopColor: theme.colors.border }]}>
+            <Text style={[styles.listTitle, { color: theme.colors.text }]}>Vaccine Library</Text>
+            <Text style={[styles.listSub, { color: theme.colors.textLight }]}>{vaccines.length} vaccines defined</Text>
+          </View>
+
+          {vaccinesLoading ? (
+            <ActivityIndicator color={theme.colors.primary} style={{ marginVertical: 20 }} />
+          ) : (
+            vaccines.map((v) => (
+              <View key={v.id} style={[styles.vaccineCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <View style={[styles.vaccineIndicator, { backgroundColor: theme.colors.primary }]} />
+                <View style={styles.vaccineBody}>
+                  <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{v.name}</Text>
+                  <Text style={[styles.vaccineMeta, { color: theme.colors.textLight }]}>
+                    {v.diseaseName || 'General Health'} • {v.doseMl || 0}ml
+                  </Text>
+                  <View style={styles.vaccineFooter}>
+                    <Text style={[styles.frequencyText, { color: theme.colors.primary }]}>
+                      {v.daysBetween > 0 ? `Every ${v.daysBetween} days` : 'One-time'}
+                    </Text>
+                    <Text style={[styles.routeTag, { color: theme.colors.textLight }]}>{v.applicationRoute}</Text>
                   </View>
                 </View>
-              ))
-            ) : (
-              <Text style={[styles.emptyText, { color: theme.colors.textLight }]}>No vaccines defined yet</Text>
-            )}
-          </View>
+              </View>
+            ))
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
 };
 
-const getStyles = (theme, isDarkMode) => StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
   },
   content: {
-    padding: SPACING.lg,
-    paddingBottom: 40,
+    padding: SPACING.md,
+    paddingBottom: 60,
   },
-  formCard: {
-    paddingBottom: SPACING.lg,
-  },
-  daysRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: SPACING.md,
-  },
-  daysLabel: {
-    fontSize: 14,
-    fontFamily: 'Inter_600SemiBold',
-    marginRight: 10,
-  },
-  daysInputBox: {
-    width: 90,
-    marginBottom: 0,
-  },
-  daysSuffix: {
-    fontSize: 14,
-    fontFamily: 'Inter_600SemiBold',
-    marginLeft: 10,
-  },
-  helperText: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: SPACING.lg,
-    fontFamily: 'Inter_600SemiBold',
-  },
-  footer: {
-    marginTop: SPACING.md,
-    marginBottom: 30,
-  },
-  listSection: {
-    marginTop: 20,
-    paddingTop: 24,
-    borderTopWidth: 1.5,
-    borderTopColor: theme.colors.border,
+  section: {
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontFamily: 'Inter_600SemiBold',
-    marginBottom: 20,
-    letterSpacing: -0.5,
-  },
-  vaccineItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 16,
-    padding: 14,
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1,
     marginBottom: 12,
-    borderWidth: 1.5,
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
+    paddingLeft: 4,
   },
-  vaccineIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-    backgroundColor: isDarkMode ? '#1A1A1A' : '#EEF2FF',
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
-  vaccineLabel: {
+  infoBox: {
+    flexDirection: 'row',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 8,
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 18,
+  },
+  listHeader: {
+    marginTop: 12,
+    paddingTop: 32,
+    borderTopWidth: 1,
+    marginBottom: 16,
+  },
+  listTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+  },
+  listSub: {
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 4,
+  },
+  vaccineCard: {
+    flexDirection: 'row',
+    borderRadius: 16,
+    borderWidth: 1.2,
+    marginBottom: 12,
+    overflow: 'hidden',
+    ...SHADOW.small,
+  },
+  vaccineIndicator: {
+    width: 6,
+  },
+  vaccineBody: {
+    flex: 1,
+    padding: 16,
+  },
+  vaccineName: {
     fontSize: 16,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_700Bold',
   },
-  vaccineDays: {
+  vaccineMeta: {
     fontSize: 13,
+    fontFamily: 'Inter_400Regular',
     marginTop: 2,
-    fontFamily: 'Inter_500Medium',
   },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: 24,
-    fontStyle: 'italic',
+  vaccineFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  frequencyText: {
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+  },
+  routeTag: {
+    fontSize: 11,
     fontFamily: 'Inter_500Medium',
   },
 });
