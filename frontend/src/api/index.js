@@ -31,7 +31,13 @@ const storage = {
 
 // For Production: Replace with your Render URL
 // For Development: Use your PC's IP address
-const BASE_URL = 'http://10.96.23.95:5001/api'; // Local Development (Use IP for mobile/simulators)
+import { Platform } from 'react-native';
+
+// Dynamically set BASE_URL: Use 'localhost' for web, and current local IP for mobile.
+const LOCAL_IP = '10.96.23.95'; 
+const BASE_URL = Platform.OS === 'web' 
+  ? 'http://localhost:5001/api' 
+  : `http://${LOCAL_IP}:5001/api`;
 
 const api = axios.create({
   baseURL: BASE_URL,

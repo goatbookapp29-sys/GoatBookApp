@@ -27,17 +27,16 @@ function updateFiles() {
     const FRONTEND_API_PATH = path.join(ROOT_DIR, 'frontend', 'src', 'api', 'index.js');
     const BACKEND_SERVER_PATH = path.join(ROOT_DIR, 'backend', 'server.js');
 
-    // 1. Update Frontend API
+    // 1. Update Frontend API (Targeting the LOCAL_IP constant now)
     if (fs.existsSync(FRONTEND_API_PATH)) {
         let content = fs.readFileSync(FRONTEND_API_PATH, 'utf8');
-        // Regex to match the BASE_URL assignment with an IP address
-        const frontendRegex = /const BASE_URL = 'http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:5001\/api';/;
+        const frontendRegex = /const LOCAL_IP = '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}';/;
         if (frontendRegex.test(content)) {
-            content = content.replace(frontendRegex, `const BASE_URL = 'http://${ip}:5001/api';`);
+            content = content.replace(frontendRegex, `const LOCAL_IP = '${ip}';`);
             fs.writeFileSync(FRONTEND_API_PATH, content);
-            console.log(`✅ Updated Frontend API with IP: ${ip}`);
+            console.log(`✅ Updated Frontend LOCAL_IP with: ${ip}`);
         } else {
-            console.warn('⚠️ Could not find BASE_URL pattern in frontend/src/api/index.js');
+            console.warn('⚠️ Could not find LOCAL_IP pattern in frontend/src/api/index.js');
         }
     }
 
