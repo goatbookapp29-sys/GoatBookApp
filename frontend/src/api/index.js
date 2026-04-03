@@ -31,7 +31,6 @@ const storage = {
 
 // For Production: Replace with your Render URL
 // For Development: Use your PC's IP address
-import { Platform } from 'react-native';
 
 // Dynamically set BASE_URL: Use 'localhost' for web, and current local IP for mobile.
 const LOCAL_IP = '10.96.23.95'; 
