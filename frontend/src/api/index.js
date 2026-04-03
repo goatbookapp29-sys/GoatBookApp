@@ -32,11 +32,8 @@ const storage = {
 // For Production: Replace with your Render URL
 // For Development: Use your PC's IP address
 
-// Dynamically set BASE_URL: Use 'localhost' for web, and current local IP for mobile.
-const LOCAL_IP = '10.96.23.95'; 
-const BASE_URL = Platform.OS === 'web' 
-  ? 'http://localhost:5001/api' 
-  : `http://${LOCAL_IP}:5001/api`;
+// For Production: Render URL
+const BASE_URL = 'https://goatbookapp.onrender.com/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
