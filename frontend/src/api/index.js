@@ -31,7 +31,7 @@ const storage = {
 
 // For Production: Replace with your Render URL
 // For Development: Use your PC's IP address
-const BASE_URL = 'http://10.30.176.95:5001/api'; // Local Development (Use IP for mobile/simulators)
+const BASE_URL = 'http://10.96.23.95:5001/api'; // Local Development (Use IP for mobile/simulators)
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -69,5 +69,20 @@ api.interceptors.request.use(async (config) => {
   if (farmId) config.headers['X-Farm-ID'] = farmId;
   return config;
 });
+
+// Response interceptor to handle auth failures (like after a DB wipe)
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      console.warn('AUTH: Session expired or invalid. Clearing storage.');
+      await storage.deleteItem('token');
+      await storage.deleteItem('selectedFarmId');
+      // Note: Ideally you would navigate to Login here, but clearing storage 
+      // will trigger state changes in most AuthContext implementations.
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

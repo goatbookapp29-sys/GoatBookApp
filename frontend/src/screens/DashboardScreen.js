@@ -31,8 +31,14 @@ const DashboardScreen = ({ navigation }) => {
           setUserRole(ep?.employeeType || 'EMPLOYEE');
           const farm = ep?.farms?.find(f => f.id === currentFarmId);
           if (farm) setFarmName(farm.name);
-      }).catch(err => console.warn('Silently failed to fetch profile in dashboard:', err));
-    }, [])
+      }).catch(err => {
+          console.warn('Dashboard: Failed to fetch profile:', err);
+          // If unauthorized (user deleted or session expired), force go to Login
+          if (err.response?.status === 401) {
+            navigation.replace('Login');
+          }
+      });
+    }, [navigation])
   );
 
   const tiles = useMemo(() => {

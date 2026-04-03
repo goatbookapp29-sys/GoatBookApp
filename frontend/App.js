@@ -102,9 +102,8 @@ function AppContent() {
     } catch (e) {
       console.warn(e);
     } finally {
-      if (fontsLoaded) {
-        await SplashScreen.hideAsync();
-      }
+      setFontsLoaded(true);
+      await SplashScreen.hideAsync();
     }
   };
 
