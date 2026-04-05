@@ -61,28 +61,34 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
 
   const handleDelete = async () => {
     if (editingVaccine.isDefault) {
-      Alert.alert('Restricted', 'System default vaccines are mandatory and cannot be deleted.');
+      Alert.alert(
+        'Protected Record',
+        'This is a system default vaccine and cannot be deleted. Default vaccines are required for the vaccination schedule to work correctly.',
+        [{ text: 'OK' }]
+      );
       return;
     }
 
     Alert.alert(
       'Delete Vaccine',
-      'Are you sure you want to remove this vaccine from the catalog?',
+      'This will permanently remove this vaccine AND all vaccination journal entries that used it. This action cannot be undone.\n\nAre you sure?',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
-          text: 'Delete', 
+          text: 'Delete Permanently', 
           style: 'destructive',
           onPress: async () => {
             setLoading(true);
             try {
               const response = await api.delete(`/vaccines/${editingVaccine.id}`);
-              console.log('Delete response:', response.data);
-              Alert.alert('Deleted', 'Vaccine catalog item removed');
+              Alert.alert('Deleted', response.data?.message || 'Vaccine removed successfully.');
               navigation.goBack();
             } catch (error) {
-              console.error('Delete error:', error.response?.data || error);
-              Alert.alert('Error', error.response?.data?.message || 'Failed to delete vaccine');
+              console.error('Delete error:', error.response?.data || error.message);
+              Alert.alert(
+                'Delete Failed', 
+                error.response?.data?.message || 'Something went wrong. Please try again.'
+              );
             } finally {
               setLoading(false);
             }

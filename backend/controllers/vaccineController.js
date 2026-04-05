@@ -128,23 +128,23 @@ exports.deleteVaccine = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
-    // NEW GUARD: Check if it's a default vaccine
+    // GUARD: Block deletion of system default vaccines
     if (vaccine.is_default) {
       return res.status(400).json({ 
         message: 'System default vaccines are mandatory and cannot be deleted.' 
       });
     }
 
-    // Logical Check: Do not delete if already used in vaccination records
-    const recordsCount = await prisma.vaccination_records.count({ where: { vaccine_id: req.params.id } });
-    if (recordsCount > 0) {
-      return res.status(400).json({ 
-        message: 'Cannot delete vaccine that has historical records. Please delete all related vaccination events first.' 
-      });
-    }
+    // Delete associated vaccination records first, then the vaccine itself
+    const deletedRecords = await prisma.vaccination_records.deleteMany({ where: { vaccine_id: req.params.id } });
+    console.log(`[DELETE] Removed ${deletedRecords.count} vaccination records for vaccine: ${vaccine.name}`);
+
+    // Delete any associated vaccination schedules
+    const deletedSchedules = await prisma.vaccination_schedules.deleteMany({ where: { vaccine_id: req.params.id } });
+    console.log(`[DELETE] Removed ${deletedSchedules.count} schedules for vaccine: ${vaccine.name}`);
 
     await prisma.vaccines.delete({ where: { id: req.params.id } });
-    res.json({ message: 'Vaccine catalog item removed' });
+    res.json({ message: `Vaccine "${vaccine.name}" removed along with ${deletedRecords.count} related record(s).` });
   } catch (err) {
     console.error('DELETE VACCINE ERROR:', err);
     res.status(500).json({ message: 'Server Error', error: err.message });
