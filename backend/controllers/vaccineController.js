@@ -9,15 +9,10 @@ exports.getVaccines = async (req, res) => {
   try {
     if (!req.farmId) return res.status(400).json({ message: 'No farm selected' });
     
-    // Fetch vaccines that:
-    // 1. Are marked as global defaults (available to everyone)
-    // 2. Are custom-created for this specific farm
+    // Fetch vaccines that belong explicitly to this farm
     const vaccines = await prisma.vaccines.findMany({
       where: {
-        OR: [
-          { farm_id: req.farmId },
-          { is_default: true }
-        ]
+        farm_id: req.farmId
       },
       include: { users_vaccines_created_by_user_idTousers: { select: { name: true } } },
       orderBy: { name: 'asc' }
@@ -82,6 +77,65 @@ exports.createVaccine = async (req, res) => {
   }
 };
 
+// @desc    Update a vaccine definition
+// @route   PUT /api/vaccines/:id
+exports.updateVaccine = async (req, res) => {
+  const { 
+    name, diseaseName, doseMl, applicationRoute, 
+    immunityDurationDays, nextDueDurationDays, daysBetween, remark 
+  } = req.body;
+
+  try {
+    const vaccine = await prisma.vaccines.findUnique({ where: { id: req.params.id } });
+    if (!vaccine) return res.status(404).json({ message: 'Vaccine not found' });
+    if (vaccine.farm_id !== req.farmId) return res.status(403).json({ message: 'Not authorized' });
+
+    const updated = await prisma.vaccines.update({
+      where: { id: req.params.id },
+      data: {
+        name: name || vaccine.name,
+        disease_name: diseaseName !== undefined ? diseaseName : vaccine.disease_name,
+        dose_ml: doseMl !== undefined ? parseFloat(doseMl) : vaccine.dose_ml,
+        application_route: applicationRoute !== undefined ? applicationRoute : vaccine.application_route,
+        immunity_duration_days: immunityDurationDays !== undefined ? parseInt(immunityDurationDays) : vaccine.immunity_duration_days,
+        next_due_duration_days: nextDueDurationDays !== undefined ? parseInt(nextDueDurationDays) : vaccine.next_due_duration_days,
+        days_between: daysBetween !== undefined ? parseInt(daysBetween) : vaccine.days_between,
+        remark: remark !== undefined ? remark : vaccine.remark,
+        updated_at: new Date()
+      }
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error('UPDATE VACCINE ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// @desc    Delete a vaccine definition
+// @route   DELETE /api/vaccines/:id
+exports.deleteVaccine = async (req, res) => {
+  try {
+    const vaccine = await prisma.vaccines.findUnique({ where: { id: req.params.id } });
+    if (!vaccine) return res.status(404).json({ message: 'Vaccine not found' });
+    if (vaccine.farm_id !== req.farmId) return res.status(403).json({ message: 'Not authorized' });
+
+    // Logical Check: Do not delete if already used in vaccination records
+    const recordsCount = await prisma.vaccination_records.count({ where: { vaccine_id: req.params.id } });
+    if (recordsCount > 0) {
+      return res.status(400).json({ 
+        message: 'Cannot delete vaccine that has historical records. Please delete all related vaccination events first.' 
+      });
+    }
+
+    await prisma.vaccines.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Vaccine catalog item removed' });
+  } catch (err) {
+    console.error('DELETE VACCINE ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 // @desc    Get upcoming boosters (due in next 30 days)
 // @route   GET /api/vaccines/upcoming
 exports.getUpcomingBoosters = async (req, res) => {
@@ -137,7 +191,15 @@ exports.getVaccinationRecords = async (req, res) => {
       where,
       include: {
         vaccines: { select: { name: true, days_between: true } },
-        animals: { select: { tag_number: true } },
+        animals: { 
+          select: { 
+            tag_number: true,
+            gender: true,
+            birth_date: true,
+            breeds: { select: { name: true } },
+            locations: { select: { name: true } }
+          } 
+        },
         users_vaccination_records_created_by_user_idTousers: { select: { name: true } }
       },
       orderBy: { date: 'desc' }
@@ -149,7 +211,13 @@ exports.getVaccinationRecords = async (req, res) => {
       remark: r.remark, farmId: r.farm_id, creationMode: r.creation_mode,
       createdAt: r.created_at,
       vaccine: r.vaccines ? { name: r.vaccines.name, daysBetween: r.vaccines.days_between } : null,
-      animal: r.animals ? { tagNumber: r.animals.tag_number } : null,
+      animal: r.animals ? { 
+        tagNumber: r.animals.tag_number,
+        gender: r.animals.gender,
+        breedName: r.animals.breeds?.name,
+        currentLocationName: r.animals.locations?.name,
+        ageInMonths: r.animals.birth_date ? Math.floor((new Date() - new Date(r.animals.birth_date)) / (1000 * 60 * 60 * 24 * 30.44)) : 'N/A'
+      } : null,
       creator: r.users_vaccination_records_created_by_user_idTousers
     })));
   } catch (err) {
@@ -207,7 +275,7 @@ exports.createVaccinationRecord = async (req, res) => {
 // @desc    Update an existing vaccination record
 // @route   PUT /api/vaccination-records/:id
 exports.updateVaccinationRecord = async (req, res) => {
-  const { date, validTill, remark } = req.body;
+  const { date, validTill, nextDueDate, remark } = req.body;
   try {
     const record = await prisma.vaccination_records.findUnique({
       where: { id: req.params.id },
@@ -220,10 +288,11 @@ exports.updateVaccinationRecord = async (req, res) => {
     const updateData = { updated_by_user_id: req.user.id, updated_at: new Date() };
     if (date) updateData.date = new Date(date);
     if (validTill !== undefined) updateData.valid_till = validTill ? new Date(validTill) : null;
+    if (nextDueDate !== undefined) updateData.next_due_date = nextDueDate ? new Date(nextDueDate) : null;
     if (remark !== undefined) updateData.remark = remark;
 
-    // Recalculate next due date if the administration date changed
-    if (date && record.vaccines?.days_between > 0) {
+    // Recalculate next due date if the administration date changed AND manual nextDueDate wasn't provided
+    if (date && !nextDueDate && record.vaccines?.days_between > 0) {
       const baseDate = new Date(date);
       baseDate.setDate(baseDate.getDate() + record.vaccines.days_between);
       updateData.next_due_date = baseDate;

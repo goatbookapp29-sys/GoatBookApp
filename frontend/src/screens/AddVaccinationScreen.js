@@ -19,9 +19,9 @@ const AddVaccinationScreen = ({ navigation, route }) => {
   const isEditing = !!existingRecord;
 
   // Form State
-  const [date, setDate] = useState(existingRecord?.date || new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(existingRecord?.date ? new Date(existingRecord.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
   const [vaccineId, setVaccineId] = useState(existingRecord?.vaccineId || '');
-  const [nextDueDate, setNextDueDate] = useState(existingRecord?.nextDueDate || '');
+  const [nextDueDate, setNextDueDate] = useState(existingRecord?.nextDueDate ? new Date(existingRecord.nextDueDate).toISOString().split('T')[0] : '');
   const [remark, setRemark] = useState(existingRecord?.remark || '');
   const [tagNumber, setTagNumber] = useState('');
   const [animal, setAnimal] = useState(existingRecord?.animal || null);
@@ -80,6 +80,32 @@ const AddVaccinationScreen = ({ navigation, route }) => {
     }
   };
 
+  const handleDelete = async () => {
+    Alert.alert(
+      'Delete Record',
+      'Are you sure you want to remove this vaccination record permanently?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await api.delete(`/vaccines/records/${existingRecord.id}`);
+              Alert.alert('Deleted', 'Record has been removed');
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete record');
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const handleSave = async () => {
     if (!animal || !vaccineId || !date) {
       Alert.alert('Validation', 'Please select an animal, vaccine, and date');
@@ -104,7 +130,7 @@ const AddVaccinationScreen = ({ navigation, route }) => {
           creationMode: 'SINGLE'
         });
       }
-      Alert.alert('Success', 'Vaccination recorded successfully');
+      Alert.alert('Success', isEditing ? 'Record updated successfully' : 'Vaccination recorded successfully');
       navigation.goBack();
     } catch (error) {
       Alert.alert('Error', error.response?.data?.message || 'Failed to save record');
@@ -141,6 +167,7 @@ const AddVaccinationScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
                   ) : null}
                   disabled={isEditing}
+                  editable={!isEditing}
                 />
               </View>
               {!isEditing && (
@@ -228,8 +255,19 @@ const AddVaccinationScreen = ({ navigation, route }) => {
             title={isEditing ? "UPDATE RECORD" : "SAVE VACCINATION"} 
             onPress={handleSave} 
             loading={loading}
-            containerStyle={{ marginTop: 12, marginBottom: 40 }}
+            containerStyle={{ marginTop: 12 }}
           />
+
+          {isEditing && (
+            <TouchableOpacity 
+              style={[styles.deleteBtn, { borderColor: theme.colors.error }]}
+              onPress={handleDelete}
+              disabled={loading}
+            >
+              <Text style={[styles.deleteBtnText, { color: theme.colors.error }]}>DELETE RECORD</Text>
+            </TouchableOpacity>
+          )}
+          <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -327,6 +365,20 @@ const getStyles = (theme) => StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
     lineHeight: 18,
+  },
+  deleteBtn: {
+    marginTop: 16,
+    height: 56,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderStyle: 'dashed',
+  },
+  deleteBtnText: {
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1,
   },
 });
 

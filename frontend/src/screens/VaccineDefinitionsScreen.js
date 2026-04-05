@@ -41,7 +41,10 @@ const VaccineDefinitionsScreen = ({ navigation }) => {
           <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{item.name}</Text>
           <Text style={[styles.daysText, { color: theme.colors.textLight }]}>Required every {item.daysBetween} days</Text>
         </View>
-        <TouchableOpacity style={styles.editBtn}>
+        <TouchableOpacity 
+          style={styles.editBtn}
+          onPress={() => navigation.navigate('AddVaccineName', { vaccine: item })}
+        >
            <Settings size={18} color={theme.colors.textMuted} />
         </TouchableOpacity>
       </View>

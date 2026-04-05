@@ -27,11 +27,9 @@ const LoginScreen = ({ navigation }) => {
       await setAuthToken(token);
       
       if (farms && farms.length > 1) {
-        setLoading(false);
         navigation.replace('FarmSelection', { farms });
       } else if (farms && farms.length === 1) {
         await setSelectedFarm(farms[0].id);
-        setLoading(false);
         try {
           navigation.replace('MainDrawer');
         } catch (navError) {

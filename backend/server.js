@@ -7,7 +7,11 @@ const prisma = require('./config/prisma');
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:8081', 'http://127.0.0.1:8081', 'http://10.30.176.95:8081', 'http://10.116.46.95:8081', 'https://goatbookapp.onrender.com'],
+<<<<<<< HEAD
+  origin: ['http://localhost:8081', 'http://10.23.22.249:8081', 'http://10.30.176.95:8081', 'http://10.116.46.95:8081', 'https://goatbookapp.onrender.com'],
+=======
+  origin: ['http://localhost:8081', 'http://10.96.23.95:8081', 'http://10.96.23.95:8081', 'https://goatbookapp.onrender.com'],
+>>>>>>> 5ba77072623c0df3979cd834a86e92667ac3dcdb
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Farm-ID'],
   credentials: true
@@ -58,4 +62,4 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5001; // Avoid port 5000 conflict with macOS AirPlay
 
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Server started on port ${PORT} at 0.0.0.0`));

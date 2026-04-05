@@ -33,6 +33,9 @@ const SideMenu = (props) => {
       if (farm) setFarmName(farm.name);
     } catch (err) {
       console.warn('SideMenu Profile Fetch Error:', err);
+      if (err.response?.status === 401) {
+        navigation.replace('Login');
+      }
     }
   };
 
@@ -62,7 +65,9 @@ const SideMenu = (props) => {
           {profilePhoto ? (
             <Image source={{ uri: profilePhoto }} style={styles.avatarPhoto} />
           ) : (
-            <User color={theme.colors.primary} size={30} fill={theme.colors.white} />
+            <Text style={styles.avatarInitial}>
+              {userName ? userName.charAt(0).toUpperCase() : 'U'}
+            </Text>
           )}
         </View>
         <View style={styles.userInfo}>
@@ -131,6 +136,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 16,
     overflow: 'hidden',
+  },
+  avatarInitial: {
+    fontSize: 24,
+    color: '#FF5A0F', // Matching primary orange
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
   },
   avatarPhoto: {
     width: 56,

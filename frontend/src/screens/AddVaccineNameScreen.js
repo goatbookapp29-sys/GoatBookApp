@@ -10,18 +10,32 @@ import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { Syringe, Activity, Microscope, Info, ChevronDown } from 'lucide-react-native';
 
-const AddVaccineNameScreen = ({ navigation }) => {
+const AddVaccineNameScreen = ({ navigation, route }) => {
   const { theme, isDarkMode } = useTheme();
   const styles = useMemo(() => getStyles(theme), [theme]);
   
+  const editingVaccine = route.params?.vaccine;
+  const isEditing = !!editingVaccine;
+  
   // Form State
-  const [name, setName] = useState('');
-  const [diseaseName, setDiseaseName] = useState('');
-  const [doseMl, setDoseMl] = useState('');
-  const [route, setRoute] = useState('Sub Cut S/c');
-  const [frequencyValue, setFrequencyValue] = useState('');
-  const [frequencyUnit, setFrequencyUnit] = useState('Months');
-  const [remark, setRemark] = useState('');
+  const [name, setName] = useState(editingVaccine?.name || '');
+  const [diseaseName, setDiseaseName] = useState(editingVaccine?.diseaseName || '');
+  const [doseMl, setDoseMl] = useState(editingVaccine?.doseMl?.toString() || '');
+  const [appRoute, setAppRoute] = useState(editingVaccine?.applicationRoute || 'Sub Cut S/c');
+  
+  // Calculate frequency based on daysBetween
+  const getInitialFrequency = () => {
+    if (!editingVaccine?.daysBetween) return { val: '', unit: 'Months' };
+    const days = editingVaccine.daysBetween;
+    if (days % 365 === 0) return { val: (days / 365).toString(), unit: 'Years' };
+    if (days % 30 === 0) return { val: (days / 30).toString(), unit: 'Months' };
+    return { val: days.toString(), unit: 'Days' };
+  };
+
+  const initialFreq = getInitialFrequency();
+  const [frequencyValue, setFrequencyValue] = useState(initialFreq.val);
+  const [frequencyUnit, setFrequencyUnit] = useState(initialFreq.unit);
+  const [remark, setRemark] = useState(editingVaccine?.remark || '');
   
   const [loading, setLoading] = useState(false);
   const [vaccines, setVaccines] = useState([]);
@@ -45,6 +59,32 @@ const AddVaccineNameScreen = ({ navigation }) => {
     }
   };
 
+  const handleDelete = async () => {
+    Alert.alert(
+      'Delete Vaccine',
+      'Are you sure you want to remove this vaccine from the catalog?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await api.delete(`/vaccines/${editingVaccine.id}`);
+              Alert.alert('Deleted', 'Vaccine catalog item removed');
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert('Error', error.response?.data?.message || 'Failed to delete vaccine');
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const handleSave = async () => {
     if (!name.trim()) {
       Alert.alert('Error', 'Vaccine name is required');
@@ -62,24 +102,39 @@ const AddVaccineNameScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      await api.post('/vaccines', {
-        name,
-        diseaseName,
-        doseMl: doseMl ? parseFloat(doseMl) : null,
-        applicationRoute: route,
-        daysBetween: days,
-        remark
-      });
+      if (isEditing) {
+        await api.put(`/vaccines/${editingVaccine.id}`, {
+          name,
+          diseaseName,
+          doseMl: doseMl ? parseFloat(doseMl) : null,
+          applicationRoute: appRoute,
+          daysBetween: days,
+          remark
+        });
+      } else {
+        await api.post('/vaccines', {
+          name,
+          diseaseName,
+          doseMl: doseMl ? parseFloat(doseMl) : null,
+          applicationRoute: appRoute,
+          daysBetween: days,
+          remark
+        });
+      }
       setLoading(false);
-      Alert.alert('Success', 'Vaccine catalog updated');
+      Alert.alert('Success', isEditing ? 'Vaccine updated' : 'Vaccine catalog updated');
       
-      // Reset Form
-      setName('');
-      setDiseaseName('');
-      setDoseMl('');
-      setFrequencyValue('');
-      setRemark('');
-      fetchVaccines();
+      if (!isEditing) {
+        // Reset Form
+        setName('');
+        setDiseaseName('');
+        setDoseMl('');
+        setFrequencyValue('');
+        setRemark('');
+        fetchVaccines();
+      } else {
+        navigation.goBack();
+      }
     } catch (error) {
       setLoading(false);
       Alert.alert('Error', error.response?.data?.message || 'Failed to save vaccine');
@@ -101,7 +156,7 @@ const AddVaccineNameScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <GHeader title="Vaccine Catalog" onBack={() => navigation.goBack()} leftAlign={true} />
+      <GHeader title={isEditing ? "Edit Vaccine" : "Vaccine Catalog"} onBack={() => navigation.goBack()} leftAlign={true} />
       
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -141,8 +196,8 @@ const AddVaccineNameScreen = ({ navigation }) => {
               <View style={{ flex: 1.5 }}>
                 <GSelect 
                   label="App. Route" 
-                  value={route}
-                  onSelect={setRoute}
+                  value={appRoute}
+                  onSelect={setAppRoute}
                   options={routeOptions}
                   placeholder="Select Route"
                 />
@@ -190,38 +245,53 @@ const AddVaccineNameScreen = ({ navigation }) => {
           />
 
           <GButton 
-            title="Save to Catalog" 
+            title={isEditing ? "Update Vaccine" : "Save to Catalog"} 
             onPress={handleSave} 
             loading={loading}
-            containerStyle={{ marginTop: 12, marginBottom: 40 }}
+            containerStyle={{ marginTop: 12, marginBottom: isEditing ? 12 : 40 }}
           />
 
-          {/* Existing Catalog List */}
-          <View style={[styles.listHeader, { borderTopColor: theme.colors.border }]}>
-            <Text style={[styles.listTitle, { color: theme.colors.text }]}>Vaccine Library</Text>
-            <Text style={[styles.listSub, { color: theme.colors.textLight }]}>{vaccines.length} vaccines defined</Text>
-          </View>
+          {isEditing && (
+            <TouchableOpacity 
+              style={[styles.deleteBtn, { borderColor: theme.colors.error }]}
+              onPress={handleDelete}
+              disabled={loading}
+            >
+              <Text style={[styles.deleteBtnText, { color: theme.colors.error }]}>DELETE FROM CATALOG</Text>
+            </TouchableOpacity>
+          )}
 
-          {vaccinesLoading ? (
-            <ActivityIndicator color={theme.colors.primary} style={{ marginVertical: 20 }} />
-          ) : (
-            vaccines.map((v) => (
-              <View key={v.id} style={[styles.vaccineCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-                <View style={[styles.vaccineIndicator, { backgroundColor: theme.colors.primary }]} />
-                <View style={styles.vaccineBody}>
-                  <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{v.name}</Text>
-                  <Text style={[styles.vaccineMeta, { color: theme.colors.textLight }]}>
-                    {v.diseaseName || 'General Health'} • {v.doseMl || 0}ml
-                  </Text>
-                  <View style={styles.vaccineFooter}>
-                    <Text style={[styles.frequencyText, { color: theme.colors.primary }]}>
-                      {v.daysBetween > 0 ? `Every ${v.daysBetween} days` : 'One-time'}
-                    </Text>
-                    <Text style={[styles.routeTag, { color: theme.colors.textLight }]}>{v.applicationRoute}</Text>
-                  </View>
-                </View>
+          {!isEditing && (
+            <>
+              {/* Existing Catalog List */}
+              <View style={[styles.listHeader, { borderTopColor: theme.colors.border }]}>
+                <Text style={[styles.listTitle, { color: theme.colors.text }]}>Vaccine Library</Text>
+                <Text style={[styles.listSub, { color: theme.colors.textLight }]}>{vaccines.length} vaccines defined</Text>
               </View>
-            ))
+
+              {vaccinesLoading ? (
+                <ActivityIndicator color={theme.colors.primary} style={{ marginVertical: 20 }} />
+              ) : (
+                vaccines.map((v) => (
+                  <View key={v.id} style={[styles.vaccineCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                    <View style={[styles.vaccineIndicator, { backgroundColor: theme.colors.primary }]} />
+                    <View style={styles.vaccineBody}>
+                      <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{v.name}</Text>
+                      <Text style={[styles.vaccineMeta, { color: theme.colors.textLight }]}>
+                        {v.diseaseName || 'General Health'} • {v.doseMl || 0}ml
+                      </Text>
+                      <View style={styles.vaccineFooter}>
+                        <Text style={[styles.frequencyText, { color: theme.colors.primary }]}>
+                          {v.daysBetween > 0 ? `Every ${v.daysBetween} days` : 'One-time'}
+                        </Text>
+                        <Text style={[styles.routeTag, { color: theme.colors.textLight }]}>{v.applicationRoute}</Text>
+                      </View>
+                    </View>
+                  </View>
+                ))
+              )}
+              <View style={{ height: 40 }} />
+            </>
           )}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -321,6 +391,20 @@ const getStyles = (theme) => StyleSheet.create({
   routeTag: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
+  },
+  deleteBtn: {
+    marginBottom: 40,
+    height: 56,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderStyle: 'dashed',
+  },
+  deleteBtnText: {
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1,
   },
 });
 

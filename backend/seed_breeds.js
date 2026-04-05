@@ -1,4 +1,3 @@
-const prisma = require('./config/prisma');
 const { v4: uuidv4 } = require('uuid');
 
 const goatBreeds = [
@@ -16,44 +15,49 @@ const sheepBreeds = [
   'Kheri', 'Bikaneri (Magra Type)'
 ];
 
-async function seedBreeds() {
+/**
+ * Seeds default breeds for a specific farm.
+ * @param {string} farmId - The UUID of the farm to seed for.
+ * @param {object} tx - (Optional) Prisma transaction client.
+ */
+async function seedBreeds(farmId, tx) {
+  const prisma = tx || require('./config/prisma');
+  const now = new Date();
+
+  console.log(`--- SEEDING BREEDS FOR FARM: ${farmId} ---`);
+
+  // Prepare data for bulk insert
+  const breedData = [
+    ...goatBreeds.map(name => ({
+      id: uuidv4(),
+      name,
+      animal_type: 'Goat',
+      farm_id: farmId,
+      is_default: true,
+      created_at: now,
+      updated_at: now
+    })),
+    ...sheepBreeds.map(name => ({
+      id: uuidv4(),
+      name,
+      animal_type: 'Sheep',
+      farm_id: farmId,
+      is_default: true,
+      created_at: now,
+      updated_at: now
+    }))
+  ];
+
   try {
-    await prisma.$connect();
-    console.log('Connected to DB');
-
-    const farms = await prisma.farms.findMany();
-    if (farms.length === 0) {
-      console.log('No farms found to seed breeds for. Create a farm first.');
-      process.exit(0);
-    }
-
-    let count = 0;
-    const now = new Date();
-    for (const farm of farms) {
-      for (const breedName of goatBreeds) {
-        const exists = await prisma.breeds.findFirst({ where: { name: breedName, farm_id: farm.id } });
-        if (!exists) {
-          await prisma.breeds.create({ data: { id: uuidv4(), name: breedName, animal_type: 'Goat', farm_id: farm.id, created_at: now, updated_at: now } });
-          count++;
-        }
-      }
-      for (const breedName of sheepBreeds) {
-        const exists = await prisma.breeds.findFirst({ where: { name: breedName, farm_id: farm.id } });
-        if (!exists) {
-          await prisma.breeds.create({ data: { id: uuidv4(), name: breedName, animal_type: 'Sheep', farm_id: farm.id, created_at: now, updated_at: now } });
-          count++;
-        }
-      }
-    }
-
-    console.log(`Successfully seeded ${count} new breeds across ${farms.length} farms.`);
-    await prisma.$disconnect();
-    process.exit(0);
+    const result = await prisma.breeds.createMany({
+      data: breedData,
+      skipDuplicates: true
+    });
+    console.log(`Successfully seeded ${result.count} breeds for farm ${farmId}.`);
+    return result;
   } catch (error) {
-    console.error('Error seeding breeds:', error);
-    await prisma.$disconnect();
-    process.exit(1);
+    console.error(`Error seeding breeds for farm ${farmId}:`, error);
+    throw error;
   }
 }
-
-seedBreeds();
+module.exports = { seedBreeds };
