@@ -117,8 +117,23 @@ exports.updateVaccine = async (req, res) => {
 exports.deleteVaccine = async (req, res) => {
   try {
     const vaccine = await prisma.vaccines.findUnique({ where: { id: req.params.id } });
-    if (!vaccine) return res.status(404).json({ message: 'Vaccine not found' });
-    if (vaccine.farm_id !== req.farmId) return res.status(403).json({ message: 'Not authorized' });
+    
+    if (!vaccine) {
+      console.log(`[DELETE] Vaccine not found: ${req.params.id}`);
+      return res.status(404).json({ message: 'Vaccine not found' });
+    }
+    
+    if (vaccine.farm_id !== req.farmId) {
+      console.log(`[DELETE] Unauthorized access attempt for vaccine: ${req.params.id} by farm: ${req.farmId}`);
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    // NEW GUARD: Check if it's a default vaccine
+    if (vaccine.is_default) {
+      return res.status(400).json({ 
+        message: 'System default vaccines are mandatory and cannot be deleted.' 
+      });
+    }
 
     // Logical Check: Do not delete if already used in vaccination records
     const recordsCount = await prisma.vaccination_records.count({ where: { vaccine_id: req.params.id } });
@@ -132,7 +147,7 @@ exports.deleteVaccine = async (req, res) => {
     res.json({ message: 'Vaccine catalog item removed' });
   } catch (err) {
     console.error('DELETE VACCINE ERROR:', err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 

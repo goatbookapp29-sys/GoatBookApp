@@ -60,6 +60,11 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
   };
 
   const handleDelete = async () => {
+    if (editingVaccine.isDefault) {
+      Alert.alert('Restricted', 'System default vaccines are mandatory and cannot be deleted.');
+      return;
+    }
+
     Alert.alert(
       'Delete Vaccine',
       'Are you sure you want to remove this vaccine from the catalog?',
@@ -71,10 +76,12 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
           onPress: async () => {
             setLoading(true);
             try {
-              await api.delete(`/vaccines/${editingVaccine.id}`);
+              const response = await api.delete(`/vaccines/${editingVaccine.id}`);
+              console.log('Delete response:', response.data);
               Alert.alert('Deleted', 'Vaccine catalog item removed');
               navigation.goBack();
             } catch (error) {
+              console.error('Delete error:', error.response?.data || error);
               Alert.alert('Error', error.response?.data?.message || 'Failed to delete vaccine');
             } finally {
               setLoading(false);
@@ -251,7 +258,7 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
             containerStyle={{ marginTop: 12, marginBottom: isEditing ? 12 : 40 }}
           />
 
-          {isEditing && (
+          {isEditing && !editingVaccine.isDefault && (
             <TouchableOpacity 
               style={[styles.deleteBtn, { borderColor: theme.colors.error }]}
               onPress={handleDelete}
