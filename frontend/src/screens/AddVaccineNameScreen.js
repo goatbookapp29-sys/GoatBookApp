@@ -175,13 +175,12 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>BASIC INFORMATION</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>Basic Information</Text>
             <GInput 
               label="Vaccine Name*" 
               value={name} 
               onChangeText={setName} 
               placeholder="e.g. PPR, ET, FMD"
-              leftIcon={<Syringe size={20} color={theme.colors.textMuted} />}
               containerStyle={{ marginBottom: 8 }}
             />
             <GInput 
@@ -189,12 +188,11 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
               value={diseaseName} 
               onChangeText={setDiseaseName} 
               placeholder="Target disease"
-              leftIcon={<Activity size={20} color={theme.colors.textMuted} />}
             />
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>DOSAGE & ROUTE</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>Dosage & Route</Text>
             <View style={styles.row}>
               <View style={{ flex: 1 }}>
                 <GInput 
@@ -219,7 +217,7 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>BOOSTER FREQUENCY</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>Booster Frequency</Text>
             <View style={styles.row}>
               <View style={{ flex: 1 }}>
                 <GInput 

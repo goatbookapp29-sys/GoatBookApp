@@ -35,8 +35,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "7c90b789-1ef9-4dab-8dfc-0b9fa04f1a79"
+        "projectId": "fbdd2a91-3947-442f-b555-79a7f85473d9"
       }
-    }
+    },
+    "owner": "ayush20001"
   }
 }
