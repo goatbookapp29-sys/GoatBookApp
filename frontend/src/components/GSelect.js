@@ -74,14 +74,18 @@ const GSelect = ({
           disabled && { opacity: 0.6, backgroundColor: isDarkMode ? '#111' : '#F3F4F6' }
         ]}
       >
-        {value || modalVisible ? (
-          <Text 
-            style={[styles.valueText, { color: theme.colors.text }, !value && { color: theme.colors.textMuted }]} 
-            numberOfLines={1}
-          >
-            {selectedOption?.label || placeholder}
-          </Text>
-        ) : <View style={{ flex: 1 }} />}
+        <Text 
+          style={[
+            styles.valueText, 
+            { 
+              color: value ? theme.colors.text : theme.colors.textMuted,
+              opacity: (value || modalVisible) ? 1 : 0 
+            }
+          ]} 
+          numberOfLines={1}
+        >
+          {selectedOption?.label || placeholder}
+        </Text>
 
         <View style={styles.iconContainer}>
           {rightIcon && (

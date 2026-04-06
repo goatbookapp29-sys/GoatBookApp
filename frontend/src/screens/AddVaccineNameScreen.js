@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
 import { COLORS, SPACING, SHADOW } from '../theme';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
@@ -9,10 +9,12 @@ import GSelect from '../components/GSelect';
 import api from '../api';
 import { useFocusEffect } from '@react-navigation/native';
 import { Syringe, Activity, Microscope, Info, ChevronDown } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const AddVaccineNameScreen = ({ navigation, route }) => {
+  const insets = useSafeAreaInsets();
   const { theme, isDarkMode } = useTheme();
-  const styles = useMemo(() => getStyles(theme), [theme]);
+  const styles = useMemo(() => getStyles(theme, insets), [theme, insets]);
   
   const editingVaccine = route.params?.vaccine;
   const isEditing = !!editingVaccine;
@@ -40,6 +42,10 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [vaccines, setVaccines] = useState([]);
   const [vaccinesLoading, setVaccinesLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -59,43 +65,31 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
     }
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await api.delete(`/vaccines/${editingVaccine.id}`);
+      setDeleting(false);
+      setShowDeleteModal(false);
+      navigation.goBack();
+    } catch (error) {
+      setDeleting(false);
+      setShowDeleteModal(false);
+      const msg = error.response?.data?.message || 'Failed to delete vaccine';
+      Alert.alert('Error', msg);
+    }
+  };
+
+  const handleDelete = () => {
     if (editingVaccine.isDefault) {
       Alert.alert(
         'Protected Record',
-        'This is a system default vaccine and cannot be deleted. Default vaccines are required for the vaccination schedule to work correctly.',
+        'This is a system default vaccine and cannot be deleted.',
         [{ text: 'OK' }]
       );
       return;
     }
-
-    Alert.alert(
-      'Delete Vaccine',
-      'This will permanently remove this vaccine AND all vaccination journal entries that used it. This action cannot be undone.\n\nAre you sure?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete Permanently', 
-          style: 'destructive',
-          onPress: async () => {
-            setLoading(true);
-            try {
-              const response = await api.delete(`/vaccines/${editingVaccine.id}`);
-              Alert.alert('Deleted', response.data?.message || 'Vaccine removed successfully.');
-              navigation.goBack();
-            } catch (error) {
-              console.error('Delete error:', error.response?.data || error.message);
-              Alert.alert(
-                'Delete Failed', 
-                error.response?.data?.message || 'Something went wrong. Please try again.'
-              );
-            } finally {
-              setLoading(false);
-            }
-          }
-        }
-      ]
-    );
+    setShowDeleteModal(true);
   };
 
   const handleSave = async () => {
@@ -104,7 +98,6 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
       return;
     }
 
-    // Convert frequency to days for backend
     let days = 0;
     const val = parseInt(frequencyValue);
     if (val > 0) {
@@ -115,42 +108,43 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
 
     setLoading(true);
     try {
+      const payload = {
+        name,
+        diseaseName,
+        doseMl: doseMl ? parseFloat(doseMl) : null,
+        applicationRoute: appRoute,
+        daysBetween: days,
+        remark
+      };
+
       if (isEditing) {
-        await api.put(`/vaccines/${editingVaccine.id}`, {
-          name,
-          diseaseName,
-          doseMl: doseMl ? parseFloat(doseMl) : null,
-          applicationRoute: appRoute,
-          daysBetween: days,
-          remark
-        });
+        await api.put(`/vaccines/${editingVaccine.id}`, payload);
       } else {
-        await api.post('/vaccines', {
-          name,
-          diseaseName,
-          doseMl: doseMl ? parseFloat(doseMl) : null,
-          applicationRoute: appRoute,
-          daysBetween: days,
-          remark
-        });
+        await api.post('/vaccines', payload);
       }
+      
       setLoading(false);
-      Alert.alert('Success', isEditing ? 'Vaccine updated' : 'Vaccine catalog updated');
+      setSuccessMessage(isEditing ? 'Vaccine updated successfully' : 'Vaccine added to your catalog');
+      setShowSuccessModal(true);
       
       if (!isEditing) {
-        // Reset Form
         setName('');
         setDiseaseName('');
         setDoseMl('');
         setFrequencyValue('');
         setRemark('');
         fetchVaccines();
-      } else {
-        navigation.goBack();
       }
     } catch (error) {
       setLoading(false);
       Alert.alert('Error', error.response?.data?.message || 'Failed to save vaccine');
+    }
+  };
+
+  const handleSuccessDone = () => {
+    setShowSuccessModal(false);
+    if (isEditing) {
+      navigation.goBack();
     }
   };
 
@@ -171,162 +165,214 @@ const AddVaccineNameScreen = ({ navigation, route }) => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title={isEditing ? "Edit Vaccine" : "Vaccine Catalog"} onBack={() => navigation.goBack()} leftAlign={true} />
       
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>Basic Information</Text>
-            <GInput 
-              label="Vaccine Name*" 
-              value={name} 
-              onChangeText={setName} 
-              placeholder="e.g. PPR, ET, FMD"
-              containerStyle={{ marginBottom: 8 }}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <View style={{ flex: 1 }}>
+          <ScrollView 
+            contentContainerStyle={styles.content} 
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Basic Information</Text>
+              <GInput 
+                label="Vaccine Name*" 
+                value={name} 
+                onChangeText={setName} 
+                placeholder="e.g. PPR, ET, FMD"
+                containerStyle={{ marginBottom: 16 }}
+              />
+              <GInput 
+                label="Name of Disease" 
+                value={diseaseName} 
+                onChangeText={setDiseaseName} 
+                placeholder="Target disease"
+              />
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Dosage & Route</Text>
+              <View style={styles.row}>
+                <View style={{ flex: 1 }}>
+                  <GInput 
+                    label="Dose (ml)" 
+                    value={doseMl} 
+                    onChangeText={setDoseMl} 
+                    placeholder="e.g. 1.0"
+                    keyboardType="decimal-pad"
+                  />
+                </View>
+                <View style={{ width: 16 }} />
+                <View style={{ flex: 1.5 }}>
+                  <GSelect 
+                    label="App. Route" 
+                    value={appRoute}
+                    onSelect={setAppRoute}
+                    options={routeOptions}
+                    placeholder="Select Route"
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Booster Frequency</Text>
+              <View style={styles.row}>
+                <View style={{ flex: 1 }}>
+                  <GInput 
+                    label="Given Every" 
+                    value={frequencyValue} 
+                    onChangeText={setFrequencyValue} 
+                    placeholder="0"
+                    keyboardType="number-pad"
+                  />
+                </View>
+                <View style={{ width: 16 }} />
+                <View style={{ flex: 1 }}>
+                  <GSelect 
+                    label="Unit" 
+                    value={frequencyUnit}
+                    onSelect={setFrequencyUnit}
+                    options={unitOptions}
+                  />
+                </View>
+              </View>
+              <View style={[styles.infoBox, { backgroundColor: theme.colors.primary + '08', borderColor: theme.colors.primary + '20' }]}>
+                <Info size={16} color={theme.colors.primary} />
+                <Text style={[styles.infoText, { color: theme.colors.textLight }]}>
+                  Set frequency to <Text style={{ fontWeight: 'bold' }}>0</Text> for one-time vaccinations. This interval helps calculate next due dates automatically.
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <GInput 
+                label="Remark" 
+                value={remark} 
+                onChangeText={setRemark} 
+                placeholder="Additional notes..."
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+
+            <View style={{ height: 120 }} />
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowDeleteModal(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Delete Vaccine</Text>
+            <Text style={styles.modalMessage}>
+              This will permanently remove this vaccine AND all vaccination journal entries that used it. This action cannot be undone.
+              {"\n\n"}Are you sure?
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setShowDeleteModal(false)} style={styles.modalBtn}>
+                <Text style={styles.cancelText}>CANCEL</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmDelete} style={styles.modalBtn} disabled={deleting}>
+                {deleting ? (
+                  <ActivityIndicator size="small" color={theme.colors.error} />
+                ) : (
+                  <Text style={styles.deleteText}>DELETE PERMANENTLY</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal
+        visible={showSuccessModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleSuccessDone}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={handleSuccessDone}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Success</Text>
+            <Text style={styles.modalMessage}>{successMessage}</Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={handleSuccessDone} style={styles.modalBtn}>
+                <Text style={styles.cancelText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Fixed Footer - Outside KeyboardAvoidingView */}
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        {isEditing ? (
+          <View style={styles.footerColumn}>
+            <GButton 
+              title="Update Vaccine" 
+              onPress={handleSave} 
+              loading={loading}
+              containerStyle={{ marginBottom: 12 }}
             />
-            <GInput 
-              label="Name of Disease" 
-              value={diseaseName} 
-              onChangeText={setDiseaseName} 
-              placeholder="Target disease"
-            />
+            {!editingVaccine.isDefault && (
+              <TouchableOpacity 
+                style={[styles.libDeleteBtn, { borderColor: theme.colors.error + '30' }]}
+                onPress={handleDelete}
+                disabled={loading || deleting}
+              >
+                <Text style={[styles.libDeleteBtnText, { color: theme.colors.error }]}>Delete from Catalog</Text>
+              </TouchableOpacity>
+            )}
           </View>
-
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>Dosage & Route</Text>
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <GInput 
-                  label="Dose (ml)" 
-                  value={doseMl} 
-                  onChangeText={setDoseMl} 
-                  placeholder="e.g. 1.0"
-                  keyboardType="decimal-pad"
-                />
-              </View>
-              <View style={{ width: 16 }} />
-              <View style={{ flex: 1.5 }}>
-                <GSelect 
-                  label="App. Route" 
-                  value={appRoute}
-                  onSelect={setAppRoute}
-                  options={routeOptions}
-                  placeholder="Select Route"
-                />
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textLight }]}>Booster Frequency</Text>
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <GInput 
-                  label="Given Every" 
-                  value={frequencyValue} 
-                  onChangeText={setFrequencyValue} 
-                  placeholder="0"
-                  keyboardType="number-pad"
-                />
-              </View>
-              <View style={{ width: 16 }} />
-              <View style={{ flex: 1 }}>
-                <GSelect 
-                  label="Unit" 
-                  value={frequencyUnit}
-                  onSelect={setFrequencyUnit}
-                  options={unitOptions}
-                />
-              </View>
-            </View>
-            <View style={[styles.infoBox, { backgroundColor: theme.colors.primary + '08', borderColor: theme.colors.primary + '20' }]}>
-              <Info size={16} color={theme.colors.primary} />
-              <Text style={[styles.infoText, { color: theme.colors.textLight }]}>
-                Set frequency to <Text style={{ fontWeight: 'bold' }}>0</Text> for one-time vaccinations. This interval helps calculate next due dates automatically.
-              </Text>
-            </View>
-          </View>
-
-          <GInput 
-            label="Remark" 
-            value={remark} 
-            onChangeText={setRemark} 
-            placeholder="Additional notes..."
-            multiline
-            numberOfLines={3}
-          />
-
+        ) : (
           <GButton 
-            title={isEditing ? "Update Vaccine" : "Save to Catalog"} 
+            title="Save to Catalog" 
             onPress={handleSave} 
             loading={loading}
-            containerStyle={{ marginTop: 12, marginBottom: isEditing ? 12 : 40 }}
           />
-
-          {isEditing && !editingVaccine.isDefault && (
-            <TouchableOpacity 
-              style={[styles.deleteBtn, { borderColor: theme.colors.error }]}
-              onPress={handleDelete}
-              disabled={loading}
-            >
-              <Text style={[styles.deleteBtnText, { color: theme.colors.error }]}>DELETE FROM CATALOG</Text>
-            </TouchableOpacity>
-          )}
-
-          {!isEditing && (
-            <>
-              {/* Existing Catalog List */}
-              <View style={[styles.listHeader, { borderTopColor: theme.colors.border }]}>
-                <Text style={[styles.listTitle, { color: theme.colors.text }]}>Vaccine Library</Text>
-                <Text style={[styles.listSub, { color: theme.colors.textLight }]}>{vaccines.length} vaccines defined</Text>
-              </View>
-
-              {vaccinesLoading ? (
-                <ActivityIndicator color={theme.colors.primary} style={{ marginVertical: 20 }} />
-              ) : (
-                vaccines.map((v) => (
-                  <View key={v.id} style={[styles.vaccineCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-                    <View style={[styles.vaccineIndicator, { backgroundColor: theme.colors.primary }]} />
-                    <View style={styles.vaccineBody}>
-                      <Text style={[styles.vaccineName, { color: theme.colors.text }]}>{v.name}</Text>
-                      <Text style={[styles.vaccineMeta, { color: theme.colors.textLight }]}>
-                        {v.diseaseName || 'General Health'} • {v.doseMl || 0}ml
-                      </Text>
-                      <View style={styles.vaccineFooter}>
-                        <Text style={[styles.frequencyText, { color: theme.colors.primary }]}>
-                          {v.daysBetween > 0 ? `Every ${v.daysBetween} days` : 'One-time'}
-                        </Text>
-                        <Text style={[styles.routeTag, { color: theme.colors.textLight }]}>{v.applicationRoute}</Text>
-                      </View>
-                    </View>
-                  </View>
-                ))
-              )}
-              <View style={{ height: 40 }} />
-            </>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        )}
+      </View>
     </View>
   );
 };
 
-const getStyles = (theme) => StyleSheet.create({
+const getStyles = (theme, insets) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   content: {
-    padding: SPACING.md,
-    paddingBottom: 60,
+    padding: SPACING.lg,
+    paddingTop: SPACING.md,
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 1,
-    marginBottom: 12,
+    letterSpacing: 0.5,
+    marginBottom: 16,
     paddingLeft: 4,
+    color: theme.colors.primary,
   },
   row: {
     flexDirection: 'row',
@@ -334,88 +380,91 @@ const getStyles = (theme) => StyleSheet.create({
   },
   infoBox: {
     flexDirection: 'row',
-    padding: 12,
-    borderRadius: 12,
+    padding: 14,
+    borderRadius: 14,
     borderWidth: 1,
-    marginTop: 8,
-    gap: 10,
+    marginTop: 14,
+    gap: 12,
     alignItems: 'flex-start',
   },
   infoText: {
     flex: 1,
-    fontSize: 12,
-    fontFamily: 'Inter_400Regular',
-    lineHeight: 18,
-  },
-  listHeader: {
-    marginTop: 12,
-    paddingTop: 32,
-    borderTopWidth: 1,
-    marginBottom: 16,
-  },
-  listTitle: {
-    fontSize: 20,
-    fontFamily: 'Inter_700Bold',
-  },
-  listSub: {
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-    marginTop: 4,
-  },
-  vaccineCard: {
-    flexDirection: 'row',
-    borderRadius: 16,
-    borderWidth: 1.2,
-    marginBottom: 12,
-    overflow: 'hidden',
-    ...SHADOW.small,
-  },
-  vaccineIndicator: {
-    width: 6,
-  },
-  vaccineBody: {
-    flex: 1,
-    padding: 16,
-  },
-  vaccineName: {
-    fontSize: 16,
-    fontFamily: 'Inter_700Bold',
-  },
-  vaccineMeta: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    marginTop: 2,
+    lineHeight: 20,
   },
-  vaccineFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 12,
-    paddingTop: 12,
+  footer: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    backgroundColor: theme.colors.background,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+    borderTopColor: theme.colors.border,
+    ...SHADOW.large,
   },
-  frequencyText: {
-    fontSize: 12,
-    fontFamily: 'Inter_700Bold',
+  footerColumn: {
+    width: '100%',
   },
-  routeTag: {
-    fontSize: 11,
-    fontFamily: 'Inter_500Medium',
-  },
-  deleteBtn: {
-    marginBottom: 40,
-    height: 56,
+  libDeleteBtn: {
+    height: 54,
     borderRadius: 12,
     borderWidth: 1.5,
     justifyContent: 'center',
     alignItems: 'center',
     borderStyle: 'dashed',
+    marginBottom: 8,
   },
-  deleteBtnText: {
+  libDeleteBtnText: {
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    ...SHADOW.large,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    color: theme.colors.text,
+    marginBottom: 16,
+  },
+  modalMessage: {
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
+    color: theme.colors.textLight,
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 20,
+  },
+  modalBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  cancelText: {
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
-    letterSpacing: 1,
+    color: '#1A73E8',
+    letterSpacing: 0.5,
+  },
+  deleteText: {
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    color: '#1A73E8',
+    letterSpacing: 0.5,
   },
 });
 

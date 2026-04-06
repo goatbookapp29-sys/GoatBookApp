@@ -36,7 +36,7 @@ function updateFiles() {
             fs.writeFileSync(FRONTEND_API_PATH, content);
             console.log(`✅ Updated Frontend LOCAL_IP with: ${ip}`);
         } else {
-            console.warn('⚠️ Could not find LOCAL_IP pattern in frontend/src/api/index.js');
+            console.log('ℹ️ Skipping Frontend IP update (using Render/Production URL).');
         }
     }
 

@@ -89,10 +89,15 @@ const SideMenu = (props) => {
               onPress={() => navigation.navigate(item.screen)}
             >
               <View style={styles.menuItemLeft}>
-                {React.cloneElement(item.icon, { 
-                  color: isActive ? theme.colors.primary : theme.colors.textLight,
-                  strokeWidth: isActive ? 2.5 : 2
-                })}
+                {item.icon && React.isValidElement(item.icon) ? (
+                  React.cloneElement(item.icon, {
+                    size: 22,
+                    color: isActive ? theme.colors.primary : theme.colors.textLight,
+                    strokeWidth: isActive ? 2.5 : 2
+                  })
+                ) : (
+                  item.icon
+                )}
                 <Text style={[
                   styles.menuItemText, 
                   { color: isActive ? theme.colors.primary : theme.colors.text },

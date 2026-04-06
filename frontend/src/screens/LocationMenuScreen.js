@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
-import { Home, Users, Search, LayoutGrid, ArrowRightLeft, PlusCircle } from 'lucide-react-native';
+import { User, Users, Search } from 'lucide-react-native';
 import { SPACING, SHADOW } from '../theme';
 
 const { width } = Dimensions.get('window');
@@ -13,31 +13,15 @@ const LocationMenuScreen = ({ navigation }) => {
 
   const menuItems = [
     {
-      id: 'create',
-      title: 'Create Shed',
-      subtitle: 'Add new stable or pen',
-      icon: <PlusCircle color={theme.colors.primary} size={32} strokeWidth={1.5} />,
-      screen: 'CreateLocation',
-    },
-    {
-      id: 'list',
-      title: 'Shed List',
-      subtitle: 'View all farm locations',
-      icon: <LayoutGrid color={theme.colors.primary} size={32} strokeWidth={1.5} />,
-      screen: 'LocationList',
-    },
-    {
       id: 'single',
-      title: 'Single Relocation',
-      subtitle: 'Move one animal',
-      icon: <Home color={theme.colors.primary} size={32} strokeWidth={1.5} />,
+      title: 'Single\nLocation/Shed',
+      icon: <User color={theme.colors.primary} size={48} strokeWidth={1.5} />,
       screen: 'AddLocation',
     },
     {
       id: 'mass',
-      title: 'Mass Relocation',
-      subtitle: 'Move animals in bulk',
-      icon: <ArrowRightLeft color={theme.colors.primary} size={32} strokeWidth={1.5} />,
+      title: 'Mass\nLocation/Shed',
+      icon: <Users color={theme.colors.primary} size={48} strokeWidth={1.5} />,
       screen: 'MassLocation',
     },
   ];
@@ -46,8 +30,9 @@ const LocationMenuScreen = ({ navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title="Location" 
-        onMenu={() => navigation.openDrawer()} 
+        onBack={() => navigation.goBack()}
         leftAlign={true}
+        rightIcon={<Search color="white" size={24} />}
       />
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -55,17 +40,14 @@ const LocationMenuScreen = ({ navigation }) => {
           {menuItems.map((item) => (
             <TouchableOpacity
               key={item.id}
-              style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+              style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border + '20' }]}
               onPress={() => navigation.navigate(item.screen)}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '10' }]}>
+              <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '05' }]}>
                 {item.icon}
               </View>
-              <View style={styles.textContainer}>
-                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
-                <Text style={[styles.cardSubtitle, { color: theme.colors.textLight }]}>{item.subtitle}</Text>
-              </View>
+              <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -83,37 +65,32 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   grid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 16,
   },
   card: {
     width: (width - SPACING.lg * 2 - 16) / 2,
+    aspectRatio: 0.85,
     padding: 20,
     borderRadius: 24,
     borderWidth: 1,
-    ...SHADOW.sm,
-  },
-  iconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    ...SHADOW.small,
   },
-  textContainer: {
-    gap: 4,
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
-    letterSpacing: -0.3,
-  },
-  cardSubtitle: {
-    fontSize: 12,
-    fontFamily: 'Inter_400Regular',
-    opacity: 0.8,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
 

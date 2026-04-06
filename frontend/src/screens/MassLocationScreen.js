@@ -7,9 +7,10 @@ import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
 import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
+import GInput from '../components/GInput';
 import { 
   Check, Square, CheckSquare, Circle, CheckCircle2, Scan, ChevronDown, 
-  Search, X 
+  Search, X, Hash, User, Weight, MapPin, Tag, Plus 
 } from 'lucide-react-native';
 import { SPACING, SHADOW } from '../theme';
 import api from '../api';
@@ -28,6 +29,9 @@ const MassLocationScreen = ({ navigation }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newLocationName, setNewLocationName] = useState('');
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [remark, setRemark] = useState('');
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -41,7 +45,7 @@ const MassLocationScreen = ({ navigation }) => {
       ]);
       setAnimals(animalsRes.data);
       setLocations(locationsRes.data.map(loc => ({
-        label: `${loc.displayName || loc.name} (${loc.animalCount || 0})`,
+        label: `${loc.displayName || loc.name}`,
         value: loc.id
       })));
     } catch (error) {
@@ -64,13 +68,9 @@ const MassLocationScreen = ({ navigation }) => {
     });
   }, []);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [remark, setRemark] = useState('');
-
   const filteredAnimals = useMemo(() => {
     let result = animals;
     
-    // 1. Filter by search query (Tag ID or Breed)
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(animal => 
@@ -79,7 +79,7 @@ const MassLocationScreen = ({ navigation }) => {
       );
     }
     
-    // 2. Auto-exclude animals already in the target shed
+    // Auto-exclude animals already in the target shed
     if (selectedLocationId) {
       result = result.filter(animal => animal.locationId !== selectedLocationId);
     }
@@ -88,7 +88,7 @@ const MassLocationScreen = ({ navigation }) => {
   }, [animals, searchQuery, selectedLocationId]);
 
   const handleSelectAll = () => {
-    if (selectedAnimals.size === filteredAnimals.length) {
+    if (selectedAnimals.size === filteredAnimals.length && filteredAnimals.length > 0) {
       setSelectedAnimals(new Set());
     } else {
       setSelectedAnimals(new Set(filteredAnimals.map(a => a.id)));
@@ -104,7 +104,7 @@ const MassLocationScreen = ({ navigation }) => {
         type: 'Internal Location'
       });
       const newLoc = {
-        label: `${res.data.name} (0)`,
+        label: `${res.data.name}`,
         value: res.data.id
       };
       setLocations(prev => [...prev, newLoc]);
@@ -133,7 +133,7 @@ const MassLocationScreen = ({ navigation }) => {
         locationId: selectedLocationId,
         remark: remark
       });
-      Alert.alert('Success', 'Location updated for selected animals');
+      Alert.alert('Success', 'Location updated successfully');
       navigation.goBack();
     } catch (error) {
       Alert.alert('Error', error.response?.data?.message || 'Failed to update location');
@@ -146,43 +146,43 @@ const MassLocationScreen = ({ navigation }) => {
     const isChecked = selectedAnimals.has(item.id);
     return (
       <TouchableOpacity 
-        style={[styles.animalItem, { borderBottomColor: theme.colors.border + '30' }]} 
+        style={[styles.animalCard, { backgroundColor: theme.colors.surface }]} 
         onPress={() => toggleAnimalSelection(item.id)}
         activeOpacity={0.7}
       >
         <View style={styles.checkWrapper}>
-          {isChecked ? (
-            <CheckCircle2 color={theme.colors.primary} size={24} fill={theme.colors.primary + '20'} />
-          ) : (
-            <Circle color={theme.colors.textMuted} size={24} />
-          )}
+          <View style={[styles.customCheck, { borderColor: isChecked ? theme.colors.primary : theme.colors.border }]}>
+            {isChecked && <View style={[styles.checkInner, { backgroundColor: theme.colors.primary }]} />}
+          </View>
         </View>
+        
         <View style={styles.animalInfo}>
           <View style={styles.infoTop}>
-            <Text style={[styles.tagId, { color: theme.colors.text }]}>Tag ID:{item.tagNumber}</Text>
+            <View style={styles.tagRow}>
+               <Tag size={12} color={theme.colors.primary} />
+               <Text style={[styles.tagId, { color: theme.colors.text }]}>Tag ID:{item.tagNumber}</Text>
+            </View>
             <Text style={[styles.breedName, { color: theme.colors.textLight }]}>{item.breeds?.name || 'Sirohi'}</Text>
           </View>
+          
           <View style={styles.infoBottom}>
-            <Text style={[styles.metaText, { color: theme.colors.textLight }]}>{item.gender || 'Male'}</Text>
-            <Text style={[styles.metaText, { color: theme.colors.primary, fontWeight: '600' }]}>
-              {item.locations?.name || 'Unassigned'}
-            </Text>
-            <Text style={[styles.metaText, { color: theme.colors.textLight }]}>
-              {item.currentWeight || item.birthWeight || 0}kg
-            </Text>
+            <View style={styles.metaBadge}>
+               <User size={10} color={theme.colors.textMuted} />
+               <Text style={[styles.metaText, { color: theme.colors.textLight }]}>{item.gender}</Text>
+            </View>
+            <View style={styles.metaBadge}>
+               <Hash size={10} color={theme.colors.textMuted} />
+               <Text style={[styles.metaText, { color: theme.colors.textLight }]}>Age(M): {item.ageInMonths}</Text>
+            </View>
+            <View style={styles.metaBadge}>
+               <Weight size={10} color={theme.colors.textMuted} />
+               <Text style={[styles.metaText, { color: theme.colors.textLight }]}>Weight: {item.currentWeight || item.birthWeight || 0}</Text>
+            </View>
           </View>
         </View>
       </TouchableOpacity>
     );
   };
-
-  if (loading) {
-    return (
-      <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
-  }
 
   const isAllSelected = filteredAnimals.length > 0 && selectedAnimals.size === filteredAnimals.length;
 
@@ -190,87 +190,83 @@ const MassLocationScreen = ({ navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader title="Add Mass Location/Shed" onBack={() => navigation.goBack()} leftAlign={true} />
 
-      {/* Top Controls */}
-      <View style={styles.controlRow}>
-        <View style={styles.selectWrapper}>
-          <GSelect 
-            label="Target Shed" 
-            placeholder="Select Destination"
-            value={selectedLocationId}
-            onSelect={(id) => {
-              setSelectedLocationId(id);
-              setSelectedAnimals(new Set()); // Clear selection when target changes to re-filter
-            }}
-            options={locations}
-            rightIcon={<Scan size={20} color={theme.colors.textMuted} />}
-          />
-        </View>
-        <TouchableOpacity 
-          style={[styles.addLocBtn, { backgroundColor: theme.colors.primary }]}
-          onPress={() => setShowAddModal(true)}
-        >
-          <Text style={styles.addLocBtnText}>+ NEW SHED</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Search and Select All Row */}
-      <View style={styles.searchRow}>
-        <View style={styles.searchInner}>
-          <GInput 
-            placeholder="Search Tag ID..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            leftIcon={<Search size={18} color={theme.colors.textMuted} />}
-            containerStyle={{ marginVertical: 0 }}
-          />
-        </View>
-        <TouchableOpacity 
-          style={styles.selectAllBtn} 
-          onPress={handleSelectAll}
-          activeOpacity={0.7}
-        >
-          {isAllSelected ? (
-            <CheckSquare color={theme.colors.primary} size={22} fill={theme.colors.primary + '20'} />
-          ) : (
-            <Square color={theme.colors.textMuted} size={22} />
-          )}
-          <Text style={[styles.selectAllText, { color: theme.colors.text }]}>
-            {selectedAnimals.size > 0 ? `Selected (${selectedAnimals.size})` : 'All'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Animal List */}
-      <FlatList 
-        data={filteredAnimals}
-        renderItem={renderAnimalItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContent}
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        windowSize={5}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: theme.colors.textLight }]}>
-              {selectedLocationId ? 'All animals are already in this shed or none match search.' : 'Select a Target Shed to begin selection.'}
-            </Text>
+      <View style={styles.content}>
+        {/* Destination Selection */}
+        <View style={styles.controlRow}>
+          <View style={styles.selectWrapper}>
+            <GSelect 
+              label="Select/Scan Location Shed" 
+              placeholder="Destination Shed"
+              value={selectedLocationId}
+              onSelect={setSelectedLocationId}
+              options={locations}
+              rightIcon={<Scan size={18} color={theme.colors.textMuted} />}
+            />
           </View>
-        }
-      />
+          <TouchableOpacity 
+            style={[styles.addLocBtn, { backgroundColor: theme.colors.primary }]}
+            onPress={() => setShowAddModal(true)}
+          >
+            <Text style={styles.addLocBtnText}>Add New Location</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Select All Toggle */}
+        <View style={styles.selectionHeader}>
+           <TouchableOpacity 
+             style={styles.selectAllRow} 
+             onPress={handleSelectAll}
+             activeOpacity={0.7}
+           >
+              <View style={[styles.customCheck, isAllSelected && { borderColor: theme.colors.primary }]}>
+                {isAllSelected && <View style={[styles.checkInner, { backgroundColor: theme.colors.primary }]} />}
+              </View>
+              <Text style={[styles.selectAllText, { color: theme.colors.text }]}>Select All</Text>
+           </TouchableOpacity>
+           
+           <View style={styles.searchCompact}>
+              <Search size={16} color={theme.colors.textMuted} />
+              <TextInput 
+                placeholder="Search Tag..." 
+                placeholderTextColor={theme.colors.textMuted}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                style={[styles.searchCompactInput, { color: theme.colors.text }]}
+              />
+           </View>
+        </View>
+
+        {/* Animal List */}
+        {loading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        ) : (
+          <FlatList 
+            data={filteredAnimals}
+            renderItem={renderAnimalItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={[styles.emptyText, { color: theme.colors.textLight }]}>
+                  {selectedLocationId ? 'No matching animals found.' : 'Select a Target Shed to begin.'}
+                </Text>
+              </View>
+            }
+          />
+        )}
+      </View>
 
       {/* Fixed Footer */}
-      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 20 }]}>
-        <GInput 
-          placeholder="Bulk Remark (Optional)" 
-          value={remark} 
-          onChangeText={setRemark}
-          containerStyle={{ marginBottom: 12 }}
-        />
+      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 24 }]}>
         <GButton 
-          title={`Move ${selectedAnimals.size} Animals`}
+          title={selectedAnimals.size > 0 ? `Move ${selectedAnimals.size} Animals` : "Move Animals"}
           onPress={handleSubmit}
           loading={submitting}
           disabled={selectedAnimals.size === 0}
+          containerStyle={styles.bulkBtn}
         />
       </View>
 
@@ -282,17 +278,21 @@ const MassLocationScreen = ({ navigation }) => {
                <Text style={styles.modalHeaderText}>Add Location/Shed</Text>
             </View>
             <View style={styles.modalBody}>
-               <TextInput 
-                  style={[styles.modalInput, { borderColor: theme.colors.border, color: theme.colors.text }]}
-                  placeholder="Enter Location/Shed Name"
-                  placeholderTextColor={theme.colors.textMuted}
-                  value={newLocationName}
-                  onChangeText={setNewLocationName}
-                  autoFocus
-               />
+               <View style={styles.modalInputWrapper}>
+                  <Text style={[styles.modalInputLabel, { color: theme.colors.textMuted }]}>Enter Location/Shed Name</Text>
+                  <TextInput 
+                    style={[styles.modalInput, { borderColor: theme.colors.border, color: theme.colors.text }]}
+                    placeholder="e.g. Shed 5"
+                    placeholderTextColor={theme.colors.textMuted}
+                    value={newLocationName}
+                    onChangeText={setNewLocationName}
+                    autoFocus
+                  />
+               </View>
                <TouchableOpacity 
                   style={[styles.saveBtn, { backgroundColor: theme.colors.primary }]}
                   onPress={handleAddNewLocation}
+                  activeOpacity={0.8}
                >
                   <Text style={styles.saveBtnText}>Save</Text>
                </TouchableOpacity>
@@ -308,13 +308,18 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
   },
+  content: {
+    flex: 1,
+  },
   centered: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   controlRow: {
     flexDirection: 'row',
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
     gap: 12,
     alignItems: 'flex-start',
   },
@@ -322,68 +327,81 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flex: 1,
   },
   addLocBtn: {
-    paddingHorizontal: 12,
     height: 52,
-    borderRadius: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 4,
-    minWidth: 140,
+    marginTop: 28,
   },
   addLocBtnText: {
     color: '#FFF',
     fontFamily: 'Inter_700Bold',
     fontSize: 13,
   },
-  selectAllRow: {
-    paddingHorizontal: SPACING.md,
+  selectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
     paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border + '15',
   },
-  selectAllBtn: {
+  selectAllRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
   selectAllText: {
-    fontSize: 15,
-    fontFamily: 'Inter_500Medium',
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  searchCompact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: 12,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: theme.colors.border + '30',
+    width: '45%',
+    gap: 8,
+  },
+  searchCompactInput: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
   },
   listContent: {
-    paddingBottom: 150,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: 120,
+    paddingTop: 12,
   },
-  searchRow: {
-    flexDirection: 'row',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 10,
-    alignItems: 'center',
-    gap: 12,
-  },
-  searchInner: {
-    flex: 1,
-  },
-  selectAllBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    minWidth: 100,
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    textAlign: 'center',
-    fontFamily: 'Inter_400Regular',
-    lineHeight: 20,
-  },
-  animalItem: {
+  animalCard: {
     flexDirection: 'row',
     padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
     alignItems: 'center',
-    borderBottomWidth: 1,
+    ...SHADOW.small,
   },
   checkWrapper: {
     marginRight: 16,
+  },
+  customCheck: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkInner: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
   },
   animalInfo: {
     flex: 1,
@@ -391,47 +409,62 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   infoTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: 6,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   tagId: {
     fontSize: 16,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_700Bold',
   },
   breedName: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter_500Medium',
+    opacity: 0.7,
   },
   infoBottom: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 12,
+  },
+  metaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   metaText: {
-    fontSize: 13,
-    fontFamily: 'Inter_400Regular',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
   },
   footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    padding: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: 16,
     backgroundColor: theme.colors.background,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border + '30',
+    ...SHADOW.large,
+  },
+  bulkBtn: {
+    height: 54,
+    borderRadius: 14,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     padding: SPACING.xl,
   },
   modalContent: {
-    borderRadius: 16,
+    borderRadius: 24,
     overflow: 'hidden',
-    ...SHADOW.lg,
+    ...SHADOW.large,
   },
   modalHeader: {
-    padding: 16,
+    padding: 18,
     alignItems: 'center',
   },
   modalHeaderText: {
@@ -442,6 +475,15 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   modalBody: {
     padding: 24,
   },
+  modalInputWrapper: {
+    marginBottom: 24,
+  },
+  modalInputLabel: {
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    marginLeft: 4,
+    marginBottom: 8,
+  },
   modalInput: {
     borderWidth: 1.5,
     borderRadius: 12,
@@ -449,7 +491,6 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 15,
     fontFamily: 'Inter_500Medium',
-    marginBottom: 20,
   },
   saveBtn: {
     height: 52,
@@ -461,6 +502,17 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.5,
+  },
+  emptyContainer: {
+    padding: 60,
+    alignItems: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 22,
+    opacity: 0.6,
   },
 });
 

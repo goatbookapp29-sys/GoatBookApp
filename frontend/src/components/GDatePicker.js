@@ -100,8 +100,10 @@ const GDatePicker = ({ label, value, onDateChange, required, placeholder = 'Sele
         <Text 
           style={[
             styles.valueText, 
-            { color: (value || show) ? theme.colors.text : 'transparent' }, 
-            (show && !value) && { color: theme.colors.textMuted }
+            { 
+              color: value ? theme.colors.text : theme.colors.textMuted,
+              opacity: (value || show) ? 1 : 0 
+            }, 
           ]}
           numberOfLines={1}
         >
