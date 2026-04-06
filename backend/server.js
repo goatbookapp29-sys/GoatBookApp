@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-const app = express();
 const prisma = require('./config/prisma');
+const { setupNotificationWorker } = require('./utils/notificationWorker');
 
 // Middleware
 app.use(cors({
@@ -62,4 +62,8 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5001; // Avoid port 5000 conflict with macOS AirPlay
 
-app.listen(PORT, '0.0.0.0', () => console.log(`Server started on port ${PORT} at 0.0.0.0`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server started on port ${PORT} at 0.0.0.0`);
+  // Start the notification background service
+  setupNotificationWorker();
+});

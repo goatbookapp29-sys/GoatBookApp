@@ -152,6 +152,7 @@ model users {
   created_at                                                        DateTime              @default(now()) @db.Timestamptz(6)
   updated_at                                                        DateTime              @updatedAt @db.Timestamptz(6)
   profile_photo_url                                                 String?
+  push_token                                                        String?               @db.VarChar(511)
   animals_animals_created_by_user_idTousers                         animals[]             @relation("animals_created_by_user_idTousers")
   animals_animals_updated_by_user_idTousers                         animals[]             @relation("animals_updated_by_user_idTousers")
   breeds_breeds_created_by_user_idTousers                           breeds[]              @relation("breeds_created_by_user_idTousers")
@@ -310,4 +311,16 @@ enum enum_employees_employee_type {
 enum enum_vaccination_records_creation_mode {
   SINGLE
   MASS
+}
+
+model reminders {
+  id                 String   @id @db.Uuid
+  user_id            String   @db.Uuid
+  animal_id          String?  @db.Uuid
+  vaccine_record_id  String?  @db.Uuid
+  title              String   @db.VarChar(255)
+  message            String
+  remind_at          DateTime @db.Timestamptz(6)
+  status             String   @default("PENDING") @db.VarChar(20)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
 }

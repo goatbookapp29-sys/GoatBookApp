@@ -12,6 +12,9 @@ router.put('/profile', auth, userController.updateProfile);
 // @route   POST api/users/change-password
 router.post('/change-password', auth, userController.changePassword);
 
+// @route   POST api/users/push-token
+router.post('/push-token', auth, userController.updatePushToken);
+
 // --- Employee Management (Owner Scoped) ---
 
 // @route   GET api/users/employees

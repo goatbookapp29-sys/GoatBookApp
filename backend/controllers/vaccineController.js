@@ -1,5 +1,5 @@
-const prisma = require('../config/prisma');
 const { v4: uuidv4 } = require('uuid');
+const { scheduleVaccinationReminders } = require('../utils/notificationHelper');
 
 // --- Vaccine Definitions (Master Data) ---
 
@@ -280,6 +280,18 @@ exports.createVaccinationRecord = async (req, res) => {
     }));
 
     const count = await prisma.vaccination_records.createMany({ data: recordsData });
+    
+    // Schedule Reminders for all created records
+    // We pass the recordsData which contains the calculated nextDueDate
+    // Enriched with vaccine name for notifications
+    const enrichedRecords = recordsData.map(r => ({
+      ...r,
+      vaccine_name: vaccine.name
+    }));
+    
+    // Fire and forget reminder scheduling
+    scheduleVaccinationReminders(enrichedRecords).catch(e => console.error('Schedule Error:', e));
+
     res.status(201).json({ message: `Successfully recorded ${count.count} vaccination(s)` });
   } catch (err) {
     console.error('CREATE RECORD ERROR:', err);
@@ -314,6 +326,19 @@ exports.updateVaccinationRecord = async (req, res) => {
     }
 
     const updated = await prisma.vaccination_records.update({ where: { id: req.params.id }, data: updateData });
+
+    // If next_due_date changed, reschedule reminders
+    if (updateData.next_due_date) {
+      await prisma.reminders.deleteMany({
+        where: { vaccine_record_id: req.params.id, status: 'PENDING' }
+      });
+      
+      scheduleVaccinationReminders({
+        ...updated,
+        vaccine_name: record.vaccines?.name
+      }).catch(e => console.error('Reschedule Error:', e));
+    }
+
     res.json(updated);
   } catch (err) {
     console.error('UPDATE RECORD ERROR:', err);
@@ -328,6 +353,11 @@ exports.deleteVaccinationRecord = async (req, res) => {
     const record = await prisma.vaccination_records.findUnique({ where: { id: req.params.id } });
     if (!record) return res.status(404).json({ message: 'Record not found' });
     if (record.farm_id !== req.farmId) return res.status(403).json({ message: 'Not authorized' });
+    
+    // Clean up pending reminders
+    await prisma.reminders.deleteMany({
+      where: { vaccine_record_id: req.params.id, status: 'PENDING' }
+    });
     
     await prisma.vaccination_records.delete({ where: { id: req.params.id } });
     res.json({ message: 'Record removed successfully' });

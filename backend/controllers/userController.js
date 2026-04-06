@@ -324,3 +324,25 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+// @desc    Update user's expo push token
+// @route   POST /api/users/push-token
+exports.updatePushToken = async (req, res) => {
+  const { pushToken } = req.body;
+  try {
+    if (!pushToken) return res.status(400).json({ message: 'Push token is required' });
+
+    await prisma.users.update({
+      where: { id: req.user.id },
+      data: { 
+        push_token: pushToken,
+        updated_at: new Date()
+      }
+    });
+
+    res.json({ message: 'Push token updated successfully' });
+  } catch (err) {
+    console.error('UPDATE PUSH TOKEN ERROR:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
