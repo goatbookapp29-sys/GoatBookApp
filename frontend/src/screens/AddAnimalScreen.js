@@ -1553,18 +1553,20 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   onPress={confirmDeleteWeight}
                   style={{ 
                     flex: 1, 
-                    backgroundColor: '#B71C1C', 
+                    backgroundColor: 'transparent',
+                    borderWidth: 1.5,
+                    borderColor: theme.colors.primary, 
                     paddingVertical: 14, 
-                    borderRadius: 8, 
+                    borderRadius: 10, 
                     marginRight: 8, 
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}
                 >
                   {deletingWeight ? (
-                    <ActivityIndicator color="#FFF" size="small" />
+                    <ActivityIndicator color={theme.colors.primary} size="small" />
                   ) : (
-                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: theme.typography.bold }}>DELETE</Text>
+                    <Text style={{ color: theme.colors.primary, fontSize: 16, fontFamily: theme.typography.semiBold }}>Delete</Text>
                   )}
                 </TouchableOpacity>
 
@@ -1575,7 +1577,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                     flex: 1, 
                     backgroundColor: theme.colors.primary, 
                     paddingVertical: 14, 
-                    borderRadius: 8, 
+                    borderRadius: 10, 
                     marginLeft: 8, 
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -1584,7 +1586,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                   {updatingWeight ? (
                     <ActivityIndicator color="#FFF" size="small" />
                   ) : (
-                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: theme.typography.bold }}>SAVE</Text>
+                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: theme.typography.semiBold }}>Save Changes</Text>
                   )}
                 </TouchableOpacity>
               </View>
