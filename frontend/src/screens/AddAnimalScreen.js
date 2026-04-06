@@ -181,11 +181,24 @@ const AddAnimalScreen = ({ navigation, route }) => {
       Alert.alert('Error', 'Weight is required');
       return;
     }
+    
+    const parsedWeight = parseFloat(editWeightValue);
+    if (parsedWeight > 9999) {
+      Alert.alert('Error', 'Weight cannot exceed 9999 KG');
+      return;
+    }
+    
+    const parsedHeight = editHeightValue ? parseFloat(editHeightValue) : null;
+    if (parsedHeight !== null && parsedHeight > 9999) {
+      Alert.alert('Error', 'Height cannot exceed 9999');
+      return;
+    }
+
     try {
       setUpdatingWeight(true);
       await api.put(`/weights/${editingWeightRecord.id}`, {
-        weight: parseFloat(editWeightValue),
-        height: editHeightValue ? parseFloat(editHeightValue) : null,
+        weight: parsedWeight,
+        height: parsedHeight,
         date: editDateValue,
         remark: editRemarkValue
       });
@@ -194,7 +207,9 @@ const AddAnimalScreen = ({ navigation, route }) => {
       Alert.alert('Success', 'Weight record updated successfully');
     } catch (err) {
       console.error('Update Weight Error:', err);
-      Alert.alert('Error', 'Failed to update weight record');
+      // Prisma errors or backend errors
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || 'Failed to update weight record';
+      Alert.alert('Error', errorMsg);
     } finally {
       setUpdatingWeight(false);
     }

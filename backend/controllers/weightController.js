@@ -108,10 +108,14 @@ exports.updateWeight = async (req, res) => {
       data.weight = numericWeight;
     }
 
-    if (height !== undefined && height !== null) {
-      const numericHeight = parseFloat(height);
-      if (!isNaN(numericHeight)) {
-        data.height = numericHeight;
+    if (height !== undefined) {
+      if (height === null || height === '') {
+        data.height = null;
+      } else {
+        const numericHeight = parseFloat(height);
+        if (!isNaN(numericHeight)) {
+          data.height = numericHeight;
+        }
       }
     }
 
