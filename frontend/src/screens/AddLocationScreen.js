@@ -234,7 +234,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   inputRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 12,
   },
   inputFlex: {
@@ -246,7 +246,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 2,
+    marginTop: 4,
   },
   addBtnText: {
     color: '#FFF',

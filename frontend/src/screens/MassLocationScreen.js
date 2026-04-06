@@ -320,7 +320,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
     gap: 12,
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   selectWrapper: {
     flex: 1,
@@ -331,7 +331,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 2,
+    marginTop: 4,
   },
   addLocBtnText: {
     color: '#FFF',
