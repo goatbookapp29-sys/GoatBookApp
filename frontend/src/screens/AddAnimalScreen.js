@@ -13,7 +13,7 @@ import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
 import GDatePicker from '../components/GDatePicker';
 import { 
-  Check, HelpCircle, ChevronDown, ChevronUp, ChevronLeft, Plus, Scale, Syringe, 
+  Check, HelpCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, Scale, Syringe, 
   Heart, Baby, Milk, Shield, Camera, Trash2, Edit2, Calendar
 } from 'lucide-react-native';
 import api from '../api';
@@ -98,6 +98,16 @@ const AddAnimalScreen = ({ navigation, route }) => {
   // Insurance specific (UI only for now)
   const [insuranceCompany, setInsuranceCompany] = useState('');
   const [planName, setPlanName] = useState('');
+  
+  // Weight Edit Modal State
+  const [editWeightModalVisible, setEditWeightModalVisible] = useState(false);
+  const [editingWeightRecord, setEditingWeightRecord] = useState(null);
+  const [editWeightValue, setEditWeightValue] = useState('');
+  const [editHeightValue, setEditHeightValue] = useState('');
+  const [editDateValue, setEditDateValue] = useState('');
+  const [editRemarkValue, setEditRemarkValue] = useState('');
+  const [updatingWeight, setUpdatingWeight] = useState(false);
+  const [deletingWeight, setDeletingWeight] = useState(false);
   const [policyNumber, setPolicyNumber] = useState('');
   const [agentName, setAgentName] = useState('');
 
@@ -148,13 +158,74 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const fetchWeights = async () => {
     try {
       setWeightsLoading(true);
-      const response = await api.get(`/weights?animalId=${existingAnimal.id}`);
-      setWeights(response.data);
-    } catch (error) {
-      console.error('Fetch weights error:', error);
+      const res = await api.get(`/weights?animalId=${existingAnimal.id}`);
+      setWeights(res.data);
+    } catch (err) {
+      console.error('Fetch Weights Error:', err);
     } finally {
       setWeightsLoading(false);
     }
+  };
+
+  const handleOpenWeightModal = (record) => {
+    setEditingWeightRecord(record);
+    setEditWeightValue(record.weight?.toString() || '');
+    setEditHeightValue(record.height?.toString() || '');
+    setEditDateValue(record.date ? new Date(record.date).toISOString().split('T')[0] : '');
+    setEditRemarkValue(record.remark || '');
+    setEditWeightModalVisible(true);
+  };
+
+  const handleUpdateWeight = async () => {
+    if (!editWeightValue) {
+      Alert.alert('Error', 'Weight is required');
+      return;
+    }
+    try {
+      setUpdatingWeight(true);
+      await api.put(`/weights/${editingWeightRecord.id}`, {
+        weight: parseFloat(editWeightValue),
+        height: editHeightValue ? parseFloat(editHeightValue) : null,
+        date: editDateValue,
+        remark: editRemarkValue
+      });
+      setEditWeightModalVisible(false);
+      fetchWeights();
+      Alert.alert('Success', 'Weight record updated successfully');
+    } catch (err) {
+      console.error('Update Weight Error:', err);
+      Alert.alert('Error', 'Failed to update weight record');
+    } finally {
+      setUpdatingWeight(false);
+    }
+  };
+
+  const confirmDeleteWeight = () => {
+    Alert.alert(
+      'Delete Weight Record',
+      'Are you sure you want to delete this weight record? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'DELETE', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setDeletingWeight(true);
+              await api.delete(`/weights/${editingWeightRecord.id}`);
+              setEditWeightModalVisible(false);
+              fetchWeights();
+              Alert.alert('Deleted', 'Weight record has been removed.');
+            } catch (err) {
+              console.error('Delete Weight Error:', err);
+              Alert.alert('Error', 'Failed to delete weight record');
+            } finally {
+              setDeletingWeight(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   // Rules: Uncheck male specific boxes if gender changes to FEMALE
@@ -1096,7 +1167,12 @@ const AddAnimalScreen = ({ navigation, route }) => {
                     ) : weights.length > 0 ? (
                       <View style={styles.weightList}>
                         {weights.map((w, idx) => (
-                          <View key={w.id} style={[styles.weightItem, { borderBottomColor: theme.colors.border }, idx === weights.length - 1 && { borderBottomWidth: 0 }]}>
+                          <TouchableOpacity 
+                            key={w.id} 
+                            style={[styles.weightItem, { borderBottomColor: theme.colors.border }, idx === weights.length - 1 && { borderBottomWidth: 0 }]}
+                            onPress={() => handleOpenWeightModal(w)}
+                            activeOpacity={0.7}
+                          >
                             <View style={[styles.weightIconBox, { backgroundColor: isDarkMode ? theme.colors.surface : '#FFF1EA' }]}>
                               <Calendar size={20} color={theme.colors.textMuted} />
                             </View>
@@ -1104,13 +1180,16 @@ const AddAnimalScreen = ({ navigation, route }) => {
                               <Text style={[styles.weightKg, { color: theme.colors.text }]}>{w.weight} KG</Text>
                               <Text style={[styles.weightDate, { color: theme.colors.textLight }]}>{new Date(w.date).toLocaleDateString()}</Text>
                             </View>
-                            {w.height ? (
-                              <View style={styles.heightInfoBlock}>
-                                <Text style={[styles.weightLabel, { color: theme.colors.textLight }]}>Height</Text>
-                                <Text style={[styles.weightValue, { color: theme.colors.text }]}>{w.height}</Text>
-                              </View>
-                            ) : null}
-                          </View>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                              {w.height ? (
+                                <View style={[styles.heightInfoBlock, { marginRight: 12 }]}>
+                                  <Text style={[styles.weightLabel, { color: theme.colors.textLight }]}>Height</Text>
+                                  <Text style={[styles.weightValue, { color: theme.colors.text }]}>{w.height}</Text>
+                                </View>
+                              ) : null}
+                              <ChevronRight size={20} color={theme.colors.textMuted} />
+                            </View>
+                          </TouchableOpacity>
                         ))}
                       </View>
                     ) : (
@@ -1387,6 +1466,117 @@ const AddAnimalScreen = ({ navigation, route }) => {
           />
         )}
       </View>
+
+      {/* EDIT WEIGHT MODAL */}
+      <Modal
+        visible={editWeightModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setEditWeightModalVisible(false)}
+      >
+        <TouchableOpacity 
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}
+          activeOpacity={1}
+          onPress={() => setEditWeightModalVisible(false)}
+        >
+          <View style={{ 
+            width: '90%', 
+            backgroundColor: theme.colors.surface, 
+            borderRadius: 16, 
+            overflow: 'hidden',
+            borderWidth: 1,
+            borderColor: theme.colors.border
+          }}>
+            <View style={{ backgroundColor: '#1A237E', padding: 16, alignItems: 'center' }}>
+              <Text style={{ fontSize: 18, fontFamily: theme.typography.semiBold, color: '#FFF' }}>Edit Weight</Text>
+            </View>
+
+            <View style={{ padding: 20 }}>
+              <View style={{ marginBottom: 12 }}>
+                <GDatePicker
+                  label="Date*"
+                  value={editDateValue}
+                  onDateChange={setEditDateValue}
+                  required
+                />
+              </View>
+
+              <View style={{ marginBottom: 12 }}>
+                <GInput
+                  label="Weight*"
+                  value={editWeightValue}
+                  onChangeText={setEditWeightValue}
+                  keyboardType="decimal-pad"
+                  placeholder="e.g. 55"
+                  required
+                />
+              </View>
+
+              <View style={{ marginBottom: 12 }}>
+                <GInput
+                  label="Height"
+                  value={editHeightValue}
+                  onChangeText={setEditHeightValue}
+                  keyboardType="decimal-pad"
+                  placeholder="e.g. 5"
+                />
+              </View>
+
+              <View style={{ marginBottom: 20 }}>
+                <GInput
+                  label="Remark"
+                  value={editRemarkValue}
+                  onChangeText={setEditRemarkValue}
+                  placeholder="e.g. Healthy"
+                  multiline
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <TouchableOpacity 
+                  disabled={deletingWeight || updatingWeight}
+                  onPress={confirmDeleteWeight}
+                  style={{ 
+                    flex: 1, 
+                    backgroundColor: '#B71C1C', 
+                    paddingVertical: 14, 
+                    borderRadius: 8, 
+                    marginRight: 8, 
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {deletingWeight ? (
+                    <ActivityIndicator color="#FFF" size="small" />
+                  ) : (
+                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: theme.typography.bold }}>DELETE</Text>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  disabled={deletingWeight || updatingWeight}
+                  onPress={handleUpdateWeight}
+                  style={{ 
+                    flex: 1, 
+                    backgroundColor: theme.colors.primary, 
+                    paddingVertical: 14, 
+                    borderRadius: 8, 
+                    marginLeft: 8, 
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {updatingWeight ? (
+                    <ActivityIndicator color="#FFF" size="small" />
+                  ) : (
+                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: theme.typography.bold }}>SAVE</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
