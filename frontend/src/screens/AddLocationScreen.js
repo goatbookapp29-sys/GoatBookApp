@@ -230,7 +230,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingBottom: 40,
   },
   formArea: {
-    gap: 4,
+    gap: 12,
   },
   inputRow: {
     flexDirection: 'row',
