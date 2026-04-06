@@ -1502,7 +1502,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
             borderWidth: 1,
             borderColor: theme.colors.border
           }}>
-            <View style={{ backgroundColor: '#1A237E', padding: 16, alignItems: 'center' }}>
+            <View style={{ backgroundColor: theme.colors.primary, padding: 16, alignItems: 'center' }}>
               <Text style={{ fontSize: 18, fontFamily: theme.typography.semiBold, color: '#FFF' }}>Edit Weight</Text>
             </View>
 
