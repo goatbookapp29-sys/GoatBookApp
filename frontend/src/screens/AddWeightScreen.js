@@ -217,7 +217,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   flex: {
     flex: 1,
