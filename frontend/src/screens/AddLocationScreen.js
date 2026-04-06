@@ -137,7 +137,7 @@ const AddLocationScreen = ({ navigation, route }) => {
                 activeOpacity={0.8}
                 disabled={searching}
               >
-                <Text style={styles.addBtnText}>{searching ? '...' : 'ADD'}</Text>
+                <Text style={styles.addBtnText}>{searching ? '...' : 'Add'}</Text>
               </TouchableOpacity>
             </View>
 
@@ -182,8 +182,6 @@ const AddLocationScreen = ({ navigation, route }) => {
               rightIcon={<HelpCircle size={18} color={theme.colors.textMuted} />}
             />
             
-            <View style={styles.spacer} />
-            
             <GInput 
               label="Add New Location" 
               placeholder="E.g. Shed B - North"
@@ -194,8 +192,6 @@ const AddLocationScreen = ({ navigation, route }) => {
               }} 
               rightIcon={<HelpCircle size={18} color={theme.colors.textMuted} />}
             />
-
-            <View style={styles.spacer} />
 
             <GInput 
               label="Remark" 
@@ -210,7 +206,7 @@ const AddLocationScreen = ({ navigation, route }) => {
       </KeyboardAvoidingView>
 
       {/* Fixed Footer */}
-      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 24 }]}>
+      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 16 }]}>
         <GButton 
           title="Submit" 
           onPress={handleSave}
@@ -232,14 +228,14 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
-    paddingBottom: 120,
+    paddingBottom: 40,
   },
   formArea: {
-    gap: 4,
+    gap: 12,
   },
   inputRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end', // LEVEL with input area
+    alignItems: 'center',
     gap: 12,
   },
   inputFlex: {
@@ -251,11 +247,11 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 2, // Fine-tuned alignment
+    marginTop: 2,
   },
   addBtnText: {
     color: '#FFF',
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
     letterSpacing: 0.5,
   },
@@ -331,14 +327,11 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     height: 12,
   },
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     paddingHorizontal: SPACING.lg,
-    paddingTop: 16,
+    paddingTop: SPACING.md,
     backgroundColor: theme.colors.background,
-    ...SHADOW.large,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
   },
   submitBtn: {
     height: 54,
