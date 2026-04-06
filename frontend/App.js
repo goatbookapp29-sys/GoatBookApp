@@ -35,7 +35,7 @@ import LocationListScreen from './src/screens/LocationListScreen';
 import AddLocationScreen from './src/screens/AddLocationScreen';
 import LocationDetailsScreen from './src/screens/LocationDetailsScreen';
 import CreateLocationScreen from './src/screens/CreateLocationScreen';
-import BreedDetailsScreen from './src/screens/BreedDetailsScreen';
+
 import AddWeightScreen from './src/screens/AddWeightScreen';
 import WeightListScreen from './src/screens/WeightListScreen';
 import FarmSettingsScreen from './src/screens/FarmSettingsScreen';
@@ -52,6 +52,7 @@ import MassLocationScreen from './src/screens/MassLocationScreen';
 import MassVaccinationScreen from './src/screens/MassVaccinationScreen';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import SideMenu from './src/components/SideMenu';
+import { registerForPushNotificationsAsync } from './src/utils/notifications';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -91,18 +92,19 @@ function AppContent() {
   const loadResources = async () => {
     try {
       await Font.loadAsync({
-        Inter_400Regular,
-        Inter_500Medium,
-        Inter_600SemiBold,
-        Inter_700Bold,
-        Inter_800ExtraBold,
+        'Inter_400Regular': Inter_400Regular,
+        'Inter_500Medium': Inter_500Medium,
+        'Inter_600SemiBold': Inter_600SemiBold,
+        'Inter_700Bold': Inter_700Bold,
+        'Inter_800ExtraBold': Inter_800ExtraBold,
       });
       setFontsLoaded(true);
       await checkSession();
     } catch (e) {
-      console.warn(e);
+      console.warn('RESOURCES LOADING FAILED:', e);
+      // Fallback: try to show app anyway
+      setFontsLoaded(true); 
     } finally {
-      setFontsLoaded(true);
       await SplashScreen.hideAsync();
     }
   };
@@ -110,6 +112,13 @@ function AppContent() {
   useEffect(() => {
     if (fontsLoaded && initialRoute) {
       SplashScreen.hideAsync();
+      
+      // If user is logged in, register for push notifications
+      if (initialRoute === 'MainDrawer') {
+        registerForPushNotificationsAsync().catch(err => 
+          console.error('Push Registration Error:', err)
+        );
+      }
     }
   }, [fontsLoaded, initialRoute]);
 
@@ -176,7 +185,7 @@ function AppContent() {
           <Stack.Screen name="EditLocation" component={CreateLocationScreen} />
           <Stack.Screen name="CreateLocation" component={CreateLocationScreen} />
           <Stack.Screen name="LocationDetails" component={LocationDetailsScreen} />
-          <Stack.Screen name="BreedDetails" component={BreedDetailsScreen} />
+
           <Stack.Screen name="AddWeight" component={AddWeightScreen} />
           <Stack.Screen name="WeightList" component={WeightListScreen} />
           <Stack.Screen name="FarmSettings" component={FarmSettingsScreen} />
