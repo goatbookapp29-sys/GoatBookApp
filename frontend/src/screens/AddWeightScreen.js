@@ -136,40 +136,48 @@ const AddWeightScreen = ({ route, navigation }) => {
             </View>
           )}
 
-          <GDatePicker 
-            label="Date" 
-            value={date} 
-            onDateChange={setDate}
-            placeholder="09-09-2025"
-            required
-          />
+          <View style={styles.row}>
+            <GDatePicker 
+              label="Date" 
+              value={date} 
+              onDateChange={setDate}
+              placeholder="09-09-2025"
+              required
+            />
+          </View>
 
-          <GInput 
-            label="Weight" 
-            value={weight} 
-            onChangeText={setWeight} 
-            keyboardType="decimal-pad"
-            placeholder="55"
-            required
-          />
+          <View style={styles.row}>
+            <GInput 
+              label="Weight" 
+              value={weight} 
+              onChangeText={setWeight} 
+              keyboardType="decimal-pad"
+              placeholder="55"
+              required
+            />
+          </View>
 
-          <GInput 
-            label="Height" 
-            value={height} 
-            onChangeText={setHeight} 
-            keyboardType="decimal-pad"
-            placeholder="5"
-          />
+          <View style={styles.row}>
+            <GInput 
+              label="Height" 
+              value={height} 
+              onChangeText={setHeight} 
+              keyboardType="decimal-pad"
+              placeholder="5"
+            />
+          </View>
 
-          <GInput 
-            label="Remark" 
-            value={remark} 
-            onChangeText={setRemark} 
-            placeholder="New!"
-            multiline
-            numberOfLines={3}
-            style={{ color: theme.colors.text }}
-          />
+          <View style={styles.row}>
+            <GInput 
+              label="Remark" 
+              value={remark} 
+              onChangeText={setRemark} 
+              placeholder="New!"
+              multiline
+              numberOfLines={3}
+              style={{ color: theme.colors.text }}
+            />
+          </View>
         </View>
       </ScrollView>
 
@@ -209,7 +217,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    marginBottom: 8,
+    marginBottom: 16,
   },
   flex: {
     flex: 1,
