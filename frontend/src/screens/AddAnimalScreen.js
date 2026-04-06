@@ -992,7 +992,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                       <View style={styles.row}>
                         <GDatePicker 
                           containerStyle={styles.halfWidth}
-                          label="Purchase Date" 
+                          label="Purch. Date" 
                           value={purchaseDate} 
                           onDateChange={setPurchaseDate}
                           placeholder="Select Date"
@@ -1000,7 +1000,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                         />
                         <GInput 
                           containerStyle={styles.halfWidth}
-                          label="Purchase Price" 
+                          label="Purch. Price" 
                           value={purchasePrice} 
                           onChangeText={setPurchasePrice} 
                           keyboardType="number-pad"
