@@ -12,7 +12,10 @@ exports.getBreeds = async (req, res) => {
     // Fetch breeds that belong explicitly to this farm
     const breeds = await prisma.breeds.findMany({
       where: {
-        farm_id: req.farmId
+        OR: [
+          { farm_id: req.farmId },
+          { is_default: true }
+        ]
       },
       include: {
         _count: {
