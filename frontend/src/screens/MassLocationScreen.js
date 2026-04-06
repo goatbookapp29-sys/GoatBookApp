@@ -159,25 +159,18 @@ const MassLocationScreen = ({ navigation }) => {
         <View style={styles.animalInfo}>
           <View style={styles.infoTop}>
             <View style={styles.tagRow}>
-               <Tag size={12} color={theme.colors.primary} />
-               <Text style={[styles.tagId, { color: theme.colors.text }]}>Tag ID:{item.tagNumber}</Text>
+               <Tag size={14} color={theme.colors.primary} />
+               <Text style={[styles.tagId, { color: theme.colors.text }]}>#{item.tagNumber}</Text>
             </View>
             <Text style={[styles.breedName, { color: theme.colors.textLight }]}>{item.breeds?.name || 'Sirohi'}</Text>
           </View>
           
-          <View style={styles.infoBottom}>
-            <View style={styles.metaBadge}>
-               <User size={10} color={theme.colors.textMuted} />
-               <Text style={[styles.metaText, { color: theme.colors.textLight }]}>{item.gender}</Text>
-            </View>
-            <View style={styles.metaBadge}>
-               <Hash size={10} color={theme.colors.textMuted} />
-               <Text style={[styles.metaText, { color: theme.colors.textLight }]}>Age(M): {item.ageInMonths}</Text>
-            </View>
-            <View style={styles.metaBadge}>
-               <Weight size={10} color={theme.colors.textMuted} />
-               <Text style={[styles.metaText, { color: theme.colors.textLight }]}>Weight: {item.currentWeight || item.birthWeight || 0}</Text>
-            </View>
+          <View style={styles.animalMetaRow}>
+            <Text style={[styles.metaItem, { color: theme.colors.textLight }]}>{item.gender}</Text>
+            <View style={styles.dot} />
+            <Text style={[styles.metaItem, { color: theme.colors.textLight }]}>{item.ageInMonths} Months</Text>
+            <View style={styles.dot} />
+            <Text style={[styles.metaItem, { color: theme.colors.textLight }]}>{item.currentWeight || item.birthWeight || 0} kg</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -360,12 +353,13 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.colors.surface,
-    paddingHorizontal: 12,
-    height: 36,
-    borderRadius: 18,
+    paddingHorizontal: 16,
+    height: 42,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: theme.colors.border + '30',
-    width: '45%',
+    borderColor: theme.colors.border,
+    flex: 1,
+    marginLeft: 16,
     gap: 8,
   },
   searchCompactInput: {
@@ -384,6 +378,8 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 16,
     marginBottom: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border + '80',
     ...SHADOW.small,
   },
   checkWrapper: {
@@ -413,7 +409,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   tagRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   tagId: {
     fontSize: 16,
@@ -424,18 +420,20 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     opacity: 0.7,
   },
-  infoBottom: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  metaBadge: {
+  animalMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 8,
   },
-  metaText: {
-    fontSize: 12,
-    fontFamily: 'Inter_500Medium',
+  metaItem: {
+    fontSize: 13,
+    fontFamily: 'Inter_400Regular',
+  },
+  dot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: theme.colors.textMuted,
   },
   footer: {
     paddingHorizontal: SPACING.lg,
