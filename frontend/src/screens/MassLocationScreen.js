@@ -263,11 +263,22 @@ const MassLocationScreen = ({ navigation }) => {
       </View>
 
       {/* Add New Location Modal */}
-      <Modal visible={showAddModal} transparent animationType="fade">
+      <Modal 
+        visible={showAddModal} 
+        transparent 
+        animationType="fade"
+        onRequestClose={() => setShowAddModal(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
             <View style={[styles.modalHeader, { backgroundColor: theme.colors.primary }]}>
                <Text style={styles.modalHeaderText}>Add Location/Shed</Text>
+               <TouchableOpacity 
+                 style={styles.modalCloseIcon}
+                 onPress={() => setShowAddModal(false)}
+               >
+                 <X size={20} color="#FFF" />
+               </TouchableOpacity>
             </View>
             <View style={styles.modalBody}>
                <View style={styles.modalInputWrapper}>
@@ -460,6 +471,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   modalHeader: {
     padding: 18,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  modalCloseIcon: {
+    position: 'absolute',
+    right: 16,
   },
   modalHeaderText: {
     color: '#FFF',
