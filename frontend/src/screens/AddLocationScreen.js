@@ -167,8 +167,7 @@ const AddLocationScreen = ({ navigation, route }) => {
               </View>
             )}
             
-            <View style={styles.divider} />
-            
+
             {/* Location Selectors */}
             <GSelect 
               label="Existing Location/Shed" 
