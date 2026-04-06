@@ -197,13 +197,21 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const fetchBreeds = async () => {
     try {
       const response = await api.get('/breeds');
-      const mapped = response.data.map(b => ({ label: `${b.name} (${b.animalType})`, value: b.id, animalType: b.animalType }));
+      const mapped = response.data.map(b => ({ 
+        label: `${b.name} (${b.animalType}) - ${(b.origin || 'INDIAN').toUpperCase()}`, 
+        value: b.id, 
+        animalType: b.animalType 
+      }));
       setAllBreeds(mapped);
     } catch (error) {
       console.warn('Fetch breeds failed, trying cache...', error);
       const cached = await getFromCache('breeds');
       if (cached) {
-        const mapped = cached.map(b => ({ label: `${b.name} (${b.animalType})`, value: b.id, animalType: b.animalType }));
+        const mapped = cached.map(b => ({ 
+          label: `${b.name} (${b.animalType}) - ${(b.origin || 'INDIAN').toUpperCase()}`, 
+          value: b.id, 
+          animalType: b.animalType 
+        }));
         setAllBreeds(mapped);
       }
     }
