@@ -48,7 +48,7 @@ const DashboardScreen = ({ navigation }) => {
       { id: '3', title: 'Employee', icon: <User color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'EmployeeList' },
       { id: '4', title: 'Location', icon: <Home color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'LocationMenu' },
       { id: '5', title: 'Vaccines', icon: <Syringe color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'VaccinesMenu' },
-      { id: '6', title: 'Weight', icon: <Scale color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'WeightList' },
+      { id: '6', title: 'Weight', icon: <Scale color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'AddWeight' },
       { id: '7', title: 'Mating', icon: <Heart color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
       { id: '8', title: 'Breeding', icon: <Activity color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
       { id: '9', title: 'Report', icon: <ClipboardList color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'ReportsMenu' },
