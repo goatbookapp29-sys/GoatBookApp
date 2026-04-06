@@ -54,7 +54,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [batchNo, setBatchNo] = useState(existingAnimal.batchNo || '');
   const [acquisitionMethod, setAcquisitionMethod] = useState(existingAnimal.acquisitionMethod || '');
   const [locationId, setLocationId] = useState(existingAnimal.locationId || null);
-  const [animalType, setAnimalType] = useState(existingAnimal.animalType || '');
+  const [animalType, setAnimalType] = useState(existingAnimal.animalType || 'Goat');
   
   const [identificationExpanded, setIdentificationExpanded] = useState(true);
   const [growthExpanded, setGrowthExpanded] = useState(true);
@@ -803,6 +803,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
                         { label: 'Goat', value: 'Goat' },
                         { label: 'Sheep', value: 'Sheep' }
                       ]}
+                      placeholder="Select Type"
                       required
                     />
                   </View>

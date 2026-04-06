@@ -40,7 +40,7 @@ exports.getAnimals = async (req, res) => {
       gender: a.gender,
       birthDate: a.birth_date,
       birthWeight: a.birth_weight,
-      animalType: a.animal_type,
+      animalType: a.animal_type ? a.animal_type.charAt(0).toUpperCase() + a.animal_type.slice(1).toLowerCase() : 'Goat',
       isBreeder: a.is_breeder,
       isQurbani: a.is_qurbani,
       batchNo: a.batch_no,
@@ -218,7 +218,8 @@ exports.getAnimal = async (req, res) => {
       remark: animal.remark,
       imageUrl: animal.image_url,
       Breed: animal.breeds,
-      Location: animal.locations
+      Location: animal.locations,
+      animalType: animal.animal_type ? animal.animal_type.charAt(0).toUpperCase() + animal.animal_type.slice(1).toLowerCase() : 'Goat',
     });
   } catch (err) {
     console.error('FETCH ANIMAL ERROR:', err);
@@ -377,6 +378,7 @@ exports.checkTagExists = async (req, res) => {
       id: animal.id,
       tagNumber: animal.tag_number,
       gender: animal.gender,
+      animalType: animal.animal_type ? animal.animal_type.charAt(0).toUpperCase() + animal.animal_type.slice(1).toLowerCase() : 'Goat',
       breedName: animal.breeds?.name || 'Unknown Breed',
       currentLocationName: animal.locations?.name || 'Unassigned',
       ageInMonths: animal.age_in_months || 0
