@@ -195,19 +195,18 @@ const MassLocationScreen = ({ navigation }) => {
         <View style={styles.controlRow}>
           <View style={styles.selectWrapper}>
             <GSelect 
-              label="Select/Scan Location Shed" 
+              label="Select Shed*" 
               placeholder="Destination Shed"
               value={selectedLocationId}
               onSelect={setSelectedLocationId}
               options={locations}
-              rightIcon={<Scan size={18} color={theme.colors.textMuted} />}
             />
           </View>
           <TouchableOpacity 
             style={[styles.addLocBtn, { backgroundColor: theme.colors.primary }]}
             onPress={() => setShowAddModal(true)}
           >
-            <Text style={styles.addLocBtnText}>Add New Location</Text>
+            <Text style={styles.addLocBtnText}>Add New</Text>
           </TouchableOpacity>
         </View>
 
@@ -260,7 +259,7 @@ const MassLocationScreen = ({ navigation }) => {
       </View>
 
       {/* Fixed Footer */}
-      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 24 }]}>
+      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 16 }]}>
         <GButton 
           title={selectedAnimals.size > 0 ? `Move ${selectedAnimals.size} Animals` : "Move Animals"}
           onPress={handleSubmit}
@@ -321,7 +320,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
     gap: 12,
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   selectWrapper: {
     flex: 1,
@@ -332,12 +331,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 28,
+    marginTop: 2,
   },
   addLocBtnText: {
     color: '#FFF',
-    fontFamily: 'Inter_700Bold',
-    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
   },
   selectionHeader: {
     flexDirection: 'row',
@@ -439,14 +438,11 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontFamily: 'Inter_500Medium',
   },
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     paddingHorizontal: SPACING.lg,
-    paddingTop: 16,
+    paddingTop: SPACING.md,
     backgroundColor: theme.colors.background,
-    ...SHADOW.large,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
   },
   bulkBtn: {
     height: 54,
