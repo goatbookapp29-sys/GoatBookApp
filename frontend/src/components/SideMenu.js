@@ -45,7 +45,7 @@ const SideMenu = (props) => {
     { title: 'Breeds', icon: <GitBranch size={22} />, screen: 'BreedList' },
     { title: 'Vaccines', icon: <Syringe size={22} />, screen: 'VaccinesMenu' },
     { title: 'Reports', icon: <ClipboardList size={22} />, screen: 'ReportsMenu' },
-    { title: 'Locations', icon: <MapPin size={22} />, screen: 'LocationList' },
+    { title: 'Locations', icon: <MapPin size={22} />, screen: 'LocationMenu' },
     { title: 'Settings', icon: <Settings size={22} />, screen: 'Settings' },
   ];
 

@@ -6,6 +6,7 @@ import GHeader from '../components/GHeader';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
+import { Home, HelpCircle, MapPin } from 'lucide-react-native';
 import api from '../api';
 
 const CreateLocationScreen = ({ navigation, route }) => {
@@ -28,7 +29,7 @@ const CreateLocationScreen = ({ navigation, route }) => {
     try {
       const response = await api.get('/locations');
       const formattedLocs = response.data
-        .filter(loc => !locationToEdit || loc.id !== locationToEdit.id) // Prevent self-parenting
+        .filter(loc => !locationToEdit || loc.id !== locationToEdit.id)
         .map(loc => ({
           label: loc.displayName || loc.name,
           value: loc.id
@@ -41,7 +42,7 @@ const CreateLocationScreen = ({ navigation, route }) => {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert('Validation', 'Location Name is required');
+      Alert.alert('Validation', 'Shed Name is required');
       return;
     }
 
@@ -54,7 +55,7 @@ const CreateLocationScreen = ({ navigation, route }) => {
           type: locationToEdit.type,
           parentLocationId
         });
-        Alert.alert('Success', 'Physical Location/Shed updated successfully!');
+        Alert.alert('Success', 'Shed updated successfully!');
       } else {
         const generatedCode = name.replace(/\s+/g, '-').substring(0, 6).toUpperCase() + '-' + Math.floor(Math.random() * 1000);
         
@@ -64,14 +65,14 @@ const CreateLocationScreen = ({ navigation, route }) => {
           type: 'Location',
           parentLocationId
         });
-        Alert.alert('Success', 'Physical Location/Shed created successfully!');
+        Alert.alert('Success', 'New Shed created successfully!');
       }
       
       setLoading(false);
       navigation.goBack();
     } catch (error) {
       setLoading(false);
-      const msg = error.response?.data?.message || 'Failed to create location';
+      const msg = error.response?.data?.message || 'Failed to save shed';
       Alert.alert('Error', msg);
     }
   };
@@ -79,7 +80,7 @@ const CreateLocationScreen = ({ navigation, route }) => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
-        title={locationToEdit ? "Edit Shed" : "Create Shed"} 
+        title={locationToEdit ? "Edit Shed" : "Create New Shed"} 
         onBack={() => navigation.goBack()} 
         leftAlign={true}
       />
@@ -91,36 +92,42 @@ const CreateLocationScreen = ({ navigation, route }) => {
         <ScrollView 
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
+          <View style={[styles.infoCard, { backgroundColor: theme.colors.surface }]}>
+             <View style={[styles.iconWrapper, { backgroundColor: theme.colors.primary + '10' }]}>
+                <Home size={28} color={theme.colors.primary} />
+             </View>
+             <Text style={[styles.infoText, { color: theme.colors.textLight }]}>
+               Define the physical sheds, pens, or pastures on your farm to organize your livestock efficiently.
+             </Text>
+          </View>
+          
           <View style={styles.formArea}>
-            <Text style={[styles.infoText, { color: theme.colors.textLight }]}>
-              Define the physical pens, sheds, and pastures on your farm so you can organize your livestock efficiently.
-            </Text>
-            
-            <View style={styles.spacer} />
-
             <GInput 
-              label="Location Name" 
+              label="Shed Name*" 
               value={name} 
               onChangeText={setName} 
               placeholder="e.g. Maternity Ward B"
               required 
+              rightIcon={<MapPin size={18} color={theme.colors.textMuted} />}
             />
             
             <View style={styles.spacer} />
             
             <GSelect 
               label="Parent Location (Optional)" 
+              placeholder="Select parent shed"
               value={parentLocationId} 
               onSelect={setParentLocationId}
               options={locations}
-              helpAction={() => {}}
+              rightIcon={<HelpCircle size={18} color={theme.colors.textMuted} />}
             />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 20 }]}>
+      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 24 }]}>
         <GButton 
           title={locationToEdit ? "Update Shed" : "Create Shed"} 
           onPress={handleSave}
@@ -137,32 +144,48 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   flex: { flex: 1 },
   scrollContent: {
     padding: SPACING.lg,
-    paddingBottom: 100,
+    paddingBottom: 120,
   },
-  formArea: {
-    marginTop: 8,
+  infoCard: {
+    padding: 20,
+    borderRadius: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 32,
+    ...SHADOW.small,
+  },
+  iconWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   infoText: {
-    fontSize: 14,
+    flex: 1,
+    fontSize: 13,
     fontFamily: 'Inter_500Medium',
-    lineHeight: 22,
+    lineHeight: 20,
     opacity: 0.8,
   },
-  spacer: { height: 24 },
+  formArea: {
+    gap: 4,
+  },
+  spacer: { height: 20 },
   footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     paddingHorizontal: SPACING.lg,
-    paddingTop: 12,
+    paddingTop: 16,
     backgroundColor: theme.colors.background,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border + '30',
+    ...SHADOW.large,
   },
   submitBtn: {
-    height: 56,
-    borderRadius: 16,
+    height: 54,
+    borderRadius: 14,
   }
 });
 
