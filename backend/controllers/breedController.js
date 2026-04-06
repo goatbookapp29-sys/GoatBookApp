@@ -32,6 +32,7 @@ exports.getBreeds = async (req, res) => {
       name: b.name,
       animalType: b.animal_type,
       category: b.category,
+      origin: b.origin || 'indian',
       farmId: b.farm_id,
       isDefault: b.is_default,
       animalCount: b._count?.animals || 0,
@@ -47,7 +48,7 @@ exports.getBreeds = async (req, res) => {
 // @desc    Register a new custom breed for a specific farm
 // @route   POST /api/breeds
 exports.addBreed = async (req, res) => {
-  const { name, animalType } = req.body;
+  const { name, animalType, origin } = req.body;
   try {
     if (!req.farmId) {
       return res.status(400).json({ message: 'No farm selected' });
@@ -79,6 +80,7 @@ exports.addBreed = async (req, res) => {
         id: uuidv4(),
         name,
         animal_type: animalType || 'Goat', // Default to Goat if not specified
+        origin: origin || 'indian',
         farm_id: req.farmId,
         created_by_user_id: req.user.id,
         created_at: now,
@@ -90,6 +92,7 @@ exports.addBreed = async (req, res) => {
       id: breed.id,
       name: breed.name,
       animalType: breed.animal_type,
+      origin: breed.origin,
       farmId: breed.farm_id,
       createdAt: breed.created_at
     });
@@ -102,7 +105,7 @@ exports.addBreed = async (req, res) => {
 // @desc    Update custom breed details
 // @route   PUT /api/breeds/:id
 exports.updateBreed = async (req, res) => {
-  const { name, animalType } = req.body;
+  const { name, animalType, origin } = req.body;
   try {
     // 1. Ensure the breed exists and is not a protected system breed
     const breed = await prisma.breeds.findFirst({
@@ -143,13 +146,20 @@ exports.updateBreed = async (req, res) => {
 
     const updated = await prisma.breeds.update({
       where: { id: req.params.id },
-      data: { name, animal_type: animalType, updated_by_user_id: req.user.id, updated_at: new Date() }
+      data: { 
+        name, 
+        animal_type: animalType, 
+        origin: origin || 'indian',
+        updated_by_user_id: req.user.id, 
+        updated_at: new Date() 
+      }
     });
 
     res.json({
       id: updated.id,
       name: updated.name,
       animalType: updated.animal_type,
+      origin: updated.origin,
       farmId: updated.farm_id,
       updatedAt: updated.updated_at
     });
@@ -182,7 +192,9 @@ exports.deleteBreed = async (req, res) => {
     // Integrity Check: Do not delete if any animals are currently assigned to this breed
     const animalCount = await prisma.animals.count({ where: { breed_id: breed.id } });
     if (animalCount > 0) {
-      return res.status(400).json({ message: 'Cannot delete breed that is assigned to animals' });
+      return res.status(400).json({ 
+        message: `Cannot delete — this breed is used by ${animalCount} animals`
+      });
     }
 
     await prisma.breeds.delete({ where: { id: req.params.id } });
@@ -207,37 +219,54 @@ exports.bulkDeleteBreeds = async (req, res) => {
   }
 
   try {
-    // 1. Verify all breeds belong to this farm (security)
-    const breeds = await prisma.breeds.findMany({
+    // 1. Fetch requested breeds including animal counts
+    const requestedBreeds = await prisma.breeds.findMany({
       where: {
         id: { in: ids },
         farm_id: req.farmId
+      },
+      include: {
+        _count: {
+          select: { animals: true }
+        }
       }
     });
 
-    if (breeds.length === 0) {
-      return res.status(400).json({ message: 'No manageable breeds found in this farm context' });
+    if (requestedBreeds.length === 0) {
+      return res.status(400).json({ message: 'No manageable breeds found' });
     }
 
-    const manageableIds = breeds.map(b => b.id);
+    const skippedIds = [];
+    const deletableIds = [];
 
-    // 2. Integrity Check: Ensure no animals are assigned to any of these manageable breeds
-    const animalCount = await prisma.animals.count({
-      where: { breed_id: { in: manageableIds } }
+    // 2. Filter: Skip system breeds AND breeds with animals
+    requestedBreeds.forEach(breed => {
+      if (breed.is_default || breed._count.animals > 0) {
+        skippedIds.push(breed.id);
+      } else {
+        deletableIds.push(breed.id);
+      }
     });
 
-    if (animalCount > 0) {
+    if (deletableIds.length === 0) {
       return res.status(400).json({ 
-        message: 'Cannot delete one or more breeds because they are assigned to animals.' 
+        message: 'No breeds were eligible for deletion (either system breeds or assigned to animals).',
+        skippedIds 
       });
     }
 
     // 3. Bulk Delete
     await prisma.breeds.deleteMany({
-      where: { id: { in: manageableIds } }
+      where: { id: { in: deletableIds } }
     });
 
-    res.json({ success: true, message: `Successfully deleted ${manageableIds.length} breeds` });
+    res.json({ 
+      success: true, 
+      message: `Successfully deleted ${deletableIds.length} breeds. ${skippedIds.length > 0 ? `${skippedIds.length} skipped.` : ''}`,
+      deletedCount: deletableIds.length,
+      skippedCount: skippedIds.length,
+      skippedIds
+    });
   } catch (err) {
     console.error('BULK DELETE BREEDS ERROR:', err);
     res.status(500).json({ message: 'Server Error' });

@@ -67,10 +67,14 @@ model breeds {
   updated_at                             DateTime  @updatedAt @db.Timestamptz(6)
   category                               String?   @db.VarChar(255)
   is_default                             Boolean   @default(false)
+  origin                                 String?   @default("indian") @db.VarChar(50)
+
   animals                                animals[]
   users_breeds_created_by_user_idTousers users?    @relation("breeds_created_by_user_idTousers", fields: [created_by_user_id], references: [id])
   farms                                  farms?    @relation(fields: [farm_id], references: [id], onDelete: Cascade)
   users_breeds_updated_by_user_idTousers users?    @relation("breeds_updated_by_user_idTousers", fields: [updated_by_user_id], references: [id])
+
+  @@index([origin])
 }
 
 model employees {

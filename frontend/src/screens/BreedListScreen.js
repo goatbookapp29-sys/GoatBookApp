@@ -46,7 +46,8 @@ const BreedListScreen = ({ navigation }) => {
       const q = searchQuery.toLowerCase();
       const filtered = breeds.filter(breed => 
         breed.name.toLowerCase().includes(q) ||
-        (breed.animalType && breed.animalType.toLowerCase().includes(q))
+        (breed.animalType && breed.animalType.toLowerCase().includes(q)) ||
+        (breed.origin && breed.origin.toLowerCase().includes(q))
       );
       setFilteredBreeds(filtered);
     }
@@ -56,9 +57,15 @@ const BreedListScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await api.get('/breeds');
-      await saveToCache('breeds', response.data);
-      setBreeds(response.data);
-      setFilteredBreeds(response.data);
+      const sortedData = response.data.sort((a, b) => {
+        if (a.isDefault !== b.isDefault) {
+          return a.isDefault ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name);
+      });
+      await saveToCache('breeds', sortedData);
+      setBreeds(sortedData);
+      setFilteredBreeds(sortedData);
       setLoading(false);
     } catch (error) {
       console.warn('Fetch breeds failed', error);
@@ -149,19 +156,32 @@ const BreedListScreen = ({ navigation }) => {
           styles.breedCard, 
           isSelected && { borderColor: theme.colors.primary, backgroundColor: isDarkMode ? '#1E1E1E' : '#fafafa' }
         ]}
-        onPress={() => isSelectionMode ? (isCustom ? toggleSelection(item.id) : null) : navigation.navigate('BreedDetails', { breedId: item.id })}
+        onPress={() => isSelectionMode ? (isCustom ? toggleSelection(item.id) : null) : (isCustom ? navigation.navigate('EditBreed', { breed: item }) : null)}
         onLongPress={() => handleLongPress(item)}
         activeOpacity={0.7}
       >
         <View style={styles.breedInfo}>
           <Text style={[styles.breedName, { color: theme.colors.text }]}>{item.name}</Text>
-          <Text style={[styles.animalType, { color: theme.colors.textLight }]}>{item.animalType}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+            <Text style={[styles.animalType, { color: theme.colors.textLight, fontSize: 13 }]}>{item.animalType}</Text>
+            <View style={[
+              styles.originBadge, 
+              { 
+                backgroundColor: (item.origin || 'indian').toLowerCase() === 'exotic' ? '#E3F2FD' : '#E8F5E9',
+                marginLeft: 10
+              }
+            ]}>
+              <Text style={[
+                styles.originText, 
+                { color: (item.origin || 'indian').toLowerCase() === 'exotic' ? '#1976D2' : '#2E7D32' }
+              ]}>
+                {(item.origin || 'Indian').toUpperCase()}
+              </Text>
+            </View>
+          </View>
         </View>
         
         <View style={styles.breedStats}>
-          <View style={[styles.countBadge, { backgroundColor: theme.colors.primary + '20' }]}>
-            <Text style={[styles.countText, { color: theme.colors.primary }]}>{item.animalCount || 0}</Text>
-          </View>
           {isSelectionMode ? (
             <View style={styles.checkboxWrapper}>
               {isCustom ? (
@@ -177,7 +197,7 @@ const BreedListScreen = ({ navigation }) => {
               )}
             </View>
           ) : (
-            <ChevronRight size={20} color={theme.colors.textMuted} />
+            isCustom && <ChevronRight size={20} color={theme.colors.textMuted} />
           )}
         </View>
       </TouchableOpacity>
@@ -234,7 +254,7 @@ const BreedListScreen = ({ navigation }) => {
             <Search size={20} color={theme.colors.textLight} style={styles.searchIcon} />
             <TextInput
               style={[styles.searchInput, { color: theme.colors.text }]}
-              placeholder="Search breed name or type..."
+              placeholder="Search name, type or origin..."
               placeholderTextColor={theme.colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -378,7 +398,18 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   checkboxSelected: { borderColor: '#007AFF', backgroundColor: '#007AFF' },
   breedInfo: { flex: 1 },
   breedName: { fontSize: 16, fontFamily: 'Inter_600SemiBold' },
-  animalType: { fontSize: 14, marginTop: 4, fontFamily: 'Inter_500Medium' },
+  animalType: { fontSize: 13, fontFamily: 'Inter_500Medium' },
+  originBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  originText: {
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+  },
   breedStats: {
     flexDirection: 'row',
     alignItems: 'center',
