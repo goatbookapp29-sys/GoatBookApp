@@ -20,42 +20,11 @@ const AddWeightScreen = ({ route, navigation }) => {
   const [height, setHeight] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [remark, setRemark] = useState('');
-  const [animalInfo, setAnimalInfo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [fetchingAnimal, setFetchingAnimal] = useState(false);
   const [successVisible, setSuccessVisible] = useState(false);
-
-  useEffect(() => {
-    if (initialTag) {
-      fetchAnimalDetails(initialTag);
-    }
-  }, [initialTag]);
-
-  const fetchAnimalDetails = async (tag) => {
-    if (!tag) return;
-    try {
-      setFetchingAnimal(true);
-      const response = await api.get(`/animals?tagNumber=${tag}`);
-      if (response.data && response.data.length > 0) {
-        setAnimalInfo(response.data[0]);
-      } else {
-        setAnimalInfo(null);
-      }
-    } catch (error) {
-      console.error('Fetch animal details error:', error);
-      setAnimalInfo(null);
-    } finally {
-      setFetchingAnimal(false);
-    }
-  };
 
   const handleTagChange = (text) => {
     setTagNumber(text);
-    if (text.length >= 3) {
-      fetchAnimalDetails(text);
-    } else {
-      setAnimalInfo(null);
-    }
   };
 
   const handleSubmit = async () => {
@@ -114,26 +83,7 @@ const AddWeightScreen = ({ route, navigation }) => {
             </View>
           </View>
 
-          {fetchingAnimal && (
-            <View style={styles.infoBox}>
-              <Text style={[styles.infoText, { color: theme.colors.textMuted }]}>Fetching animal details...</Text>
-            </View>
-          )}
-
-          {animalInfo && (
-            <View style={styles.animalDetailCard}>
-               <View style={styles.detailRow}>
-                <Info size={16} color={theme.colors.primary} />
-                <Text style={[styles.detailLabel, { color: theme.colors.textLight }]}>Breed: </Text>
-                <Text style={[styles.detailValue, { color: theme.colors.text }]}>{animalInfo.breed?.name || animalInfo.Breed?.name}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Info size={16} color={theme.colors.primary} />
-                <Text style={[styles.detailLabel, { color: theme.colors.textLight }]}>Gender: </Text>
-                <Text style={[styles.detailValue, { color: theme.colors.text }]}>{animalInfo.gender}</Text>
-              </View>
-            </View>
-          )}
+          </View>
 
           <View style={styles.row}>
             <GDatePicker 
