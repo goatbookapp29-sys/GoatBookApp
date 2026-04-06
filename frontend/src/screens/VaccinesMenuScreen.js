@@ -28,12 +28,6 @@ const VaccinesMenuScreen = ({ navigation }) => {
       icon: <Users color={theme.colors.primary} size={32} strokeWidth={1.5} />, 
       onPress: () => navigation.navigate('MassVaccination') 
     },
-    { 
-      id: 'history', 
-      title: 'Vaccination History', 
-      icon: <History color={theme.colors.primary} size={32} strokeWidth={1.5} />, 
-      onPress: () => navigation.navigate('VaccinationList') 
-    },
   ];
 
   return (
@@ -59,21 +53,6 @@ const VaccinesMenuScreen = ({ navigation }) => {
             </TouchableOpacity>
           ))}
         </View>
-        
-        {/* Health Insights Alert Card */}
-        <TouchableOpacity 
-          style={[styles.alertCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
-          activeOpacity={0.8}
-        >
-          <View style={styles.alertHeader}>
-            <Bell size={20} color={theme.colors.primary} />
-            <Text style={[styles.alertTag, { color: theme.colors.primary }]}>HEALTH ALERTS</Text>
-          </View>
-          <Text style={[styles.alertTitle, { color: theme.colors.text }]}>Check Upcoming Boosters</Text>
-          <Text style={[styles.alertSub, { color: theme.colors.textLight }]}>
-            View Goats whose vaccinations are expiring in the next 30 days.
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );
