@@ -6,7 +6,7 @@ import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import GSelect from '../components/GSelect';
 import api from '../api';
-import { Scan, HelpCircle, X, Tag, MapPin, Info } from 'lucide-react-native';
+import { Scan, HelpCircle, X, Tag, MapPin, Info, ArrowRightLeft } from 'lucide-react-native';
 import { SPACING, SHADOW } from '../theme';
 
 const AddLocationScreen = ({ navigation, route }) => {
@@ -98,7 +98,7 @@ const AddLocationScreen = ({ navigation, route }) => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
-        title="Add Location/Shed" 
+        title="Move Livestock" 
         onBack={() => navigation.goBack()} 
         leftAlign={true}
       />
@@ -112,12 +112,13 @@ const AddLocationScreen = ({ navigation, route }) => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.formArea}>
-            {/* Tag ID Search Row */}
+          {/* Tag ID Search Row - Fixed Alignment */}
+          <View style={styles.searchSection}>
             <View style={styles.inputRow}>
               <View style={styles.inputFlex}>
                 <GInput 
                   label="Scan/Enter Tag ID*" 
+                  placeholder="e.g. 501"
                   value={tagNumber} 
                   onChangeText={(val) => {
                     setTagNumber(val);
@@ -137,74 +138,100 @@ const AddLocationScreen = ({ navigation, route }) => {
                 activeOpacity={0.8}
                 disabled={searching}
               >
-                <Text style={styles.addBtnText}>{searching ? '...' : 'ADD'}</Text>
+                <Text style={styles.addBtnText}>{searching ? '...' : 'SEARCH'}</Text>
               </TouchableOpacity>
             </View>
+          </View>
 
-            {/* Animal Card (Preview) */}
-            {animal && (
-              <View style={[styles.animalCard, { backgroundColor: theme.colors.surface }]}>
-                <View style={styles.cardAccent} />
-                <View style={styles.animalCardContent}>
-                  <View style={styles.animalHeader}>
-                    <View style={styles.tagBadgeMain}>
-                       <Tag size={14} color={theme.colors.primary} />
-                       <Text style={[styles.animalTitle, { color: theme.colors.text }]}>#{animal.tagNumber}</Text>
-                    </View>
-                    <Text style={[styles.animalBreed, { color: theme.colors.textLight }]}>{animal.breedName}</Text>
-                  </View>
-                  <View style={styles.animalMetaRow}>
-                    <Text style={[styles.metaItem, { color: theme.colors.textLight }]}>{animal.gender}</Text>
-                    <View style={styles.dot} />
-                    <Text style={[styles.metaItem, { color: theme.colors.textLight }]}>{animal.ageInMonths} Months</Text>
-                    <View style={styles.dot} />
-                    <View style={styles.currentLocBadge}>
-                        <MapPin size={10} color={theme.colors.primary} />
-                        <Text style={[styles.currentLocText, { color: theme.colors.primary }]}>{animal.currentLocationName}</Text>
-                    </View>
+          {/* Animal Card (Premium Preview) */}
+          {animal ? (
+            <View style={[styles.animalCard, { backgroundColor: theme.colors.surface }]}>
+              <View style={styles.cardHeader}>
+                <View style={styles.tagBadge}>
+                  <Tag size={14} color="#FFF" />
+                  <Text style={styles.tagText}>#{animal.tagNumber}</Text>
+                </View>
+                <Text style={[styles.breedText, { color: theme.colors.textLight }]}>{animal.breedName || 'Sirohi'}</Text>
+              </View>
+              
+              <View style={styles.cardDivider} />
+              
+              <View style={styles.metaGrid}>
+                <View style={styles.metaItem}>
+                  <Text style={[styles.metaLabel, { color: theme.colors.textMuted }]}>Gender</Text>
+                  <Text style={[styles.metaVal, { color: theme.colors.text }]}>{animal.gender}</Text>
+                </View>
+                <View style={styles.metaItem}>
+                  <Text style={[styles.metaLabel, { color: theme.colors.textMuted }]}>Age</Text>
+                  <Text style={[styles.metaVal, { color: theme.colors.text }]}>{animal.ageInMonths} Months</Text>
+                </View>
+                <View style={styles.metaItem}>
+                  <Text style={[styles.metaLabel, { color: theme.colors.textMuted }]}>Current Shed</Text>
+                  <View style={styles.locRow}>
+                    <MapPin size={12} color={theme.colors.primary} />
+                    <Text style={[styles.metaVal, { color: theme.colors.primary }]}>{animal.currentLocationName || 'N/A'}</Text>
                   </View>
                 </View>
               </View>
-            )}
-            
-            <View style={styles.divider} />
+            </View>
+          ) : (
+             <View style={[styles.placeholderCard, { borderColor: theme.colors.border + '50' }]}>
+                <Info size={24} color={theme.colors.textMuted} />
+                <Text style={[styles.placeholderText, { color: theme.colors.textMuted }]}>
+                  Search an animal to begin the relocation process.
+                </Text>
+             </View>
+          )}
+          
+          <View style={styles.assignmentSection}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Relocation Details</Text>
             
             {/* Location Selectors */}
-            <GSelect 
-              label="Existing Location/Shed" 
-              placeholder="Select from your sheds"
-              value={locationId} 
-              onSelect={(val) => {
-                setLocationId(val);
-                if (val) setNewLocationName('');
-              }}
-              options={locations}
-              rightIcon={<HelpCircle size={18} color={theme.colors.textMuted} />}
-            />
-            
-            <View style={styles.spacer} />
-            
-            <GInput 
-              label="Add New Location" 
-              placeholder="E.g. Shed B - North"
-              value={newLocationName} 
-              onChangeText={(val) => {
-                setNewLocationName(val);
-                if (val) setLocationId(null);
-              }} 
-              rightIcon={<HelpCircle size={18} color={theme.colors.textMuted} />}
-            />
+            <View style={[styles.formCard, { backgroundColor: theme.colors.surface }]}>
+              <GSelect 
+                label="Target Shed*" 
+                placeholder="Select from your sheds"
+                value={locationId} 
+                onSelect={(val) => {
+                  setLocationId(val);
+                  if (val) setNewLocationName('');
+                }}
+                options={locations}
+                rightIcon={<ArrowRightLeft size={18} color={theme.colors.textMuted} />}
+              />
+              
+              <View style={styles.inputSpacer} />
+              
+              <View style={styles.orDivider}>
+                <View style={[styles.line, { backgroundColor: theme.colors.border }]} />
+                <Text style={[styles.orText, { color: theme.colors.textMuted }]}>OR CREATE NEW</Text>
+                <View style={[styles.line, { backgroundColor: theme.colors.border }]} />
+              </View>
 
-            <View style={styles.spacer} />
+              <View style={styles.inputSpacer} />
 
-            <GInput 
-              label="Remark" 
-              placeholder="Reason for movement (Optional)"
-              value={remark} 
-              onChangeText={setRemark} 
-              multiline
-              numberOfLines={3}
-            />
+              <GInput 
+                label="New Shed Name" 
+                placeholder="E.g. Quarantine Pen 2"
+                value={newLocationName} 
+                onChangeText={(val) => {
+                  setNewLocationName(val);
+                  if (val) setLocationId(null);
+                }} 
+                rightIcon={<Plus size={18} color={theme.colors.textMuted} />}
+              />
+
+              <View style={styles.inputSpacer} />
+
+              <GInput 
+                label="Remark" 
+                placeholder="Reason for movement (Optional)"
+                value={remark} 
+                onChangeText={setRemark} 
+                multiline
+                numberOfLines={3}
+              />
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -212,9 +239,10 @@ const AddLocationScreen = ({ navigation, route }) => {
       {/* Fixed Footer */}
       <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? 34 : 24 }]}>
         <GButton 
-          title="Submit" 
+          title="Confirm Assignment" 
           onPress={handleSave}
           loading={loading}
+          disabled={!animal || (!locationId && !newLocationName)}
           containerStyle={styles.submitBtn}
         />
       </View>
@@ -230,16 +258,16 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    paddingBottom: 140,
+  },
+  searchSection: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
-    paddingBottom: 120,
-  },
-  formArea: {
-    gap: 4,
+    paddingBottom: SPACING.md,
   },
   inputRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'flex-end', // Aligned to bottom of input area
     gap: 12,
   },
   inputFlex: {
@@ -247,88 +275,125 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   addBtn: {
     height: 52,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    paddingHorizontal: 20,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 28, // Align with GInput label
+    ...SHADOW.small,
   },
   addBtnText: {
     color: '#FFF',
     fontFamily: 'Inter_700Bold',
-    fontSize: 14,
+    fontSize: 13,
     letterSpacing: 0.5,
   },
   animalCard: {
-    borderRadius: 16,
-    flexDirection: 'row',
-    overflow: 'hidden',
-    marginTop: 12,
-    ...SHADOW.small,
+    marginHorizontal: SPACING.lg,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 32,
+    ...SHADOW.medium,
   },
-  cardAccent: {
-    width: 6,
-    backgroundColor: theme.colors.primary,
-  },
-  animalCardContent: {
-    padding: 16,
-    flex: 1,
-  },
-  animalHeader: {
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  tagBadgeMain: {
+  tagBadge: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
     gap: 6,
   },
-  animalTitle: {
-    fontSize: 18,
+  tagText: {
+    color: '#FFF',
     fontFamily: 'Inter_700Bold',
+    fontSize: 16,
   },
-  animalBreed: {
-    fontSize: 13,
-    fontFamily: 'Inter_500Medium',
-    opacity: 0.7,
+  breedText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    opacity: 0.8,
   },
-  animalMetaRow: {
+  cardDivider: {
+    height: 1,
+    backgroundColor: theme.colors.border + '30',
+    marginBottom: 16,
+  },
+  metaGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
   },
   metaItem: {
+    flex: 1,
+  },
+  metaLabel: {
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 4,
+  },
+  metaVal: {
     fontSize: 13,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'Inter_700Bold',
   },
-  dot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: theme.colors.textMuted,
-  },
-  currentLocBadge: {
+  locRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: theme.colors.primary + '10',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
   },
-  currentLocText: {
-    fontSize: 11,
-    fontFamily: 'Inter_600SemiBold',
+  placeholderCard: {
+    marginHorizontal: SPACING.lg,
+    height: 120,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    marginBottom: 32,
   },
-  divider: {
-    height: 1,
-    backgroundColor: theme.colors.border + '15',
-    marginVertical: 20,
+  placeholderText: {
+    textAlign: 'center',
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    marginTop: 10,
+    lineHeight: 18,
   },
-  spacer: {
+  assignmentSection: {
+    paddingHorizontal: SPACING.lg,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 16,
+  },
+  formCard: {
+    borderRadius: 24,
+    padding: 20,
+    ...SHADOW.small,
+  },
+  inputSpacer: {
     height: 12,
+  },
+  orDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 12,
+    gap: 8,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    opacity: 0.3,
+  },
+  orText: {
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1,
   },
   footer: {
     position: 'absolute',
@@ -341,9 +406,15 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     ...SHADOW.large,
   },
   submitBtn: {
-    height: 54,
-    borderRadius: 14,
+    height: 56,
+    borderRadius: 16,
   }
 });
+
+const Plus = ({ size, color }) => (
+  <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
+    <Text style={{ color, fontSize: 24, fontWeight: 'bold' }}>+</Text>
+  </View>
+);
 
 export default AddLocationScreen;
