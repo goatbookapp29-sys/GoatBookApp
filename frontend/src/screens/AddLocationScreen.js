@@ -117,7 +117,7 @@ const AddLocationScreen = ({ navigation, route }) => {
             <View style={styles.inputRow}>
               <View style={styles.inputFlex}>
                 <GInput 
-                  label="Scan/Enter Tag ID*" 
+                  label="Enter Tag ID*" 
                   value={tagNumber} 
                   onChangeText={(val) => {
                     setTagNumber(val);
@@ -128,7 +128,7 @@ const AddLocationScreen = ({ navigation, route }) => {
                     <TouchableOpacity onPress={() => {setTagNumber(''); setAnimal(null);}}>
                         <X size={18} color={theme.colors.textMuted} />
                     </TouchableOpacity>
-                  ) : <Scan size={20} color={theme.colors.textMuted} />}
+                  ) : null}
                 />
               </View>
               <TouchableOpacity 
@@ -231,7 +231,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     paddingBottom: 40,
   },
   formArea: {
-    gap: 12,
+    gap: 4,
   },
   inputRow: {
     flexDirection: 'row',
