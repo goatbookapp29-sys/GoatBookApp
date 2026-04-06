@@ -110,7 +110,6 @@ const AddWeightScreen = ({ route, navigation }) => {
                 onChangeText={handleTagChange} 
                 placeholder="2912"
                 required
-                rightIcon={<Scan size={20} color={theme.colors.primary} />}
               />
             </View>
           </View>
