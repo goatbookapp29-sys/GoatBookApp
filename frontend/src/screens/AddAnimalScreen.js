@@ -989,25 +989,27 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
                     {/* PURCHASE SECTION */}
                     {acquisitionMethod === 'PURCHASED' && (
-                      <View style={styles.row}>
-                        <GDatePicker 
-                          containerStyle={styles.halfWidth}
-                          label="Purch. Date" 
-                          value={purchaseDate} 
-                          onDateChange={setPurchaseDate}
-                          placeholder="Select Date"
-                          required
-                        />
-                        <GInput 
-                          containerStyle={styles.halfWidth}
-                          label="Purch. Price" 
-                          value={purchasePrice} 
-                          onChangeText={setPurchasePrice} 
-                          keyboardType="number-pad"
-                          placeholder="e.g. 5000"
-                          required
-                        />
-                      </View>
+                      <>
+                        <View style={styles.row}>
+                          <GDatePicker 
+                            label="Purchase Date" 
+                            value={purchaseDate} 
+                            onDateChange={setPurchaseDate}
+                            placeholder="Select Date"
+                            required
+                          />
+                        </View>
+                        <View style={styles.row}>
+                          <GInput 
+                            label="Purchase Price" 
+                            value={purchasePrice} 
+                            onChangeText={setPurchasePrice} 
+                            keyboardType="number-pad"
+                            placeholder="e.g. 5000"
+                            required
+                          />
+                        </View>
+                      </>
                     )}
                     
                   {gender === 'FEMALE' && acquisitionMethod === 'PURCHASED' && (
