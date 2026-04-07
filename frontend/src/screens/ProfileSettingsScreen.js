@@ -9,6 +9,7 @@ import GSelect from '../components/GSelect';
 import api from '../api';
 import { User, Camera, ImageIcon, Trash2 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { uploadToCloudinary as cloudinaryUpload } from '../utils/cloudinary';
 
 const ProfileSettingsScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -94,33 +95,9 @@ const ProfileSettingsScreen = ({ navigation }) => {
     if (!imageUri || imageUri.startsWith('http')) return imageUri;
     try {
       setUploading(true);
-      const data = new FormData();
-      data.append('upload_preset', 'goatbook_preset');
-      data.append('cloud_name', 'dvtfv9vvr');
-
-      if (Platform.OS === 'web') {
-        const blobResponse = await fetch(imageUri);
-        const blob = await blobResponse.blob();
-        data.append('file', blob, 'upload.jpg');
-      } else {
-        const fileName = imageUri.split('/').pop();
-        const fileType = fileName.split('.').pop();
-        data.append('file', {
-          uri: imageUri,
-          name: fileName || 'upload.jpg',
-          type: `image/${fileType === 'jpg' ? 'jpeg' : fileType}`,
-        });
-      }
-
-      const response = await fetch('https://api.cloudinary.com/v1_1/dvtfv9vvr/image/upload', {
-        method: 'POST',
-        body: data,
-      });
-
-      if (!response.ok) throw new Error('Cloudinary Upload Failed');
-      const resData = await response.json();
+      const uploadedImageUrl = await cloudinaryUpload(imageUri);
       setUploading(false);
-      return resData.secure_url;
+      return uploadedImageUrl;
     } catch (error) {
       setUploading(false);
       console.error('Upload error:', error);

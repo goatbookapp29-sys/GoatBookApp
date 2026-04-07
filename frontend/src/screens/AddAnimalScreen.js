@@ -18,6 +18,7 @@ import {
 } from 'lucide-react-native';
 import api from '../api';
 import { getFromCache } from '../utils/cache';
+import { uploadToCloudinary as cloudinaryUpload } from '../utils/cloudinary';
 
 const AddAnimalScreen = ({ navigation, route }) => {
   const { isDarkMode, theme } = useTheme();
@@ -374,47 +375,15 @@ const AddAnimalScreen = ({ navigation, route }) => {
 
   const uploadToCloudinary = async (imageUri) => {
     if (!imageUri || imageUri.startsWith('http')) return imageUri;
-
     try {
       setUploading(true);
-      
-      const data = new FormData();
-      data.append('upload_preset', 'goatbook_preset'); 
-      data.append('cloud_name', 'dvtfv9vvr'); 
-
-      if (Platform.OS === 'web') {
-        const blobResponse = await fetch(imageUri);
-        const blob = await blobResponse.blob();
-        data.append('file', blob, 'upload.jpg');
-      } else {
-        // Correct way for React Native / Mobile
-        const fileName = imageUri.split('/').pop();
-        const fileType = fileName.split('.').pop();
-        data.append('file', {
-          uri: imageUri,
-          name: fileName || 'upload.jpg',
-          type: `image/${fileType === 'jpg' ? 'jpeg' : fileType}`,
-        });
-      }
-
-      const response = await fetch('https://api.cloudinary.com/v1_1/dvtfv9vvr/image/upload', {
-        method: 'POST',
-        body: data,
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Cloudinary Upload Failed:', errorText);
-        throw new Error('Cloudinary Upload Failed');
-      }
-
-      const resData = await response.json();
+      const uploadedImageUrl = await cloudinaryUpload(imageUri);
       setUploading(false);
-      return resData.secure_url;
+      return uploadedImageUrl;
     } catch (error) {
       setUploading(false);
       console.error('Upload to Cloudinary error:', error);
-      Alert.alert('Upload Error', 'Failed to upload image to Cloudinary. Please check your connection.');
+      Alert.alert('Upload Error', 'Failed to upload image. Please check your connection.');
       throw error;
     }
   };
