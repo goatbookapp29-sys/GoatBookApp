@@ -61,6 +61,8 @@ exports.getAnimals = async (req, res) => {
       remark: a.remark,
       imageUrl: a.image_url,
       teethStage: a.teeth_stage,
+      purchaseWeight: a.purchase_weight,
+      landingCost: a.landing_cost,
       createdByUserId: a.created_by_user_id,
       updatedByUserId: a.updated_by_user_id,
       createdAt: a.created_at,
@@ -86,7 +88,7 @@ exports.addAnimal = async (req, res) => {
     matingDate, expectedDeliveryDate,
     birthType, motherTagId, fatherTagId, remark,
     status, isReadyForSale, currentWeight, salePrice, imageUrl,
-    teethStage,
+    teethStage, purchaseWeight, landingCost,
     deathDate, deathReason,
     soldAt, soldRemark
   } = req.body;
@@ -149,6 +151,8 @@ exports.addAnimal = async (req, res) => {
         acquisition_method: acquisitionMethod?.toUpperCase() || 'BORN',
         purchase_date: (acquisitionMethod?.toUpperCase() === 'PURCHASED') && purchaseDate ? new Date(purchaseDate) : null,
         purchase_price: (acquisitionMethod?.toUpperCase() === 'PURCHASED') ? purchasePrice : null,
+        purchase_weight: (acquisitionMethod?.toUpperCase() === 'PURCHASED') ? purchaseWeight : null,
+        landing_cost: (acquisitionMethod?.toUpperCase() === 'PURCHASED') ? landingCost : null,
         age_in_months: (acquisitionMethod?.toUpperCase() === 'PURCHASED') ? ageInMonths : null,
         teeth_stage: (acquisitionMethod?.toUpperCase() === 'PURCHASED' || acquisitionMethod?.toUpperCase() === 'BORN') ? teethStage : null,
         female_condition: gender?.toUpperCase() === 'FEMALE' ? femaleCondition : null,
@@ -219,6 +223,8 @@ exports.getAnimal = async (req, res) => {
       soldRemark: animal.sold_remark,
       isReadyForSale: animal.is_ready_for_sale,
       teethStage: animal.teeth_stage,
+      purchaseWeight: animal.purchase_weight,
+      landingCost: animal.landing_cost,
       remark: animal.remark,
       imageUrl: animal.image_url,
       Breed: animal.breeds,
@@ -241,7 +247,7 @@ exports.updateAnimal = async (req, res) => {
     matingDate, expectedDeliveryDate,
     birthType, motherTagId, fatherTagId, remark,
     status, isReadyForSale, currentWeight, salePrice, imageUrl,
-    teethStage,
+    teethStage, purchaseWeight, landingCost,
     deathDate, deathReason,
     soldAt, soldRemark
   } = req.body;
@@ -282,6 +288,8 @@ exports.updateAnimal = async (req, res) => {
         acquisition_method: currentAcqMethod,
         purchase_date: currentAcqMethod === 'PURCHASED' && purchaseDate ? new Date(purchaseDate) : null,
         purchase_price: currentAcqMethod === 'PURCHASED' ? purchasePrice : null,
+        purchase_weight: currentAcqMethod === 'PURCHASED' ? purchaseWeight : null,
+        landing_cost: currentAcqMethod === 'PURCHASED' ? landingCost : null,
         age_in_months: currentAcqMethod === 'PURCHASED' ? ageInMonths : null,
         teeth_stage: (currentAcqMethod === 'PURCHASED' || currentAcqMethod === 'BORN') ? teethStage : null,
         female_condition: gender?.toUpperCase() === 'FEMALE' ? femaleCondition : null,

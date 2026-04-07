@@ -79,6 +79,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
   // Purchased specific
   const [purchaseDate, setPurchaseDate] = useState(existingAnimal.purchaseDate || '');
   const [purchasePrice, setPurchasePrice] = useState(existingAnimal.purchasePrice?.toString() || '');
+  const [purchaseWeight, setPurchaseWeight] = useState(existingAnimal.purchaseWeight?.toString() || '');
+  const [landingCost, setLandingCost] = useState(existingAnimal.landingCost?.toString() || '');
   const [femaleCondition, setFemaleCondition] = useState(existingAnimal.femaleCondition || 'NONE');
   const [matingDate, setMatingDate] = useState(existingAnimal.matingDate || '');
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState(existingAnimal.expectedDeliveryDate || '');
@@ -464,6 +466,8 @@ const AddAnimalScreen = ({ navigation, route }) => {
         isQurbani: gender === 'MALE' ? isQurbani : false,
         purchaseDate: (acquisitionMethod === 'PURCHASED' && isValidDate(purchaseDate)) ? purchaseDate : null,
         purchasePrice: (purchasePrice && !isNaN(parseFloat(purchasePrice))) ? parseFloat(purchasePrice) : null,
+        purchaseWeight: (purchaseWeight && !isNaN(parseFloat(purchaseWeight))) ? parseFloat(purchaseWeight) : null,
+        landingCost: (landingCost && !isNaN(parseFloat(landingCost))) ? parseFloat(landingCost) : null,
         femaleCondition: (gender === 'FEMALE') ? femaleCondition : null,
         matingDate: femaleCondition === 'MATED' ? (isValidDate(matingDate) ? matingDate : null) : null,
         expectedDeliveryDate: femaleCondition === 'PREGNANT' ? (isValidDate(expectedDeliveryDate) ? expectedDeliveryDate : null) : null,
@@ -1110,12 +1114,31 @@ const AddAnimalScreen = ({ navigation, route }) => {
                         </View>
                         <View style={styles.row}>
                           <GInput 
+                            containerStyle={styles.halfWidth}
                             label="Purchase Price" 
                             value={purchasePrice} 
                             onChangeText={setPurchasePrice} 
                             keyboardType="number-pad"
                             placeholder="e.g. 5000"
                             required
+                          />
+                          <GInput 
+                            containerStyle={styles.halfWidth}
+                            label="Landing Cost" 
+                            value={landingCost} 
+                            onChangeText={setLandingCost} 
+                            keyboardType="number-pad"
+                            placeholder="e.g. 300"
+                          />
+                        </View>
+                        <View style={styles.row}>
+                          <GInput 
+                            containerStyle={styles.halfWidth}
+                            label="Purchase Wt (KG)" 
+                            value={purchaseWeight} 
+                            onChangeText={setPurchaseWeight} 
+                            keyboardType="decimal-pad"
+                            placeholder="e.g. 20.5"
                           />
                         </View>
                       </>
