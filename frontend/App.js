@@ -91,6 +91,7 @@ function AppContent() {
 
   const loadResources = async () => {
     try {
+      console.log("Loading fonts...");
       await Font.loadAsync({
         'Inter_400Regular': Inter_400Regular,
         'Inter_500Medium': Inter_500Medium,
@@ -98,13 +99,16 @@ function AppContent() {
         'Inter_700Bold': Inter_700Bold,
         'Inter_800ExtraBold': Inter_800ExtraBold,
       });
+      console.log("Fonts loaded.");
       setFontsLoaded(true);
-      await checkSession();
     } catch (e) {
       console.warn('RESOURCES LOADING FAILED:', e);
       // Fallback: try to show app anyway
       setFontsLoaded(true); 
     } finally {
+      console.log("Checking session...");
+      await checkSession();
+      console.log("Session checked, hiding splash screen...");
       await SplashScreen.hideAsync();
     }
   };
@@ -124,21 +128,34 @@ function AppContent() {
 
   const checkSession = async () => {
     try {
-      let token, farmId;
-      if (Platform.OS === 'web') {
-        token = localStorage.getItem('token');
-        farmId = localStorage.getItem('selectedFarmId');
-      } else {
-        token = await SecureStore.getItemAsync('token');
-        farmId = await SecureStore.getItemAsync('selectedFarmId');
-      }
+      console.log("Inside checkSession");
+      
+      const sessionPromise = (async () => {
+        let token, farmId;
+        if (Platform.OS === 'web') {
+          token = localStorage.getItem('token');
+          farmId = localStorage.getItem('selectedFarmId');
+        } else {
+          token = await SecureStore.getItemAsync('token');
+          farmId = await SecureStore.getItemAsync('selectedFarmId');
+        }
+        return { token, farmId };
+      })();
 
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Session check timeout')), 3000)
+      );
+
+      const { token, farmId } = await Promise.race([sessionPromise, timeoutPromise]);
+
+      console.log("Token:", token, "FarmId:", farmId);
       if (token && farmId) {
         setInitialRoute('MainDrawer');
       } else {
         setInitialRoute('Login');
       }
     } catch (e) {
+      console.error("Error in checkSession:", e);
       setInitialRoute('Login');
     }
   };
