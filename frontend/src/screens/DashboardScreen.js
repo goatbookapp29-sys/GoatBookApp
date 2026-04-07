@@ -7,9 +7,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { 
   Menu, GitBranch, PawPrint, User, Home, Syringe, Scale, 
   Heart, Activity, ClipboardList, Globe, Settings, Briefcase,
-  Moon, Sun, RefreshCcw, Milk, Settings2, Bell
+  Moon, Sun, RefreshCcw, Milk, Sliders, Bell
 } from 'lucide-react-native';
 import api from '../api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStyles } from './DashboardScreen.styles';
 
 const DashboardScreen = ({ navigation }) => {
@@ -24,40 +25,53 @@ const DashboardScreen = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      // Fetch profile to get real farm name
-      api.get('/users/profile').then(res => {
-          const currentFarmId = api.defaults.headers.common['X-Farm-ID'];
+      const loadDashboardData = async () => {
+        try {
+          // 1. Get current farm ID (Check header first, then storage)
+          let currentFarmId = api.defaults.headers.common['X-Farm-ID'];
+          if (!currentFarmId) {
+            currentFarmId = await AsyncStorage.getItem('selectedFarmId');
+          }
+
+          // 2. Fetch profile
+          const res = await api.get('/users/profile');
           const ep = res.data.employeeProfile;
           setUserRole(ep?.employeeType || 'EMPLOYEE');
-          const farm = ep?.farms?.find(f => f.id === currentFarmId);
-          if (farm) setFarmName(farm.name);
-      }).catch(err => {
-          console.warn('Dashboard: Failed to fetch profile:', err);
-          // If unauthorized (user deleted or session expired), force go to Login
+
+          // 3. Find and set farm name
+          if (ep?.farms && ep.farms.length > 0) {
+            const farm = ep.farms.find(f => f.id === currentFarmId) || ep.farms[0];
+            if (farm) setFarmName(farm.name);
+          }
+        } catch (err) {
+          console.warn('Dashboard: Failed to load data:', err);
           if (err.response?.status === 401) {
             navigation.replace('Login');
           }
-      });
+        }
+      };
+
+      loadDashboardData();
     }, [navigation])
   );
 
   const tiles = useMemo(() => {
     const allTiles = [
-      { id: '1', title: 'Breed', icon: <GitBranch color={theme.colors.primary} size={34} strokeWidth={1.8} />, screen: 'BreedList' },
-      { id: '2', title: 'Animals', icon: <PawPrint color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'AnimalList' },
-      { id: '3', title: 'Employee', icon: <User color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'EmployeeList' },
-      { id: '4', title: 'Location', icon: <Home color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'LocationMenu' },
-      { id: '5', title: 'Vaccines', icon: <Syringe color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'VaccinesMenu' },
-      { id: '6', title: 'Weight', icon: <Scale color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'AddWeight' },
-      { id: '7', title: 'Mating', icon: <Heart color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-      { id: '8', title: 'Breeding', icon: <Activity color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-      { id: '9', title: 'Report', icon: <ClipboardList color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'ReportsMenu' },
-      { id: '10', title: 'Language', icon: <Globe color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-      { id: '11', title: 'Settings', icon: <Settings color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'Settings' },
-      { id: '12', title: 'Financials', icon: <Briefcase color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-      { id: '13', title: 'Replace Tag', icon: <RefreshCcw color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: 'ReplaceTag' },
-      { id: '14', title: 'Milk Records', icon: <Milk color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
-      { id: '15', title: 'Farm Setting', icon: <Settings2 color={theme.colors.primary} size={36} strokeWidth={1.5} />, screen: null },
+      { id: '1', title: 'Breed', icon: <GitBranch color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: 'BreedList' },
+      { id: '2', title: 'Animals', icon: <PawPrint color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: 'AnimalList' },
+      { id: '3', title: 'Employee', icon: <User color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: 'EmployeeList' },
+      { id: '4', title: 'Location', icon: <Home color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: 'LocationMenu' },
+      { id: '5', title: 'Vaccines', icon: <Syringe color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: 'VaccinesMenu' },
+      { id: '6', title: 'Weight', icon: <Scale color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: 'AddWeight' },
+      { id: '7', title: 'Mating', icon: <Heart color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: null },
+      { id: '8', title: 'Breeding', icon: <Activity color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: null },
+      { id: '9', title: 'Report', icon: <ClipboardList color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: 'ReportsMenu' },
+      { id: '10', title: 'Language', icon: <Globe color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: null },
+      { id: '11', title: 'Settings', icon: <Settings color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: 'Settings' },
+      { id: '12', title: 'Financials', icon: <Briefcase color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: null },
+      { id: '13', title: 'Replace Tag', icon: <RefreshCcw color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: 'ReplaceTag' },
+      { id: '14', title: 'Milk Records', icon: <Milk color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: null },
+      { id: '15', title: 'Farm Setting', icon: <Sliders color={theme.colors.primary} size={28} strokeWidth={1.8} />, screen: null },
     ];
 
     // Filter out 'Employee' tile for non-OWNER roles
@@ -79,7 +93,7 @@ const DashboardScreen = ({ navigation }) => {
       }}
       activeOpacity={0.7}
     >
-      <View style={styles.tileIcon}>
+      <View style={[styles.tileIconContainer, { backgroundColor: theme.colors.primary + '10' }]}>
         {item.icon}
       </View>
       <Text style={styles.tileTitle}>{item.title}</Text>

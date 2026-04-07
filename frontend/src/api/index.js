@@ -30,9 +30,8 @@ const storage = {
 };
 
 // Backend URL configuration
-// Using Render backend by default as requested
+// Using Render backend (Production) exclusively as requested.
 const BASE_URL = 'https://goatbookapp.onrender.com/api';
-// const LOCAL_IP = '10.19.105.95'; // Use this for local development if needed
 
 const api = axios.create({
   baseURL: BASE_URL,

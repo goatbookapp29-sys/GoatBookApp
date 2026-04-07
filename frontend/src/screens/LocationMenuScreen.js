@@ -1,50 +1,48 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import GHeader from '../components/GHeader';
-import { User, Users, Search } from 'lucide-react-native';
+import { MapPin, Users, Search } from 'lucide-react-native';
 import { SPACING, SHADOW } from '../theme';
-
-const { width } = Dimensions.get('window');
 
 const LocationMenuScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
-  const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
+  const styles = useMemo(() => getStyles(theme), [theme]);
 
   const menuItems = [
     {
       id: 'single',
-      title: 'Single\nLocation/Shed',
-      icon: <User color={theme.colors.primary} size={48} strokeWidth={1.5} />,
+      title: 'Single Location/Shed',
+      icon: <MapPin color={theme.colors.primary} size={32} strokeWidth={1.5} />,
       screen: 'AddLocation',
     },
     {
       id: 'mass',
-      title: 'Mass\nLocation/Shed',
-      icon: <Users color={theme.colors.primary} size={48} strokeWidth={1.5} />,
+      title: 'Mass Location/Shed',
+      icon: <Users color={theme.colors.primary} size={32} strokeWidth={1.5} />,
       screen: 'MassLocation',
     },
   ];
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <GHeader 
         title="Location" 
         onBack={() => navigation.goBack()}
         leftAlign={true}
-        rightIcon={<Search color="white" size={24} />}
+        // Removing Search icon for now as it's not in the target reference style for this menu type
       />
       
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.grid}>
           {menuItems.map((item) => (
             <TouchableOpacity
               key={item.id}
-              style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border + '20' }]}
+              style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
               onPress={() => navigation.navigate(item.screen)}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '05' }]}>
+              <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '10' }]}>
                 {item.icon}
               </View>
               <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{item.title}</Text>
@@ -52,45 +50,47 @@ const LocationMenuScreen = ({ navigation }) => {
           ))}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
-const getStyles = (theme, isDarkMode) => StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    padding: SPACING.lg,
+  content: {
+    padding: SPACING.md,
+    paddingTop: SPACING.lg,
   },
   grid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 16,
   },
   card: {
-    width: (width - SPACING.lg * 2 - 16) / 2,
-    aspectRatio: 0.85,
-    padding: 20,
-    borderRadius: 24,
-    borderWidth: 1,
+    width: '47.5%',
+    aspectRatio: 1,
+    borderRadius: 16,
+    padding: SPACING.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    ...SHADOW.small,
+    borderWidth: 1.2,
   },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
     textAlign: 'center',
-    lineHeight: 20,
+    paddingHorizontal: 4,
+    lineHeight: 18,
   },
 });
 

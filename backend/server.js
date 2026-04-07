@@ -9,7 +9,7 @@ const { setupNotificationWorker } = require('./utils/notificationWorker');
 // Middleware
 app.use(cors({
   origin: [
-    'http://localhost:8081', 'http://10.19.105.95:8081',
+    'http://localhost:8081', 'http://172.24.174.95:8081',
     'http://localhost:8082', 'http://192.168.0.183:8082',
     'http://10.96.23.95:8081', 'https://goatbookapp.onrender.com'
   ],

@@ -80,7 +80,6 @@ const getStyles = (theme) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.2,
-    ...SHADOW.small,
   },
   iconContainer: {
     width: 64,

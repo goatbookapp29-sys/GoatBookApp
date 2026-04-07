@@ -3,12 +3,15 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView, ScrollVi
 import { useTheme } from '../theme/ThemeContext';
 import { 
   Home, PawPrint, GitBranch, Syringe, ClipboardList, 
-  MapPin, Settings, LogOut, ChevronRight, User, ExternalLink
+  MapPin, Settings, LogOut, ChevronRight, User, ExternalLink,
+  Scale, Heart, Activity, Globe, Briefcase, RefreshCcw, Milk, Sliders
 } from 'lucide-react-native';
 import * as SecureStore from 'expo-secure-store';
 import { LinearGradient } from 'expo-linear-gradient';
 import api, { setAuthToken, setSelectedFarm } from '../api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { Modal } from 'react-native';
 
 const SideMenu = (props) => {
   const { theme } = useTheme();
@@ -23,14 +26,30 @@ const SideMenu = (props) => {
     }, [])
   );
 
+  const [userRole, setUserRole] = useState('EMPLOYEE');
+  const [soonVisible, setSoonVisible] = useState(false);
+
   const fetchProfile = async () => {
     try {
+      // 1. Get current farm ID (Check header first, then storage)
+      let currentFarmId = api.defaults.headers.common['X-Farm-ID'];
+      if (!currentFarmId) {
+        currentFarmId = await AsyncStorage.getItem('selectedFarmId');
+      }
+
+      // 2. Fetch profile
       const res = await api.get('/users/profile');
       setUserName(res.data.name || 'User');
       setProfilePhoto(res.data.profilePhotoUrl || null);
-      const currentFarmId = api.defaults.headers.common['X-Farm-ID'];
-      const farm = res.data.employeeProfile?.farms?.find(f => f.id === currentFarmId);
-      if (farm) setFarmName(farm.name);
+      
+      const ep = res.data.employeeProfile;
+      setUserRole(ep?.employeeType || 'EMPLOYEE');
+
+      // 3. Find and set farm name
+      if (ep?.farms && ep.farms.length > 0) {
+        const farm = ep.farms.find(f => f.id === currentFarmId) || ep.farms[0];
+        if (farm) setFarmName(farm.name);
+      }
     } catch (err) {
       console.warn('SideMenu Profile Fetch Error:', err);
       if (err.response?.status === 401) {
@@ -43,11 +62,20 @@ const SideMenu = (props) => {
     { title: 'Dashboard', icon: <Home size={22} />, screen: 'Dashboard' },
     { title: 'Animals', icon: <PawPrint size={22} />, screen: 'AnimalList' },
     { title: 'Breeds', icon: <GitBranch size={22} />, screen: 'BreedList' },
-    { title: 'Vaccines', icon: <Syringe size={22} />, screen: 'VaccinesMenu' },
-    { title: 'Reports', icon: <ClipboardList size={22} />, screen: 'ReportsMenu' },
+    { title: 'Employee', icon: <User size={22} />, screen: 'EmployeeList', role: 'OWNER' },
     { title: 'Locations', icon: <MapPin size={22} />, screen: 'LocationMenu' },
+    { title: 'Vaccines', icon: <Syringe size={22} />, screen: 'VaccinesMenu' },
+    { title: 'Weight', icon: <Scale size={22} />, screen: 'AddWeight' },
+    { title: 'Mating', icon: <Heart size={22} />, screen: null },
+    { title: 'Breeding', icon: <Activity size={22} />, screen: null },
+    { title: 'Reports', icon: <ClipboardList size={22} />, screen: 'ReportsMenu' },
+    { title: 'Language', icon: <Globe size={22} />, screen: null },
+    { title: 'Financials', icon: <Briefcase size={22} />, screen: null },
+    { title: 'Replace Tag', icon: <RefreshCcw size={22} />, screen: 'ReplaceTag' },
+    { title: 'Milk Records', icon: <Milk size={22} />, screen: null },
+    { title: 'Farm Setting', icon: <Sliders size={22} />, screen: null },
     { title: 'Settings', icon: <Settings size={22} />, screen: 'Settings' },
-  ];
+  ].filter(item => !item.role || item.role === userRole);
 
   const handleLogout = async () => {
     await setAuthToken(null);
@@ -86,7 +114,13 @@ const SideMenu = (props) => {
                 styles.menuItem, 
                 isActive && { backgroundColor: theme.colors.primary + '10' }
               ]}
-              onPress={() => navigation.navigate(item.screen)}
+              onPress={() => {
+                if (item.screen) {
+                  navigation.navigate(item.screen);
+                } else {
+                  setSoonVisible(true);
+                }
+              }}
             >
               <View style={styles.menuItemLeft}>
                 {item.icon && React.isValidElement(item.icon) ? (
@@ -117,6 +151,36 @@ const SideMenu = (props) => {
         <LogOut color={theme.colors.error} size={22} />
         <Text style={[styles.logoutText, { color: theme.colors.error }]}>Log Out</Text>
       </TouchableOpacity>
+
+      {/* Coming Soon Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={soonVisible}
+        onRequestClose={() => setSoonVisible(false)}
+      >
+        <TouchableOpacity 
+           style={styles.modalOverlay} 
+           activeOpacity={1} 
+           onPress={() => setSoonVisible(false)}
+        >
+          <View style={styles.modalContent}>
+             <View style={styles.modalIconContainer}>
+                <Activity color={theme.colors.primary} size={40} strokeWidth={1.5} />
+             </View>
+             <Text style={styles.modalTitle}>Coming Soon!</Text>
+             <Text style={styles.modalMessage}>
+                We are currently working on this module. This feature will be available soon!
+             </Text>
+             <TouchableOpacity 
+                style={styles.modalButton}
+                onPress={() => setSoonVisible(false)}
+             >
+                <Text style={styles.modalButtonText}>Got it</Text>
+             </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -201,6 +265,61 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Inter_600SemiBold',
     marginLeft: 16,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 28,
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  modalIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F9500410', 
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: 'Inter_700Bold',
+    color: '#111827',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 15,
+    fontFamily: 'Inter_500Medium',
+    color: '#4B5563',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 28,
+  },
+  modalButton: {
+    backgroundColor: '#F95004',
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 14,
+    width: '100%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
   },
 });
 

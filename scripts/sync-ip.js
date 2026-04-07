@@ -20,6 +20,10 @@ function getLocalAddress() {
 }
 
 function updateFiles() {
+    // DISABLING LOCAL IP SYNCING PER USER REQUEST (STRICTLY USING RENDER)
+    console.log('ℹ️ Local IP syncing is currently disabled. Using Render/Production URLs.');
+    
+    /*
     const ip = getLocalAddress();
     console.log(`📡 Detected Local IP: ${ip}`);
 
@@ -53,6 +57,7 @@ function updateFiles() {
             console.warn('⚠️ Could not find IP pattern in backend/server.js CORS configuration');
         }
     }
+    */
 }
 
 updateFiles();

@@ -39,22 +39,28 @@ export const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   tile: {
     backgroundColor: theme.colors.surface,
-    width: '31%',
+    width: '31.5%',
     aspectRatio: 1,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 1.2,
     borderColor: theme.colors.border,
   },
-  tileIcon: {
-    marginBottom: 12,
+  tileIconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   tileTitle: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: theme.colors.text,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     textAlign: 'center',
+    paddingHorizontal: 2,
   },
   // Modal Styles
   modalOverlay: {
