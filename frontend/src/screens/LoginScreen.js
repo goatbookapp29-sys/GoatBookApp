@@ -5,6 +5,7 @@ import { useTheme } from '../theme/ThemeContext';
 import GInput from '../components/GInput';
 import GButton from '../components/GButton';
 import api, { setAuthToken, setSelectedFarm } from '../api';
+import { registerForPushNotificationsAsync } from '../utils/notificationService';
 
 const LoginScreen = ({ navigation }) => {
   const { isDarkMode, theme } = useTheme();
@@ -30,6 +31,12 @@ const LoginScreen = ({ navigation }) => {
         navigation.replace('FarmSelection', { farms });
       } else if (farms && farms.length === 1) {
         await setSelectedFarm(farms[0].id);
+        
+        // Register for push notifications after login/farm selection
+        registerForPushNotificationsAsync().catch(err => 
+          console.error('Failed to register for push notifications:', err)
+        );
+
         try {
           navigation.replace('MainDrawer');
         } catch (navError) {

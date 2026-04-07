@@ -39,7 +39,8 @@
           "photosPermission": "The app accesses your photos to let you share them with your farm profile and animals.",
           "cameraPermission": "The app accesses your camera to let you take photos of your livestock and profile."
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "extra": {
       "eas": {

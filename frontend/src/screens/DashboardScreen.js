@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, FlatList, Alert, Platform, Modal, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -12,6 +12,7 @@ import {
 import api from '../api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStyles } from './DashboardScreen.styles';
+import { registerForPushNotificationsAsync } from '../utils/notificationService';
 
 const DashboardScreen = ({ navigation }) => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
@@ -22,6 +23,13 @@ const DashboardScreen = ({ navigation }) => {
   
   // Memoize styles to avoid re-calculation on every render
   const styles = useMemo(() => getStyles(theme, isDarkMode), [theme, isDarkMode]);
+  
+  useEffect(() => {
+    // Register for push notifications on app start
+    registerForPushNotificationsAsync().catch(err => 
+      console.error('Failed to register for push notifications:', err)
+    );
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
