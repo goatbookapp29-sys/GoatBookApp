@@ -53,6 +53,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
   const [gender, setGender] = useState(existingAnimal.gender || '');
   const [batchNo, setBatchNo] = useState(existingAnimal.batchNo || '');
   const [acquisitionMethod, setAcquisitionMethod] = useState(existingAnimal.acquisitionMethod || '');
+  const [teethStage, setTeethStage] = useState(existingAnimal.teethStage || '');
   const [locationId, setLocationId] = useState(existingAnimal.locationId || null);
   const [animalType, setAnimalType] = useState(existingAnimal.animalType || 'Goat');
   
@@ -449,6 +450,7 @@ const AddAnimalScreen = ({ navigation, route }) => {
         color,
         batchNo,
         acquisitionMethod,
+        teethStage: ['BORN', 'PURCHASED'].includes(acquisitionMethod) ? (teethStage || null) : null,
         locationId,
         imageUrl: uploadedImageUrl,
         status: status,
@@ -1052,6 +1054,27 @@ const AddAnimalScreen = ({ navigation, route }) => {
                         placeholder="Select Type"
                       />
                     </View>
+
+                    {/* Teeth Stage dropdown */}
+                    {(acquisitionMethod === 'BORN' || acquisitionMethod === 'PURCHASED') && (
+                      <View style={styles.row}>
+                        <GSelect 
+                          containerStyle={styles.halfWidth}
+                          label="Teeth Stage" 
+                          value={teethStage} 
+                          onSelect={setTeethStage}
+                          options={[
+                            { label: 'Boney Teeth', value: 'Boney Teeth' },
+                            { label: '2 Teeth', value: '2 Teeth' },
+                            { label: '4 Teeth', value: '4 Teeth' },
+                            { label: '6 Teeth', value: '6 Teeth' },
+                            { label: '8 Teeth', value: '8 Teeth' },
+                            { label: 'More than 10 Teeth', value: 'More than 10 Teeth' }
+                          ]}
+                          placeholder="Select Stage"
+                        />
+                      </View>
+                    )}
 
                     {/* PARENTS: Only if Born at farm */}
                     {acquisitionMethod === 'BORN' && (
