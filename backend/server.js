@@ -3,6 +3,12 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+
+// Root health check (Render heartbeat) - AT THE VERY TOP TO BYPASS MIDDLEWARE
+app.get('/', (req, res) => {
+  console.log(`[HEALTH] Heartbeat requested by ${req.ip}`);
+  res.status(200).send('GoatBook API Running');
+});
 const prisma = require('./config/prisma');
 const { setupNotificationWorker } = require('./utils/notificationWorker');
 
@@ -10,16 +16,15 @@ const { setupNotificationWorker } = require('./utils/notificationWorker');
 app.use(cors()); // Allow all origins for connectivity diagnostics
 app.use(express.json());
 
-// Request logger
 // Verbose Request logger for diagnostics
 app.use((req, res, next) => {
-  console.log(`[NET] ${new Date().toISOString()} ${req.method} ${req.url}`);
-  console.log(`[HEADERS] ${JSON.stringify(req.headers)}`);
+  const timestamp = new Date().toISOString();
+  console.log(`[NET] ${timestamp} ${req.method} ${req.url}`);
+  console.log(`[HEADERS] ${JSON.stringify(req.headers, null, 2)}`);
+  console.log(`[IP] ${req.ip} | [PROTOCOL] ${req.protocol}`);
   next();
 });
 
-// Root health check (Render heartbeat) - MOVED TO TOP FOR RECOVERY
-app.get('/', (req, res) => res.status(200).send('GoatBook API Running'));
 
 // Diagnostic route for DB - MOVED TO TOP FOR RECOVERY
 app.get('/api/test-db', async (req, res) => {
