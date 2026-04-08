@@ -65,7 +65,7 @@ app.listen(PORT, '0.0.0.0', () => {
   
   // SELF-PING HACK: Keep server awake
   // Checks PUBLIC_URL env var, or falls back to Render for safety during transition
-  const PUBLIC_URL = process.env.PUBLIC_URL || 'https://goatbookapp.onrender.com/';
+  const PUBLIC_URL = process.env.PUBLIC_URL || 'https://goatbookapp-production.up.railway.app/';
   const https = require('https');
   
   setInterval(() => {
