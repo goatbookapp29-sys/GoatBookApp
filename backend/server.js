@@ -63,13 +63,14 @@ const PORT = process.env.PORT || 5001; // Avoid port 5000 conflict with macOS Ai
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server started on port ${PORT} at 0.0.0.0`);
   
-  // SELF-PING HACK: Keep Render server awake
-  const API_URL = 'https://goatbookapp.onrender.com/';
+  // SELF-PING HACK: Keep server awake
+  // Checks PUBLIC_URL env var, or falls back to Render for safety during transition
+  const PUBLIC_URL = process.env.PUBLIC_URL || 'https://goatbookapp.onrender.com/';
   const https = require('https');
   
   setInterval(() => {
-    https.get(API_URL, (res) => {
-      console.log(`[SELF-PING] Status: ${res.statusCode}`);
+    https.get(PUBLIC_URL, (res) => {
+      console.log(`[SELF-PING] Status: ${res.statusCode} | Target: ${PUBLIC_URL}`);
     }).on('error', (err) => {
       console.error(`[SELF-PING] Error: ${err.message}`);
     });
