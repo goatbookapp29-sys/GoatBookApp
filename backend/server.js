@@ -7,21 +7,14 @@ const prisma = require('./config/prisma');
 const { setupNotificationWorker } = require('./utils/notificationWorker');
 
 // Middleware
-app.use(cors({
-  origin: [
-    'http://localhost:8081', 'http://172.24.174.95:8081',
-    'http://localhost:8082', 'http://192.168.0.183:8082',
-    'http://10.96.23.95:8081', 'https://goatbookapp.onrender.com'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Farm-ID'],
-  credentials: true
-}));
+app.use(cors()); // Allow all origins for connectivity diagnostics
 app.use(express.json());
 
 // Request logger
+// Verbose Request logger for diagnostics
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+  console.log(`[NET] ${new Date().toISOString()} ${req.method} ${req.url}`);
+  console.log(`[HEADERS] ${JSON.stringify(req.headers)}`);
   next();
 });
 
@@ -62,8 +55,8 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5001; // Avoid port 5000 conflict with macOS AirPlay
 
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server started on port ${PORT} at 0.0.0.0`);
   // WORKER DISABLED TEMPORARILY FOR EMERGENCY RECOVERY
   // setupNotificationWorker();
 });
