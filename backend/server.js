@@ -25,10 +25,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Root health check (Render heartbeat)
+// Root health check (Render heartbeat) - MOVED TO TOP FOR RECOVERY
 app.get('/', (req, res) => res.status(200).send('GoatBook API Running'));
 
-// Diagnostic route for DB
+// Diagnostic route for DB - MOVED TO TOP FOR RECOVERY
 app.get('/api/test-db', async (req, res) => {
   try {
     const start = Date.now();
@@ -40,7 +40,6 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/breeds', require('./routes/breeds'));
@@ -65,9 +64,6 @@ const PORT = process.env.PORT || 5001; // Avoid port 5000 conflict with macOS Ai
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
-  // Start the notification background service with a delay to ensure port binding on Render
-  setTimeout(() => {
-    console.log('[Worker] Initiating background service...');
-    setupNotificationWorker();
-  }, 10000);
+  // WORKER DISABLED TEMPORARILY FOR EMERGENCY RECOVERY
+  // setupNotificationWorker();
 });
