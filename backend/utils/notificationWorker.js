@@ -12,7 +12,8 @@ const expo = new Expo();
 const setupNotificationWorker = () => {
   // Run every 1 minute: '*/1 * * * *'
   cron.schedule('*/1 * * * *', async () => {
-    console.log('[Worker] Checking for due notifications...');
+    const startTime = new Date();
+    console.log(`[Worker] Notification check started at ${startTime.toISOString()}`);
     
     try {
       const now = new Date();
@@ -95,7 +96,11 @@ const setupNotificationWorker = () => {
         }
       }
     } catch (globalError) {
-      console.error('[Worker] Global Error:', globalError);
+      console.error('[Worker] CRITICAL Global Error:', globalError);
+    } finally {
+      const endTime = new Date();
+      const duration = (endTime - startTime) / 1000;
+      console.log(`[Worker] Finished check in ${duration}s.`);
     }
   });
 

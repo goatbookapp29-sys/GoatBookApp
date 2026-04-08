@@ -38,7 +38,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 120000, // Increased to 2 mins for Render + Neon cold starts
+  timeout: 150000, // Increased to 150s for Render + Neon cold starts
 });
 
 export const setAuthToken = async (token) => {
