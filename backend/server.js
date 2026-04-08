@@ -63,8 +63,8 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5001; // Avoid port 5000 conflict with macOS AirPlay
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server started on port ${PORT} at 0.0.0.0`);
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
   // Start the notification background service with a delay to ensure port binding on Render
   setTimeout(() => {
     console.log('[Worker] Initiating background service...');

@@ -6,8 +6,11 @@
     "presync": "node ../scripts/sync-ip.js",
     "start": "node server.js",
     "dev": "npm run presync && nodemon server.js",
-    "build": "npx prisma generate && npx prisma db push",
+    "build": "npx prisma generate",
     "postinstall": "npx prisma generate"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "keywords": [],
   "author": "",
